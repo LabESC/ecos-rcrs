@@ -1,0 +1,7 @@
+bertopic
+top2vec
+pandas
+nltk
+matplotlib
+scikit-learn
+bertopic[gensim]
