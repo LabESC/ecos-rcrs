@@ -1,4 +1,4 @@
-# Identificação de Requisitos em ECOS
+# Identificação de possíveis requisitos em Ecossistemas de Software (ECOS)
 
 ## Eduardo Santos, Paulo Malcher, Rodrigo Santos
 
@@ -14,16 +14,18 @@ Identificação de requisitos em ecossistemas de software.
 ### Metodologias/Algoritmos:
 
 - **AI/Machine Learning/Algoritmos:**
-  - scikit-learn;
   - gensim;
-  - nltk;
   - top2vec;
+  - bertopic;
+  - scikit-learn;
 - **APIS:**
   - requests;
   - fastAPI;
   - uvicorn;
 - **Dados:**
   - pandas;
+  - BeautifulSoup;
+  - nltk;
 - **Outras:**
   - os;
   - dotenv;
