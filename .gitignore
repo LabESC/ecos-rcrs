@@ -2,3 +2,6 @@
 como-entrar-wsl.txt
 requirements-antigo.txt
 *reuniao*
+.idea
+.vscode
+*.pyc*

@@ -12,3 +12,5 @@ gensim
 beautifulsoup4
 requests
 python-dotenv
+SQLAlchemy
+uvicorn
