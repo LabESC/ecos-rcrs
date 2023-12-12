@@ -15,7 +15,7 @@ msg_404 = {"en-US": "User not found!", "pt-BR": "Usuário não encontrado!"}
 
 @router_user.get("/", response_model=list[UserResponse])
 async def get_all(request: Request):
-    # ! Verificando autenticação
+    """# ! Verificando autenticação
     auth = authValidator().validate(request)
     if auth is False:
         return JSONResponse(
@@ -27,7 +27,7 @@ async def get_all(request: Request):
             ],
             status_code=401,
         )
-
+    """
     # ! Obtendo todos os usuários
     users = await userService().get_all()
 

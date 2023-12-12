@@ -3,14 +3,26 @@ from sqlalchemy.engine import URL
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+# ! Importando .env
+import os
+from dotenv import load_dotenv
+from pathlib import Path
+
+env_path = Path(".") / ".env"
+load_dotenv(dotenv_path=env_path)
+bd_user = os.getenv("BD_USER")
+bd_pwd = os.getenv("BD_PWD")
+bd_host = os.getenv("BD_HOST")
+bd_db = os.getenv("BD_DATABASE")
+
 # ! Definindo URL de conexão
 url = URL.create(
     drivername="postgresql",
-    username="fl0user",
-    password="Zv7NLT5kXGaM",
-    host="ep-winter-sun-15915881.us-east-2.aws.neon.fl0.io",
+    username=bd_user,
+    password=bd_pwd,
+    host=bd_host,
     port=5432,
-    database="ecos-db",
+    database=bd_db,
 )
 
 # ! Definindo engine

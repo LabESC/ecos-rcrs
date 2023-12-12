@@ -5,3 +5,4 @@ requirements-antigo.txt
 .idea
 .vscode
 *.pyc*
+*.env*
