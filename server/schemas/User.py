@@ -12,7 +12,10 @@ class UserRequest(UserBase):
 
 
 class UserResponse(UserBase):
-    id: int
+    id: str
+    status: str
+    _password: str
 
     class Config:
         orm_mode = True
+        exclude = {"password"}

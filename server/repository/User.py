@@ -1,4 +1,5 @@
-from sqlalchemy.orm import Session
+# from sqlalchemy.orm import Session
+from database.db import conn as Session
 from typing import List
 from model.User import User as UserModel
 
@@ -12,13 +13,19 @@ class User:
 
     # ! Criando usuário
     @staticmethod
-    def create(db: Session, user: UserModel) -> UserModel:
-        if user.id:
-            db.merge(user)
-        else:
-            db.add(user)
+    def create(db: Session, user: UserModel, user_id: str) -> UserModel:
+        user_add = UserModel(
+            id=user_id,
+            name=user.name,
+            email=user.email,
+            password=user.password,
+            status="pending",
+        )
+        db.add(user_add)
         db.commit()
-        return user
+        db.refresh(user_add)
+        return user_add
+        # return User.get_by_id(db, user_id)
 
     # ! Obtendo usuário por id
     @staticmethod

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
 # Importando dependencias locais
-from schemas.User import UserResponse
+from schemas.User import UserResponse, UserRequest
 from service.User import User as userService
 from validations.Auth import Auth as authValidator
 from utils.Error import error
@@ -56,3 +56,80 @@ async def get_all(request: Request):
 
     # ! Retornando usuários
     return users
+
+
+@router_user.get("/{id}", response_model=UserResponse)
+async def get_by_id(id: str, request: Request):
+    """# ! Verificando autenticação
+    auth = authValidator().validate(request)
+    if auth is False:
+        return JSONResponse(
+            [
+                error(
+                    "auth",
+                    "Authentication failed!",
+                )
+            ],
+            status_code=401,
+        )
+    """
+    # ! Obtendo usuário por id
+    user = await userService().get_by_id(id)
+
+    # ! Validando retorno
+    if not user:  # * Se não houver usuário (None)
+        return JSONResponse(
+            [
+                error(
+                    "user",
+                    msg_404,
+                )
+            ],
+            status_code=404,
+        )
+
+    if user == -1:
+        return JSONResponse(
+            [
+                error(
+                    "user",
+                    "Internal server error!",
+                )
+            ],
+            status_code=500,
+        )
+
+    # ! Retornando usuário
+    return user
+
+
+@router_user.post("/", response_model=UserResponse)
+async def create(user: UserRequest):
+    # ! Criando usuário
+    user = await userService().create(user)
+
+    # ! Validando retorno
+    if not user:  # * Se não houver usuário (None)
+        return JSONResponse(
+            [
+                error(
+                    "user",
+                    "User not created!",
+                )
+            ],
+            status_code=404,
+        )
+
+    if user == -1:
+        return JSONResponse(
+            [
+                error(
+                    "user",
+                    "Internal server error!",
+                )
+            ],
+            status_code=500,
+        )
+
+    # ! Retornando usuário
+    return user
