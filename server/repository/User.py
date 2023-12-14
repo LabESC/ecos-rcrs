@@ -1,7 +1,9 @@
 # from sqlalchemy.orm import Session
+import uuid
 from database.db import conn as Session
 from typing import List
 from model.User import User as UserModel
+from validations.User import User as UserValidation
 
 
 # ! Definindo métodos do repositório do User
@@ -13,13 +15,16 @@ class User:
 
     # ! Criando usuário
     @staticmethod
-    def create(db: Session, user: UserModel, user_id: str) -> UserModel:
+    def create(
+        db: Session, user: UserModel, user_id: str, password_hash: str
+    ) -> UserModel:
         user_add = UserModel(
             id=user_id,
             name=user.name,
             email=user.email,
-            password=user.password,
+            password=password_hash,
             status="pending",
+            token=None,
         )
         db.add(user_add)
         db.commit()
@@ -50,10 +55,53 @@ class User:
             db.commit()
         return user_db
 
+    # ! Ativando usuário
+    @staticmethod
+    def activate(db: Session, id: str):
+        user = db.query(UserModel).filter(UserModel.id == id).first()
+        if user is None:
+            return False
+
+        if user.status == "active":
+            return None
+
+        user.status = "active"
+        db.commit()
+        return True
+
     # ! Inativando usuário por id
     @staticmethod
-    def inactivate_by_id(db: Session, id: str) -> None:
+    def inactivate(db: Session, id: str) -> bool:
         user = db.query(UserModel).filter(UserModel.id == id).first()
-        if user is not None:
-            user.active = False
-            db.commit()
+        if user is None:
+            return False
+
+        user.status = "inactive"
+        db.commit()
+        return True
+
+    # ! Autenticando usuário
+    @staticmethod
+    def authenticate(db: Session, email: str, password: str) -> UserModel:
+        user = db.query(UserModel).filter(UserModel.email == email).first()
+        if user is None:
+            return False
+
+        if not UserValidation.validate_password(password, user.password):
+            return None
+
+        user.token = str(uuid.uuid4())
+        db.commit()
+        return user
+
+    # ! Validando token
+    @staticmethod
+    def validate_token(db: Session, id: str, token: str) -> bool:
+        user = db.query(UserModel).filter(UserModel.id == id).first()
+        if user is None:  # * Se não existir usuário
+            return False
+
+        if user.token != token:  # * Se o token não for igual
+            return False
+
+        return True

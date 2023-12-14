@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Boolean  # , Enum
+from sqlalchemy import Column, String, LargeBinary  # , Enum
 from sqlalchemy.dialects.postgresql import ENUM
 from database.db import Base
 
@@ -11,7 +11,8 @@ class User(Base):
     id: str = Column(String(45), primary_key=True, index=True)
     name: str = Column(String(255), nullable=False)
     email: str = Column(String(255), nullable=False, unique=True)
-    password: str = Column(String(255), nullable=False)
+    password: str = Column(LargeBinary, nullable=False)
+    token: str = Column(String(45))
     status: str = Column(
         ENUM("active", "inactive", "pending", name="user_status"),
         nullable=False,

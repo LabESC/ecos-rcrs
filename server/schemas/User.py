@@ -19,3 +19,13 @@ class UserResponse(UserBase):
     class Config:
         orm_mode = True
         exclude = {"password"}
+
+
+class AuthRequest(BaseModel):
+    email: str
+    password: str
+
+
+class AuthResponse(BaseModel):
+    id: str
+    token: str

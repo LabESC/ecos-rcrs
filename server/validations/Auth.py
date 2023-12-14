@@ -1,4 +1,5 @@
 from fastapi import Request
+from repository.User import User as UserRepository
 
 
 class Auth:
@@ -19,6 +20,12 @@ class Auth:
         ):
             return False
 
-        # !! Validar token do usuário existente - IMPLEMENTAR
+        # * Validar token do usuário existente
+        validate_token = UserRepository.validate_token(
+            header.get("user-id"), header.get("user-token")
+        )
+
+        if not validate_token:
+            return False
 
         return True
