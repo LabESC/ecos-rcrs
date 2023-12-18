@@ -15,3 +15,5 @@ python-dotenv
 SQLAlchemy
 uvicorn
 bcrypt
+pyDNS
+validate_email

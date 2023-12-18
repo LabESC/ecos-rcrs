@@ -1,5 +1,4 @@
-from sqlalchemy import Column, String, LargeBinary  # , Enum
-from sqlalchemy.dialects.postgresql import ENUM
+from sqlalchemy import Column, String
 from database.db import Base
 
 
@@ -10,4 +9,4 @@ class VotingUser(Base):
 
     id: str = Column(String(45), primary_key=True, index=True)
     email: str = Column(String(255), nullable=False, unique=True)
-    access_code: str = Column(String(8))
+    access_code: str = Column(String(8), default=None)

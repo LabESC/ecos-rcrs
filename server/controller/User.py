@@ -11,7 +11,7 @@ from utils.Error import error
 router_user = APIRouter(prefix="/user", tags=["User"])
 
 msg_404 = {"en-US": "User not found!", "pt-BR": "Usuário não encontrado!"}
-
+msg_500 = {"en-US": "Internal server error!", "pt-BR": "Erro interno do servidor!"}
 
 @router_user.get("/", response_model=list[UserResponse])
 async def get_all(request: Request):
@@ -48,7 +48,7 @@ async def get_all(request: Request):
             [
                 error(
                     "user",
-                    "Internal server error!",
+                    msg_500['en-US'],
                 )
             ],
             status_code=500,
@@ -93,7 +93,7 @@ async def get_by_id(id: str, request: Request):
             [
                 error(
                     "user",
-                    "Internal server error!",
+                    msg_500['en-US'],
                 )
             ],
             status_code=500,
@@ -125,10 +125,20 @@ async def create(user: UserRequest):
             [
                 error(
                     "user",
-                    "Internal server error!",
+                    msg_500['en-US'],
                 )
             ],
             status_code=500,
+        )
+    if user == -2:
+        return JSONResponse(
+            [
+                error(
+                    "user",
+                    "Invalid e-mail!",
+                )
+            ],
+            status_code=422,
         )
 
     # ! Retornando usuário
@@ -168,7 +178,7 @@ async def activate(id: str):
             [
                 error(
                     "user",
-                    "Internal server error!",
+                    msg_500['en-US'],
                 )
             ],
             status_code=500,
@@ -208,7 +218,7 @@ async def authenticate(user_auth: AuthRequest):
             [
                 error(
                     "user",
-                    "Internal server error!",
+                    msg_500['en-US'],
                 )
             ],
             status_code=500,
@@ -259,3 +269,64 @@ async def inactivate(id: str):
             ],
             status_code=500,
         )
+
+@router_user.put("/{id}", response_model=UserResponse)
+async def update(id: str, user: UserRequest):
+    # ! Atualizando usuário
+    user = await userService().update(user, id)
+
+    # ! Validando retorno
+    if not user:
+        return JSONResponse(
+            [
+                error(
+                    "user",
+                    msg_404,
+                )
+            ],
+            status_code=404,
+        )
+
+    if user == -1:
+        return JSONResponse(
+            [
+                error(
+                    "user",
+                    msg_500['en-US'],
+                )
+            ],
+            status_code=500,
+        )
+
+    if user == -2:
+        return JSONResponse(
+            [
+                error(
+                    "user",
+                    "Invalid e-mail!",
+                )
+            ],
+            status_code=422,
+        )
+
+    if user == -3:
+        return JSONResponse(
+            [
+                error(
+                    "user",
+                    msg_500['en-US'],
+                )
+            ],
+            status_code=422,
+        )
+
+    # ! Retornando usuário
+    return user
+
+@router_user.post("/sendEmail")
+async def send_email():
+    # ! Enviando e-mail
+    email = await userService().test_email_sender()
+
+    # ! Retornando usuário
+    return email

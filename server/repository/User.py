@@ -30,7 +30,6 @@ class User:
         db.commit()
         db.refresh(user_add)
         return user_add
-        # return User.get_by_id(db, user_id)
 
     # ! Obtendo usuário por id
     @staticmethod
@@ -51,8 +50,12 @@ class User:
         if user_db is not None:
             user_db.name = name
             user_db.email = email
-            user_db.password = password
+            # * Se foi recebido senha, altere-a
+            if password is not None:
+                user_db.password = password
             db.commit()
+            db.refresh(user_db)
+
         return user_db
 
     # ! Ativando usuário

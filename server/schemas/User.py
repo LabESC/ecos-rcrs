@@ -1,4 +1,5 @@
-from pydantic import BaseModel
+from typing import Annotated
+from pydantic import BaseModel, Field
 
 
 class UserBase(BaseModel):
@@ -14,11 +15,10 @@ class UserRequest(UserBase):
 class UserResponse(UserBase):
     id: str
     status: str
-    _password: str
+    password: Annotated[str, Field(exclude=True)]
 
     class Config:
-        orm_mode = True
-        exclude = {"password"}
+        from_attributes = True
 
 
 class AuthRequest(BaseModel):
