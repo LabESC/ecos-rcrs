@@ -7,3 +7,10 @@ class VotingUserBase(BaseModel):
 
 class VotingUserRequest(VotingUserBase):
     ...
+
+
+class VotingUserResponse(VotingUserBase):
+    id: str
+
+    class Config:
+        from_attributes = True
