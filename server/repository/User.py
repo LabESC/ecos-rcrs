@@ -1,7 +1,9 @@
 # from sqlalchemy.orm import Session
 import uuid
+from datetime import datetime
 from database.db import conn as Session
 from typing import List
+
 from model.User import User as UserModel
 from validations.User import User as UserValidation
 
@@ -50,6 +52,7 @@ class User:
         if user_db is not None:
             user_db.name = name
             user_db.email = email
+            user_db.last_updated = datetime.now()
             # * Se foi recebido senha, altere-a
             if password is not None:
                 user_db.password = password
@@ -69,6 +72,7 @@ class User:
             return None
 
         user.status = "active"
+        user.last_updated = datetime.now()
         db.commit()
         return True
 
@@ -80,6 +84,7 @@ class User:
             return False
 
         user.status = "inactive"
+        user.last_updated = datetime.now()
         db.commit()
         return True
 
