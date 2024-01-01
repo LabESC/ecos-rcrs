@@ -1,0 +1,12 @@
+pandas
+matplotlib
+fastapi
+starlette
+beautifulsoup4
+requests
+python-dotenv
+SQLAlchemy
+uvicorn
+bcrypt
+pyDNS
+validate_email

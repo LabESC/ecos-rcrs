@@ -1,0 +1,9 @@
+pandas
+nltk
+fastapi
+starlette
+beautifulsoup4
+requests
+python-dotenv
+uvicorn
+httpx
