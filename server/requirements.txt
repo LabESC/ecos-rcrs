@@ -8,5 +8,5 @@ python-dotenv
 SQLAlchemy
 uvicorn
 bcrypt
-pyDNS
+py3DNS
 validate_email
