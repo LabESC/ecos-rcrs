@@ -19,8 +19,15 @@ class Environment(Base):
     user_id: str = Column(String(45), ForeignKey("ic.users.id"), nullable=False)
     name: str = Column(String(255), nullable=False)
     details: dict = Column(JSONB, nullable=False)
-    data: dict = Column(JSONB, nullable=False)
-    older_data: dict = Column(JSONB)
+    repos: list[str] = Column(JSONB, nullable=False)
+    mining_type: str = Column(
+        ENUM("organization", "repos", name="mining_type"), nullable=False
+    )
+    organization_name: str = Column(String(255))
+    mining_data: list[dict] = Column(JSONB)
+    topic_data: list[dict] = Column(JSONB)
+    priority_data: list[dict] = Column(JSONB)
+    final_rcr: list[dict] = Column(JSONB)
     status: str = Column(
         ENUM(
             "mining",

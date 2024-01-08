@@ -1,10 +1,13 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
+import json
 
 # Importando dependencias locais
-from service.GitHub import GitHub as githubService
+from service.Top2Vec import Top2VecImpl
+from service.Databases import Database
+from service.Auth import Auth as authValidator
 
-from schemas.Mining import MiningReposRequest
+from schemas.Topic import TopicReposRequest
 
 """from schemas.Environment import (
     EnvironmentResponse,
@@ -15,13 +18,13 @@ from validations.Auth import Auth as authValidator
 from utils.Error import error"""
 
 
-router_mining = APIRouter(prefix="/environment", tags=["Environment"])
+router_topic = APIRouter(prefix="/topic", tags=["Topic"])
 
 # Variáveis globais
-entity_name = "mining"
+entity_name = "topic"
 msg_404 = {
     "en-US": f"{entity_name} not found!",
-    "pt-BR": "Ambiente não encontrado!",
+    "pt-BR": "Topico não encontrado!",
 }
 msg_500 = {"en-US": "Internal server error!", "pt-BR": "Erro interno do servidor!"}
 msg_email_not_sent = {"en-US": "E-mail not sent!", "pt-BR": "E-mail não enviado!"}
@@ -40,62 +43,63 @@ msg_user_not_active = {
 
 
 # Rotas
-@router_mining.post("/api/buscaRepos")
-async def buscando_issues_Repos(repos: MiningReposRequest):
-    # Obtendo issues de vários repositórios
-    array_repos_issues = await obtemRepos(repos)
-
-    # Criar um dataframe Pandas associando issues com repositorios e tratando-o como uma organização
-    modelagem_topicos = await obtem_topicos(array_repos_issues)
-
-    if modelagem_topicos is False:
-        return {"erro": "Não há issues suficientes para gerar o modelo"}
-
-    return {
-        "comparacoes": modelagem_topicos["comparacoes"],
-        "topicos": modelagem_topicos["topicos"],
-    }
 
 
-@router_mining.post("/api/buscaRepos/bert")
-async def buscando_issues_Repos_Bertopic(repos: MiningReposRequest):
-    # Obtendo issues de vários repositórios
-    """repos = await request.json()
-    repos = repos["repos"]"""
-    array_repos_issues = await obtemRepos(repos)
-
-    # Criar um dataframe Pandas associando issues com repositorios e tratando-o como uma organização
-    modelagem_topicos = await obtem_topicos_bertopic(array_repos_issues)
-
-    if modelagem_topicos is False:
-        return {"erro": "Não há issues suficientes para gerar o modelo"}
-
-    return {
-        "comparacoes": modelagem_topicos["comparacoes"],
-        "topicos": modelagem_topicos["topicos"],
-    }
-
-
-@router_mining.patch("/api/geraTopicos/bert")
-@router_mining.get("/api/buscaAndroid/t2v")
+# @router_topic.patch("/geraTopicos/bert")
+@router_topic.get("/android/t2v")
 async def busca_android_top2vec():
     # Obtendo issues de vários repositórios
-    df = android_base()
-
-    modelagem_topicos = await obtem_topicos_pd(df)
+    df = Database.get_android()
+    print(df.head())
+    modelagem_topicos = await Top2VecImpl.obtem_topicos_pd(df)
     if modelagem_topicos is False:
         return JSONResponse(
             content={"erro": "Não há issues suficientes para gerar o modelo"},
             status_code=400,
         )
 
+    # !! TESTE - Salvando JSON para visualizar
+    with open("./internal_data/modelagem_topicos_t2v.json", "w") as outfile:
+        json.dump(modelagem_topicos, outfile)
+
+    # ! Inserir o resultado no BD
     return {
         "comparacoes": modelagem_topicos["comparacoes"],
         "topicos": modelagem_topicos["topicos"],
     }
 
 
-@router_mining.get("/api/buscaPython/t2v")
+@router_topic.post("/repos/t2v")
+async def busca_repos_top2vec(request: TopicReposRequest):
+    # * Validando usuário e senha
+    if authValidator.validate_user(request.user, request.password) is False:
+        return JSONResponse(
+            {"code": "auth", "message": "Authentication failed!"},
+            status_code=401,
+        )
+
+    # * Modelando issues recebidas
+    modelagem_topicos = await Top2VecImpl.obtem_topicos_pd(request.issues)
+    if modelagem_topicos is False:
+        return JSONResponse(
+            content={
+                "code": "modelling",
+                "message": "Não há issues suficientes para gerar o modelo",
+            },
+            status_code=400,
+        )
+
+    # !! Inserir o resultado no BD - Pendente
+
+    # ! Retornando resultado
+    return {
+        "comparacoes": modelagem_topicos["comparacoes"],
+        "topicos": modelagem_topicos["topicos"],
+    }
+
+
+"""
+@router_topic.get("/buscaPython/t2v")
 async def busca_python_top2vec():
     # Obtendo issues de vários repositórios
     df = python_base()
@@ -111,3 +115,4 @@ async def busca_python_top2vec():
         "comparacoes": modelagem_topicos["comparacoes"],
         "topicos": modelagem_topicos["topicos"],
     }
+"""

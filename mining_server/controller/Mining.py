@@ -35,13 +35,14 @@ msg_user_not_active = {
 @router_mining.post("/api/buscaRepos")
 async def searching_repos_issues(request: MiningReposRequest):
     # * Validando usuário e senha
-    if authValidator.validate_user(request.user, request.pwd):
+    if authValidator.validate_user(request.user, request.password) is False:
         return JSONResponse(
             {"code": "auth", "message": "Authentication failed!"},
             status_code=401,
         )
+
     # * Obtendo issues de vários repositórios
-    mining_issues = await githubService.obtem_repos(request.repos)
+    mining_issues = await githubService().obtem_repos(request.repos)
 
     # ! Enviar dados para o microsserviço do BD (salvar dados) (A IMPLEMENTAR)
     # requests....

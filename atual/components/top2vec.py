@@ -6,30 +6,33 @@ async def obtem_topicos(array_repos_issues: list[dict]):
     # Criar um dataframe Pandas associando issues com repositorios e tratando-o como uma organização
     keys = array_repos_issues.keys()
     values = array_repos_issues.values()
-
     df = pd.DataFrame(keys, columns=["Repositórios"])
     df["Issues"] = values
-    print(f"Tamanho do conjunto: {df.shape[0]}")
 
     try:
         model = Top2Vec(values, embedding_model="doc2vec")
-    except Exception:
-        # Não foi possivel identificar consistencia no ecos informado, por consequência, não houve a possibilidade de gerar um modelo de tópicos para o ecos
+    except Exception as e:
+        print(e)
+        # . Não foi possivel identificar consistencia no ecos informado, por consequência, não houve a possibilidade de gerar um modelo de tópicos para o ecos
         return False
 
+    # * Obtendo tamanho e número dos topicos
     topic_sizes, _topic_nums = model.get_topic_sizes()
-    print(topic_sizes)
+    print(topic_sizes)  # !! LOG
 
+    # * Obtendo palavras dos tópicos
     topic_words, _word_scores, _topic_nums = model.get_topics()
 
-    # iterando sobre os topicos e obtendo 50 documentos para cada
+    # * Iterando sobre os topicos e obtendo os documentos de cada
     i = 0
     doc_dict = []
     while i < len(topic_sizes):
+        # * Obtendo dados dos documentos do tópico corrente
         documents, document_scores, document_ids = model.search_documents_by_topic(
             topic_num=i, num_docs=topic_sizes[i]
         )
 
+        # * Para cada documento, obter o id, score e o texto deste para o topico buscado
         doc_dict.append(
             {
                 f"#{doc_id} - Score: {score}": doc
@@ -43,27 +46,32 @@ async def obtem_topicos(array_repos_issues: list[dict]):
 
 
 async def obtem_topicos_pd(df: pd.DataFrame):
-    # Criar um dataframe Pandas associando issues com repositorios e tratando-o como uma organização
+    # * Obtendo o texto das issues
     values = df["Issues"].values
     try:
         model = Top2Vec(values, embedding_model="doc2vec")
-    except Exception:
+    except Exception as e:
+        print(e)
         # Não foi possivel identificar consistencia no ecos informado, por consequência, não houve a possibilidade de gerar um modelo de tópicos para o ecos
         return False
 
+    # * Obtendo tamanho e número dos topicos
     topic_sizes, _topic_nums = model.get_topic_sizes()
-    print(topic_sizes)
+    print(topic_sizes)  # !! LOG
 
+    # * Obtendo palavras dos tópicos
     topic_words, _word_scores, _topic_nums = model.get_topics()
 
-    # iterando sobre os topicos e obtendo os documentos para cada
+    # * Iterando sobre os topicos e obtendo os documentos para cada
     i = 0
     doc_dict = []
     while i < len(topic_sizes):
+        # * Obtendo dados dos documentos do tópico corrente
         documents, document_scores, document_ids = model.search_documents_by_topic(
             topic_num=i, num_docs=topic_sizes[i]
         )
 
+        # * Para cada documento, obter o id, score e o texto deste para o topico buscado
         doc_dict.append(
             {
                 f"#{doc_id} - Score: {score}": doc
@@ -76,6 +84,7 @@ async def obtem_topicos_pd(df: pd.DataFrame):
     return {"comparacoes": doc_dict, "topicos": topic_words.tolist()}
 
 
+"""
 async def obtem_topicos_pd_retorna_pd(df: pd.DataFrame):
     # Criar um dataframe Pandas associando issues com repositorios e tratando-o como uma organização
     values = df["Issues"].values
@@ -92,7 +101,9 @@ async def obtem_topicos_pd_retorna_pd(df: pd.DataFrame):
 
     # iterando sobre os topicos e obtendo os documentos para cada
     i = 0
-    df_topics = pd.DataFrame(data={topic_nums, topic_words}, columns=["num_topic", "words"])
+    df_topics = pd.DataFrame(
+        data={topic_nums, topic_words}, columns=["num_topic", "words"]
+    )
     df_issues = pd.DataFrame(columns=["repository", "issue", "score", "num_topic"])
     while i < len(topic_sizes):
         documents, document_scores, document_ids = model.search_documents_by_topic(
@@ -100,9 +111,16 @@ async def obtem_topicos_pd_retorna_pd(df: pd.DataFrame):
         )
 
         for doc, score, doc_id in zip(documents, document_scores, document_ids):
-            df_issues.append({"repository": df["Repositórios"][doc_id], "issue": doc, "score": score, "num_topic": i})
+            df_issues.append(
+                {
+                    "repository": df["Repositórios"][doc_id],
+                    "issue": doc,
+                    "score": score,
+                    "num_topic": i,
+                }
+            )
 
         i += 1
 
     return {"comparacoes": df_issues, "topicos": df_topics}
-
+"""

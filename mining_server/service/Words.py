@@ -16,7 +16,8 @@ warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning, module="bs4")
 
 # Importando bibliotecas de dados (pandas)
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
+
+# from sklearn.feature_extraction.text import TfidfVectorizer
 import nltk
 from nltk.corpus import stopwords
 
@@ -25,9 +26,15 @@ nltk.download("stopwords")
 # Palavras que poluem o texto (para remoção nos textos)
 wordsToRemove = ["\n", "\r", "\r\n", "\r\n\r\n", "[x]", "[X]", "[ ]"]
 
+# * Regex de link
+regexLink = re.compile("http://\S+|https://\S+")
+
+# * Regex de codigo (entre ``` e ```)
+regexCode = re.compile("```.*?```")
+
 
 # Funçoes para limpeza de textos
-def filtraArrayRequestGit(array: list[dict], nomeRepo=" ", idIssue=False):
+def filtraArrayRequestGit(array: list[dict], nomeRepo=" ", idIssue=False) -> list[dict]:
     """Retorna um array somente com o body das issues
 
     Args:
@@ -46,9 +53,6 @@ def filtraArrayRequestGit(array: list[dict], nomeRepo=" ", idIssue=False):
             for word in wordsToRemove:
                 issueObtida = issueObtida.replace(word, " ")
 
-            # Remover as tags html da string - SÓ REMOVIA A TAG, MANTINHA O TEXTO DENTRO DELA
-            # issueObtida = re.sub(re.compile("<.*?>"), "", issueObtida)
-
             # Instanciando a biblioteca BeatifulSoup na issue obtida
             issueObtida = bs(issueObtida, "html.parser")
 
@@ -60,10 +64,10 @@ def filtraArrayRequestGit(array: list[dict], nomeRepo=" ", idIssue=False):
             issueObtida = issueObtida.get_text()
 
             # Remover os links na string
-            issueObtida = re.sub("http://\S+|https://\S+", " ", issueObtida)
+            issueObtida = re.sub(regexLink, " ", issueObtida)
 
             # Entendendo que textos que estão entre ``` são códigos, remova-os
-            issueObtida = re.sub("```.*?```", " ", issueObtida)
+            issueObtida = re.sub(regexCode, " ", issueObtida)
 
             # Remover os espaços demasiados numa string
             issueObtida = re.sub(" +", " ", issueObtida)
@@ -74,8 +78,8 @@ def filtraArrayRequestGit(array: list[dict], nomeRepo=" ", idIssue=False):
             # if idIssue != False and len(issueObtida) > 0
             # else issueObtida
             # )
-            if idIssue != False and len(issueObtida) > 0:
-                arrayIssues.append(f"{idIssue} - Issues: {issueObtida}")
+            if idIssue is not False and len(issueObtida) > 0:
+                arrayIssues.append({idIssue: issueObtida})
 
     return arrayIssues
 
@@ -101,7 +105,7 @@ def criaDicionarioTags(array: list[dict]):
         if keyDict not in dicionario:
             dicionario[keyDict] = []
 
-        if issue.get("body") != None:
+        if issue.get("body") is not None:
             issueObtida = issue.get("title")
             issueObtida = issueObtida + " " + issue.get("body")
 
@@ -113,13 +117,13 @@ def criaDicionarioTags(array: list[dict]):
             issueObtida = re.sub(re.compile("<.*?>"), "", issueObtida)
 
             # Remover os links na string
-            issueObtida = re.sub("http://\S+|https://\S+", " ", issueObtida)
+            issueObtida = re.sub(regexLink, " ", issueObtida)
 
             # Remover os espaços demasiados numa string
             issueObtida = re.sub(" +", " ", issueObtida)
 
             # Entendendo que textos que estão entre ``` são códigos, remova-os
-            issueObtida = re.sub("```.*?```", " ", issueObtida)
+            issueObtida = re.sub(regexCode, " ", issueObtida)
 
             dicionario[keyDict].append(issueObtida)
 
@@ -148,7 +152,7 @@ def filtraArrayRequestGitCTit(array: list[dict]):
     arrayIssues = []
 
     for issue in array:
-        if issue.get("body") != None:
+        if issue.get("body") is not None:
             issueObtida = issue.get("title")
             issueObtida = issueObtida + " " + issue.get("body")
 
@@ -157,13 +161,13 @@ def filtraArrayRequestGitCTit(array: list[dict]):
                 issueObtida = issueObtida.replace(word, " ")
 
             # Remover os links na string
-            issueObtida = re.sub("http://\S+|https://\S+", " ", issueObtida)
+            issueObtida = re.sub(regexLink, " ", issueObtida)
 
             # Remover os espaços demasiados numa string
             issueObtida = re.sub(" +", " ", issueObtida)
 
             # Entendendo que textos que estão entre ``` são códigos, remova-os
-            issueObtida = re.sub("```.*?```", " ", issueObtida)
+            issueObtida = re.sub(regexCode, " ", issueObtida)
 
             arrayIssues.append(issueObtida)
 
@@ -186,18 +190,17 @@ def limpaRespostaGit(issue: list[dict]):
         issueObtida = issueObtida.replace(word, " ")
 
     # Remover os links na string
-    issueObtida = re.sub("http://\S+|https://\S+", " ", issueObtida)
+    issueObtida = re.sub(regexLink, " ", issueObtida)
 
     # Remover os espaços demasiados numa string
     issueObtida = re.sub(" +", " ", issueObtida)
 
     # Entendendo que textos que estão entre ``` são códigos, remova-os
-    issueObtida = re.sub("```.*?```", " ", issueObtida)
+    issueObtida = re.sub(regexCode, " ", issueObtida)
 
     return issueObtida
 
-
-def geraTfIdf(responseAPI: list[str], filtrar: bool = False):
+    # def geraTfIdf(responseAPI: list[str], filtrar: bool = False):
     """Gera o tf-idf para cada issue da resposta da API
 
     Args:
@@ -206,6 +209,7 @@ def geraTfIdf(responseAPI: list[str], filtrar: bool = False):
 
     Returns:
         _type_: Um dicionário com o tf-idf de cada issue
+    """
     """
     issuesRepo = {f"Issue n°{i + 1}": responseAPI[i] for i in range(len(responseAPI))}
     # Gerando o tf-idf para cada resposta da API
@@ -235,21 +239,27 @@ def geraTfIdf(responseAPI: list[str], filtrar: bool = False):
         tfIdfDict[f"Issue n°{i+1}"] = df
 
     return tfIdfDict
+"""
 
 
 # Função que retorna um array key-value a partir de uma string divisível em , e ;
 def vrfProximo(link: str):
     links = link.split(",")
-    for l in links:
-        obj = l.split(";")
+    for other_link in links:
+        obj = other_link.split(";")
         if obj[1].split("=")[1] == '"next"':
             return True
 
     return False
 
 
-# Função que retorna um array key-value a partir de uma string divisível em , e ;
+#
 def vrfProximoNovo(link: dict):
+    """Função que retorna se existe o atributo "next" em um dicionário "link"
+
+    Args:
+        link (dict): Um dicionário com os links presentes no atributo "links" da resposta da API do GitHub
+    """
     if "next" in link:
         return True
     else:
@@ -306,6 +316,6 @@ def filtraArrayRequestGitSemLimpar(array: list[dict], nomeRepo=" ", idIssue=Fals
     return arrayIssues
 
 
-def filtrar_key_words():
+def filtrar_key_words(text: str):
     # ! A IMPLEMENTAR
-    return True
+    return text

@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Optional
 
 
-class EnvironmentDataBase(BaseModel):
+"""class EnvironmentDataBase(BaseModel):
     repos: list[str]
     mining_type: str
     organization_name: Optional[str] = None
@@ -10,13 +10,20 @@ class EnvironmentDataBase(BaseModel):
     topic_data: Optional[list[dict]] = None
     priority_data: Optional[list[dict]] = None
     final_rcr: Optional[list[dict]] = None
+"""
 
 
 class EnvironmentBase(BaseModel):
     user_id: str
     name: str
     details: str
-    data: EnvironmentDataBase
+    repos: list[str]
+    mining_type: str
+    organization_name: Optional[str] = None
+    mining_data: Optional[list[dict]] = None
+    topic_data: Optional[list[dict]] = None
+    priority_data: Optional[list[dict]] = None
+    final_rcr: Optional[list[dict]] = None
 
 
 class EnvironmentRequest(EnvironmentBase):

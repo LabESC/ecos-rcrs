@@ -63,8 +63,8 @@ class Environment:
 
         # ! Validando se o tipo é organização e o nome da organização foi informado
         if (
-            environment.data.mining_type == "organization"
-            and environment.data.organization_name is None
+            environment.mining_type == "organization"
+            and environment.organization_name is None
         ):
             return -4
 
@@ -72,10 +72,9 @@ class Environment:
         ambiente_add = EnvironmentModel(
             id=str(uuid.uuid4()), **environment.model_dump()
         )
-        # voting_user_id = str(uuid.uuid4())
         ambiente = None
 
-        # Inserindo usuário no BD
+        # Inserindo ambiente no BD
         try:
             ambiente = EnvironmentRepository.create(db, ambiente_add)
         except Exception as e:
@@ -94,3 +93,81 @@ class Environment:
             print(e)"""
 
         return ambiente
+
+    # ! Altera o status do ambiente
+    async def update_status(self, environment_id: str, status: str):
+        try:
+            db = next(conn())
+            environment = EnvironmentRepository.update_status(
+                db, environment_id, status
+            )
+            return environment
+        except Exception as e:
+            print(e)
+            return -1
+
+    # ! Altera os dados de mineração
+    async def update_mining(
+        self, environment_id: str, mining_data: list[dict], status: str = None
+    ):
+        try:
+            db = next(conn())
+            environment = EnvironmentRepository.update_mining(
+                db, environment_id, mining_data, status
+            )
+            return environment
+        except Exception as e:
+            print(e)
+            return -1
+
+    # ! Altera os dados de tópicos
+    async def update_topics(
+        self, environment_id: str, topic_data: list[dict], status: str = None
+    ):
+        try:
+            db = next(conn())
+            environment = EnvironmentRepository.update_topics(
+                db, environment_id, topic_data, status
+            )
+            return environment
+        except Exception as e:
+            print(e)
+            return -1
+
+    # ! Altera os dados de prioridades
+    async def update_priority(
+        self, environment_id: str, priority_data: list[dict], status: str = None
+    ):
+        try:
+            db = next(conn())
+            environment = EnvironmentRepository.update_priority(
+                db, environment_id, priority_data, status
+            )
+            return environment
+        except Exception as e:
+            print(e)
+            return -1
+
+    # ! Altera os dados de prioridades
+    async def update_final_rcr(
+        self, environment_id: str, final_rcr: list[dict], status: str = None
+    ):
+        try:
+            db = next(conn())
+            environment = EnvironmentRepository.update_final_rcr(
+                db, environment_id, final_rcr, status
+            )
+            return environment
+        except Exception as e:
+            print(e)
+            return -1
+
+    # ! Obtendo usuários votantes de um ambiente
+    async def get_voting_users(self, environment_id: str):
+        try:
+            db = next(conn())
+            users = EnvironmentRepository.get_voting_users(db, environment_id)
+            return users
+        except Exception as e:
+            print(e)
+            return -1

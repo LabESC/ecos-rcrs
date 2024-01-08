@@ -10,3 +10,4 @@ uvicorn
 bcrypt
 py3DNS
 validate_email
+psycopg2

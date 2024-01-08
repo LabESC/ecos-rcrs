@@ -17,7 +17,7 @@ basic_fields = [
 
 # ! Definindo métodos do repositório do User
 class Environment:
-    # ! Obtendo todos os ambientes - TESTE
+    # ! Obtendo todos os ambientes - TESTEre
     @staticmethod
     def get_all(db: Session) -> List[EnvironmentModel]:
         return db.query(EnvironmentModel).all()
@@ -59,3 +59,98 @@ class Environment:
         db.commit()
         db.refresh(environment)
         return environment
+
+    # ! Alterando dados de mineração
+    @staticmethod
+    def update_mining(
+        db: Session, environment_id: str, mining_data: list[dict], status: str = None
+    ) -> EnvironmentModel:
+        environment = (
+            db.query(EnvironmentModel)
+            .filter(EnvironmentModel.id == environment_id)
+            .first()
+        )
+        environment.mining_data = mining_data
+        environment.last_updated = datetime.now()
+
+        # * Se existir status, altere-o
+        if status:
+            environment.status = status
+
+        db.commit()
+        db.refresh(environment)
+        return environment
+
+    # ! Alterando dados de tópicos
+    @staticmethod
+    def update_topics(
+        db: Session, environment_id: str, topic_data: list[dict], status: str = None
+    ) -> EnvironmentModel:
+        environment = (
+            db.query(EnvironmentModel)
+            .filter(EnvironmentModel.id == environment_id)
+            .first()
+        )
+        environment.topic_data = topic_data
+        environment.last_updated = datetime.now()
+
+        # * Se existir status, altere-o
+        if status:
+            environment.status = status
+
+        db.commit()
+        db.refresh(environment)
+        return environment
+
+    # ! Alterando dados de prioridades
+    @staticmethod
+    def update_priority(
+        db: Session, environment_id: str, priority_data: list[dict], status: str = None
+    ) -> EnvironmentModel:
+        environment = (
+            db.query(EnvironmentModel)
+            .filter(EnvironmentModel.id == environment_id)
+            .first()
+        )
+        environment.priority_data = priority_data
+        environment.last_updated = datetime.now()
+
+        # * Se existir status, altere-o
+        if status:
+            environment.status = status
+
+        db.commit()
+        db.refresh(environment)
+        return environment
+
+    # ! Alterando dados de RCR final
+    @staticmethod
+    def update_final_rcr(
+        db: Session, environment_id: str, final_rcr: list[dict], status: str = None
+    ) -> EnvironmentModel:
+        environment = (
+            db.query(EnvironmentModel)
+            .filter(EnvironmentModel.id == environment_id)
+            .first()
+        )
+        environment.final_rcr = final_rcr
+        environment.last_updated = datetime.now()
+
+        # * Se existir status, altere-o
+        if status:
+            environment.status = status
+
+        db.commit()
+        db.refresh(environment)
+        return environment
+
+    # ! Obtendo usuários votantes de um ambiente
+    @staticmethod
+    def get_voting_users(
+        db: Session, environment_id: str
+    ) -> List[VotingUserEnvironmentModel]:
+        return (
+            db.query(VotingUserEnvironmentModel)
+            .filter(VotingUserEnvironmentModel.environment_id == environment_id)
+            .all()
+        )

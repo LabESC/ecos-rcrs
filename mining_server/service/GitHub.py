@@ -1,5 +1,5 @@
 # Importando serviço de requisições
-from service.Requests import Requests as requestsService
+from service.Requests import Request as requestsService
 
 # Importando biblioteca de json
 import json
@@ -26,24 +26,34 @@ class GitHub:
 
         # * Itere sobre os repositórios
         for repo in repos:
+            print("Obtendo issues do repositório: " + repo)  # . LOG
+            # * Criando o repositório no dicionário
+            self.__issues[repo] = []
+
             # * Inicializando a variável de pesquisa na página 1
             pagina = 1
 
             while True:
-                resposta_repo_obj, resposta_repo_links = requests.get_repo_issue(
+                # * Fazendo a requisição
+                resposta_repo_obj, resposta_repo_links = await requests.get_repo_issue(
                     repo, pagina
                 )
                 resposta_repo_obj = filtraArrayRequestGit(resposta_repo_obj)
 
-                if resposta_repo_obj != [] and resposta_repo_obj[0] != "":
+                if resposta_repo_obj is not []:  # and resposta_repo_obj[0] != "":
+                    # * Itere sobre as issues obtidas
                     for issue in resposta_repo_obj:
-                        issue_split = issue.split(" - Issues: ")
-
+                        # * Inserindo cada issue no dicionário do repositório
                         try:
-                            self.__issues[f"{repo} - {issue_split[0]}"] = issue_split[1]
+                            self.__issues[repo].append(issue)
                         except Exception:
                             print("Erro ao adicionar a issue")
 
+                    """for key in resposta_repo_obj.keys():
+                        try:
+                            self.__issues[repo].append(
+                                {key: resposta_repo_obj[key].strip()}
+                            )"""
                     # Caso não haja uma próxima página, encerre o loop
                     if vrfProximoNovo(resposta_repo_links) is False:
                         break

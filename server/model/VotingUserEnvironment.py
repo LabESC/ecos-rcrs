@@ -16,5 +16,5 @@ class VotingUserEnvironment(Base):
     environment_id: str = Column(
         String(45), ForeignKey("ic.environments.id"), nullable=False
     )
-    votes_rcr_definition: dict = Column(JSONB)
-    votes_rcr_priority: dict = Column(JSONB)
+    votes_rcr_definition: list[dict] = Column(JSONB)
+    votes_rcr_priority: list[dict] = Column(JSONB)

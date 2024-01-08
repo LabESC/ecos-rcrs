@@ -1,7 +1,11 @@
 # from sqlalchemy.orm import Session
+from sqlalchemy import and_
 from database.db import conn as Session
 from typing import List
 from model.VotingUser import VotingUser as VotingUserModel
+from model.VotingUserEnvironment import (
+    VotingUserEnvironment as VotingUserEnvironmentModel,
+)
 from validations.User import User as UserValidation
 
 
@@ -56,5 +60,53 @@ class VotingUser:
         voting_user.access_code = access_code
         db.commit()
         db.refresh(voting_user)
+
+        return True
+
+    # ! Registrando votos de definição de rcr
+    @staticmethod
+    def register_definition_votes(
+        db: Session, voting_user_id: str, environment_id: str, votes: list[dict]
+    ) -> bool:
+        voting_user_environment = (
+            db.query(VotingUserEnvironmentModel)
+            .filter(
+                and_(
+                    VotingUserEnvironmentModel.id == voting_user_id,
+                    VotingUserEnvironmentModel.environment_id == environment_id,
+                )
+            )
+            .first()
+        )
+        if voting_user_environment is None:
+            return False
+
+        voting_user_environment.votes_rcr_definition = votes
+        db.commit()
+        db.refresh(voting_user_environment)
+
+        return True
+
+    # ! Registrando votos de priorização de rcr
+    @staticmethod
+    def register_priority_votes(
+        db: Session, voting_user_id: str, environment_id: str, votes: list[dict]
+    ) -> bool:
+        voting_user_environment = (
+            db.query(VotingUserEnvironmentModel)
+            .filter(
+                and_(
+                    VotingUserEnvironmentModel.id == voting_user_id,
+                    VotingUserEnvironmentModel.environment_id == environment_id,
+                )
+            )
+            .first()
+        )
+        if voting_user_environment is None:
+            return False
+
+        voting_user_environment.votes_rcr_priority = votes
+        db.commit()
+        db.refresh(voting_user_environment)
 
         return True
