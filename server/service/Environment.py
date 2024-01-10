@@ -108,7 +108,7 @@ class Environment:
 
     # ! Altera os dados de mineração
     async def update_mining(
-        self, environment_id: str, mining_data: list[dict], status: str = None
+        self, environment_id: str, mining_data: list[dict], status: str = "mining_done"
     ):
         try:
             db = next(conn())
@@ -122,7 +122,7 @@ class Environment:
 
     # ! Altera os dados de tópicos
     async def update_topics(
-        self, environment_id: str, topic_data: list[dict], status: str = None
+        self, environment_id: str, topic_data: list[dict], status: str = "topics_done"
     ):
         try:
             db = next(conn())
@@ -136,7 +136,10 @@ class Environment:
 
     # ! Altera os dados de prioridades
     async def update_priority(
-        self, environment_id: str, priority_data: list[dict], status: str = None
+        self,
+        environment_id: str,
+        priority_data: list[dict],
+        status: str = "rcr_priority_done",
     ):
         try:
             db = next(conn())
@@ -157,6 +160,46 @@ class Environment:
             environment = EnvironmentRepository.update_final_rcr(
                 db, environment_id, final_rcr, status
             )
+            return environment
+        except Exception as e:
+            print(e)
+            return -1
+
+    # ! Obtem os dados de mineração
+    async def get_mining_data(self, environment_id: str):
+        try:
+            db = next(conn())
+            environment = EnvironmentRepository.get_mining_data(db, environment_id)
+            return environment
+        except Exception as e:
+            print(e)
+            return -1
+
+    # ! Obtem os dados de tópicos
+    async def get_topic_data(self, environment_id: str):
+        try:
+            db = next(conn())
+            environment = EnvironmentRepository.get_topic_data(db, environment_id)
+            return environment
+        except Exception as e:
+            print(e)
+            return -1
+
+    # ! Obtem os dados de prioridades
+    async def get_priority_data(self, environment_id: str):
+        try:
+            db = next(conn())
+            environment = EnvironmentRepository.get_priority_data(db, environment_id)
+            return environment
+        except Exception as e:
+            print(e)
+            return -1
+
+    # ! Obtem os dados de RCR final
+    async def get_final_rcr(self, environment_id: str):
+        try:
+            db = next(conn())
+            environment = EnvironmentRepository.get_final_rcr(db, environment_id)
             return environment
         except Exception as e:
             print(e)

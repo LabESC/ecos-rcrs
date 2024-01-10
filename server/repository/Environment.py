@@ -144,6 +144,42 @@ class Environment:
         db.refresh(environment)
         return environment
 
+    # ! Obtendo dados de mineração de um ambiente
+    @staticmethod
+    def get_mining_data(db: Session, environment_id: str) -> EnvironmentModel:
+        return (
+            db.query(EnvironmentModel.mining_data)
+            .filter(EnvironmentModel.id == environment_id)
+            .first()
+        )
+
+    # ! Obtendo dados de tópicos de um ambiente
+    @staticmethod
+    def get_topic_data(db: Session, environment_id: str) -> EnvironmentModel:
+        return (
+            db.query(EnvironmentModel.topic_data)
+            .filter(EnvironmentModel.id == environment_id)
+            .first()
+        )
+
+    # ! Obtendo dados de prioridades de um ambiente
+    @staticmethod
+    def get_priority_data(db: Session, environment_id: str) -> EnvironmentModel:
+        return (
+            db.query(EnvironmentModel.priority_data)
+            .filter(EnvironmentModel.id == environment_id)
+            .first()
+        )
+
+    # ! Obtendo dados de RCR final de um ambiente
+    @staticmethod
+    def get_final_rcr(db: Session, environment_id: str) -> EnvironmentModel:
+        return (
+            db.query(EnvironmentModel.final_rcr)
+            .filter(EnvironmentModel.id == environment_id)
+            .first()
+        )
+
     # ! Obtendo usuários votantes de um ambiente
     @staticmethod
     def get_voting_users(

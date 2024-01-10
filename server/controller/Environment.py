@@ -6,6 +6,10 @@ from schemas.Environment import (
     EnvironmentResponse,
     EnvironmentRequest,
     EnvironmentResponseFiltered,
+    EnvironmentUpdateMiningDataRequest,
+    EnvironmentUpdateTopicDataRequest,
+    EnvironmentUpdatePriorityDataRequest,
+    EnvironmentUpdateFinalDataRequest,
 )
 from service.Environment import Environment as environmentService
 from validations.Auth import Auth as authValidator
@@ -225,4 +229,441 @@ async def create(environment: EnvironmentRequest):
         )
 
     # ! Retornando usuário
+    return environment
+
+
+@router_environment.put("/{id}/status/{status}", response_model=EnvironmentResponse)
+async def update_status(id: str, status: str, request: Request):
+    # . Variável de controle de acesso
+    grant_access = False
+
+    # ! Validando credenciais de serviço
+    if authValidator().validate_service(request):
+        grant_access = True
+
+    # ! Validando credenciais de usuário
+    if authValidator().validate_user(request):
+        grant_access = True
+
+    # ! Se não teve acesso por nenhum dos dois, retorne erro
+    if not grant_access:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Service or user authentication failed!",
+                )
+            ],
+            status_code=401,
+        )
+
+    # ! Atualizando status do ambiente
+    environment = await environmentService().update_status(id, status)
+
+    # ! Validando retorno
+    if not environment:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Environment not updated!",
+                )
+            ],
+            status_code=404,
+        )
+
+    if environment == -1:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    msg_500["en-US"],
+                )
+            ],
+            status_code=500,
+        )
+
+    # ! Retornando ambiente
+    return environment
+
+
+@router_environment.post("/{id}/miningdata", response_model=EnvironmentResponse)
+async def update_mining_data(
+    id: str, body: EnvironmentUpdateMiningDataRequest, request: Request
+):
+    # ! Validando credenciais de serviço
+    if not authValidator().validate_service(request):
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Service authentication failed!",
+                )
+            ],
+            status_code=401,
+        )
+
+    # ! Atualizando status do ambiente
+    environment = await environmentService().update_mining(id, body.mining_data)
+
+    # ! Validando retorno
+    if not environment:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Environment not updated!",
+                )
+            ],
+            status_code=404,
+        )
+
+    if environment == -1:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    msg_500["en-US"],
+                )
+            ],
+            status_code=500,
+        )
+
+    # ! Retornando ambiente
+    return environment
+
+
+@router_environment.post("/{id}/topicdata", response_model=EnvironmentResponse)
+async def update_topic_data(
+    id: str, body: EnvironmentUpdateTopicDataRequest, request: Request
+):
+    # ! Validando credenciais de serviço
+    if not authValidator().validate_service(request):
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Service authentication failed!",
+                )
+            ],
+            status_code=401,
+        )
+
+    # ! Atualizando status do ambiente
+    environment = await environmentService().update_topics(id, body.topic_data)
+
+    # ! Validando retorno
+    if not environment:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Environment not updated!",
+                )
+            ],
+            status_code=404,
+        )
+
+    if environment == -1:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    msg_500["en-US"],
+                )
+            ],
+            status_code=500,
+        )
+
+    # ! Retornando ambiente
+    return environment
+
+
+@router_environment.post("/{id}/prioritydata", response_model=EnvironmentResponse)
+async def update_priority_data(
+    id: str, body: EnvironmentUpdatePriorityDataRequest, request: Request
+):
+    # . Variável de controle de acesso
+    grant_access = False
+
+    # ! Validando credenciais de serviço
+    if authValidator().validate_service(request):
+        grant_access = True
+
+    # ! Validando credenciais de usuário
+    if authValidator().validate_user(request):
+        grant_access = True
+
+    # ! Se não teve acesso por nenhum dos dois, retorne erro
+    if not grant_access:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Service or user authentication failed!",
+                )
+            ],
+            status_code=401,
+        )
+
+    # ! Atualizando status do ambiente
+    environment = await environmentService().update_priority(id, body.priority_data)
+
+    # ! Validando retorno
+    if not environment:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Environment not updated!",
+                )
+            ],
+            status_code=404,
+        )
+
+    if environment == -1:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    msg_500["en-US"],
+                )
+            ],
+            status_code=500,
+        )
+
+    # ! Retornando ambiente
+    return environment
+
+
+@router_environment.post("/{id}/finaldata", response_model=EnvironmentResponse)
+async def update_final_data(
+    id: str, body: EnvironmentUpdateFinalDataRequest, request: Request
+):
+    # . Variável de controle de acesso
+    grant_access = False
+
+    # ! Validando credenciais de serviço
+    if authValidator().validate_service(request):
+        grant_access = True
+
+    # ! Validando credenciais de usuário
+    if authValidator().validate_user(request):
+        grant_access = True
+
+    # ! Se não teve acesso por nenhum dos dois, retorne erro
+    if not grant_access:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Service or user authentication failed!",
+                )
+            ],
+            status_code=401,
+        )
+
+    # ! Atualizando status do ambiente
+    environment = await environmentService().update_final_rcr(id, body.final_rcr)
+
+    # ! Validando retorno
+    if not environment:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Environment not updated!",
+                )
+            ],
+            status_code=404,
+        )
+
+    if environment == -1:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    msg_500["en-US"],
+                )
+            ],
+            status_code=500,
+        )
+
+    # ! Retornando ambiente
+    return environment
+
+
+@router_environment.get("/{id}/miningdata")  # , response_model=EnvironmentResponse)
+async def get_mining_data(id: str, request: Request):
+    # ! Validando credenciais de usuário
+    if authValidator().validate_user(request):
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Service or user authentication failed!",
+                )
+            ],
+            status_code=401,
+        )
+
+    # ! Obtendo dados de mineração
+    environment = await environmentService().get_mining_data(id)
+
+    # ! Validando retorno
+    if not environment:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Environment not found!",
+                )
+            ],
+            status_code=404,
+        )
+
+    if environment == -1:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    msg_500["en-US"],
+                )
+            ],
+            status_code=500,
+        )
+
+    # ! Retornando ambiente
+    return environment
+
+
+@router_environment.get("/{id}/topicdata")  # , response_model=EnvironmentResponse)
+async def get_topic_data(id: str, request: Request):
+    # ! Validando credenciais de usuário
+    if authValidator().validate_user(request):
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Service or user authentication failed!",
+                )
+            ],
+            status_code=401,
+        )
+
+    # ! Obtendo dados de mineração
+    environment = await environmentService().get_topic_data(id)
+
+    # ! Validando retorno
+    if not environment:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Environment not found!",
+                )
+            ],
+            status_code=404,
+        )
+
+    if environment == -1:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    msg_500["en-US"],
+                )
+            ],
+            status_code=500,
+        )
+
+    # ! Retornando ambiente
+    return environment
+
+
+@router_environment.get("/{id}/prioritydata")  # , response_model=EnvironmentResponse)
+async def get_priority_data(id: str, request: Request):
+    # ! Validando credenciais de usuário
+    if authValidator().validate_user(request):
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Service or user authentication failed!",
+                )
+            ],
+            status_code=401,
+        )
+
+    # ! Obtendo dados de mineração
+    environment = await environmentService().get_priority_data(id)
+
+    # ! Validando retorno
+    if not environment:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Environment not found!",
+                )
+            ],
+            status_code=404,
+        )
+
+    if environment == -1:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    msg_500["en-US"],
+                )
+            ],
+            status_code=500,
+        )
+
+    # ! Retornando ambiente
+    return environment
+
+
+@router_environment.get("/{id}/finaldata")  # , response_model=EnvironmentResponse)
+async def get_final_data(id: str, request: Request):
+    # ! Validando credenciais de usuário
+    if authValidator().validate_user(request):
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Service or user authentication failed!",
+                )
+            ],
+            status_code=401,
+        )
+
+    # ! Obtendo dados de mineração
+    environment = await environmentService().get_final_rcr(id)
+
+    # ! Validando retorno
+    if not environment:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Environment not found!",
+                )
+            ],
+            status_code=404,
+        )
+
+    if environment == -1:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    msg_500["en-US"],
+                )
+            ],
+            status_code=500,
+        )
+
+    # ! Retornando ambiente
     return environment

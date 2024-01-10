@@ -43,3 +43,23 @@ class EnvironmentResponseFiltered(BaseModel):
     name: str
     details: str
     status: str
+
+
+class EnvironmentUpdateMiningDataRequest(BaseModel):
+    mining_data: Optional[list[dict]] = None
+    status: Optional[str] = None
+
+
+class EnvironmentUpdateTopicDataRequest(BaseModel):
+    topic_data: Optional[list[dict]] = None
+    status: Optional[str] = None
+
+
+class EnvironmentUpdatePriorityDataRequest(BaseModel):
+    priority_data: Optional[list[dict]] = None
+    status: Optional[str] = None
+
+
+class EnvironmentUpdateFinalDataRequest(BaseModel):
+    final_rcr: Optional[list[dict]] = None
+    status: Optional[str] = None
