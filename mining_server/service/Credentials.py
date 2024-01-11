@@ -20,3 +20,11 @@ class Credentials:
     @staticmethod
     def get_github_token():
         return os.getenv("GITHUB_TOKEN")
+
+    @staticmethod
+    def get_db_microsservice_base():
+        return os.getenv("DB_MICROSERVICE_BASE")
+
+    @staticmethod
+    def get_topic_microsservice_base():
+        return os.getenv("TOPIC_MICROSERVICE_BASE")

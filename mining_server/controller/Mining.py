@@ -1,10 +1,10 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
+import asyncio
 
 # Importando dependencias locais
-from service.GitHub import GitHub as githubService
 from service.Auth import Auth as authValidator
-
+from service.GitHubRequests import GitHubRequests
 from schemas.Mining import MiningReposRequest
 
 router_mining = APIRouter(prefix="/mining", tags=["Mining"])
@@ -29,10 +29,11 @@ msg_user_not_active = {
     "en-US": "User not active!",
     "pt-BR": "Usuário não está ativo!",
 }
+githubRequests = GitHubRequests()
 
 
 # Rotas
-@router_mining.post("/api/buscaRepos")
+@router_mining.post("/api/minerepos")
 async def searching_repos_issues(request: MiningReposRequest):
     # * Validando usuário e senha
     if authValidator.validate_user(request.user, request.password) is False:
@@ -41,10 +42,18 @@ async def searching_repos_issues(request: MiningReposRequest):
             status_code=401,
         )
 
-    # * Obtendo issues de vários repositórios
-    mining_issues = await githubService().obtem_repos(request.repos)
+    # * Verificando se há uma mineração em andamento
+    if await githubRequests.is_running():
+        # * Se tiver, adicione a requisição na fila
+        asyncio.create_task(
+            githubRequests.add_to_queue(request.repos, request.environment_id)
+        )
+        return JSONResponse(
+            {"code": "another_mining_in_progress", "message": "Mining added to queue!"},
+            status_code=201,
+        )
 
-    # ! Enviar dados para o microsserviço do BD (salvar dados) (A IMPLEMENTAR)
-    # requests....
+    # * Se não tiver, execute a mineração
+    await githubRequests.run(request.repos, request.environment_id)
 
-    return mining_issues
+    return {"code": "mining_in_progress", "message": "Mining in progress!"}

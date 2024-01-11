@@ -6,3 +6,4 @@ requirements-antigo.txt
 .vscode
 *.pyc*
 *.env*
+*node_modules*

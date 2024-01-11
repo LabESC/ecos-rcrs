@@ -16,11 +16,16 @@ from service.Words import (
 
 
 class GitHub:
-    def __init__(self) -> None:
-        self.__issues = {}
+    """def __init__(self) -> None:
+    issues = {}
+    self.__isRunning = False"""
 
+    @staticmethod
     # ! Função que obtém as issues de um repositório
     async def obtem_repos(self, repos: list[str]):
+        # * Instanciando dicionário de issues
+        issues = {}
+
         # * Inicializando serviço de requisições
         requests = requestsService()
 
@@ -28,16 +33,17 @@ class GitHub:
         for repo in repos:
             print("Obtendo issues do repositório: " + repo)  # . LOG
             # * Criando o repositório no dicionário
-            self.__issues[repo] = []
+            issues[repo] = []
 
             # * Inicializando a variável de pesquisa na página 1
             pagina = 1
 
             while True:
                 # * Fazendo a requisição
-                resposta_repo_obj, resposta_repo_links = await requests.get_repo_issue(
-                    repo, pagina
-                )
+                (
+                    resposta_repo_obj,
+                    resposta_repo_links,
+                ) = await requests.get_repo_issue(repo, pagina)
                 resposta_repo_obj = filtraArrayRequestGit(resposta_repo_obj)
 
                 if resposta_repo_obj is not []:  # and resposta_repo_obj[0] != "":
@@ -45,22 +51,22 @@ class GitHub:
                     for issue in resposta_repo_obj:
                         # * Inserindo cada issue no dicionário do repositório
                         try:
-                            self.__issues[repo].append(issue)
+                            issues[repo].append(issue)
                         except Exception:
                             print("Erro ao adicionar a issue")
 
                     """for key in resposta_repo_obj.keys():
                         try:
-                            self.__issues[repo].append(
+                            issues[repo].append(
                                 {key: resposta_repo_obj[key].strip()}
                             )"""
-                    # Caso não haja uma próxima página, encerre o loop
+                    # . Caso não haja uma próxima página, encerre o loop
                     if vrfProximoNovo(resposta_repo_links) is False:
                         break
 
-                    # Incremente o número da página buscada e busque-a
+                    # . Incremente o número da página buscada e busque-a
                     pagina += 1
                 else:
                     break
 
-        return self.__issues
+        return issues

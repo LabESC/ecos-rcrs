@@ -31,8 +31,10 @@ class Environment(Base):
     status: str = Column(
         ENUM(
             "mining",
+            "mining_error",
             "mining_done",
             "making_topics",
+            "topics_error",
             "topics_done",
             "waiting_rcr_voting",
             "rcr_voting_done",
