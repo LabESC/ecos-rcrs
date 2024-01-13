@@ -12,5 +12,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use(require("./controller/GitHub.js"));
+app.use(require("./controller/Email.js"));
 
 module.exports = app;

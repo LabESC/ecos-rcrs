@@ -6,7 +6,7 @@ import json
 from service.Top2Vec import Top2VecImpl
 from service.Databases import Database
 from service.Auth import Auth as authValidator
-
+from service.DBRequests import DBRequests
 from schemas.Topic import TopicReposRequest
 
 """from schemas.Environment import (
@@ -18,7 +18,7 @@ from validations.Auth import Auth as authValidator
 from utils.Error import error"""
 
 
-router_topic = APIRouter(prefix="/topic", tags=["Topic"])
+router_topic = APIRouter(prefix="/api/topic", tags=["Topic"])
 
 # Variáveis globais
 entity_name = "topic"
@@ -45,8 +45,7 @@ msg_user_not_active = {
 # Rotas
 
 
-# @router_topic.patch("/geraTopicos/bert")
-@router_topic.get("/android/t2v")
+@router_topic.get("/t2v/android")
 async def busca_android_top2vec():
     # Obtendo issues de vários repositórios
     df = Database.get_android()
@@ -69,33 +68,47 @@ async def busca_android_top2vec():
     }
 
 
-@router_topic.post("/repos/t2v")
-async def busca_repos_top2vec(request: TopicReposRequest):
+@router_topic.post("/t2v")
+async def busca_repos_top2vec(body: TopicReposRequest, request: Request):
     # * Validando usuário e senha
-    if authValidator.validate_user(request.user, request.password) is False:
+    if authValidator.validate_user(request) is False:
         return JSONResponse(
             {"code": "auth", "message": "Authentication failed!"},
             status_code=401,
         )
 
+    # * Formatando o json para dataframe
+    df = await Top2VecImpl.create_df_by_json_issues(body.issues)
+
     # * Modelando issues recebidas
-    modelagem_topicos = await Top2VecImpl.obtem_topicos_pd(request.issues)
-    if modelagem_topicos is False:
-        return JSONResponse(
-            content={
-                "code": "modelling",
-                "message": "Não há issues suficientes para gerar o modelo",
-            },
-            status_code=400,
+    try:
+        topic_generation = await Top2VecImpl.obtem_topicos_pd_body(df)
+    except Exception as e:
+        try:
+            topic_generation = {"error": str(e)}
+        except Exception:
+            topic_generation = {
+                "error": "An error occurred while generating topics, "
+                + "please try again or with another instance!"
+            }
+
+    # . Se ocorrer erro, enviar o erro pro BD
+    if "error" in topic_generation:
+        await DBRequests.update_enviroment_topic_data(
+            body.environment_id,
+            topic_generation,
+            "topics_error",
         )
+        return
 
-    # !! Inserir o resultado no BD - Pendente
+    # !! . Senão, inserir o resultado no BD - Pendente
+    await DBRequests.update_enviroment_topic_data(
+        body.environment_id,
+        topic_generation,
+        "topics_done",
+    )
 
-    # ! Retornando resultado
-    return {
-        "comparacoes": modelagem_topicos["comparacoes"],
-        "topicos": modelagem_topicos["topicos"],
-    }
+    return topic_generation
 
 
 """

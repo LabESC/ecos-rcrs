@@ -30,20 +30,24 @@ async function updateEnvironmentMiningData(
   status
 ) {
   // * Definindo url
-  const url = `${DB_MICROSERVICE_BASE}/environment/${environment_id}/mining_data`;
+  const url = `${DB_MICROSERVICE_BASE}/environment/${environment_id}/miningdata`;
 
   // * Fazendo requisição
   try {
-    await axios.post(url, {
-      headers: {
-        "service-login": USER_LOGIN,
-        "service-pwd": USER_PWD,
-      },
-      data: {
+    const req = await axios.post(
+      url,
+      {
         mining_data: mining_data,
         status: status,
       },
-    });
+      {
+        headers: {
+          "service-login": USER_LOGIN,
+          "service-pwd": USER_PWD,
+        },
+      }
+    );
+    console.log(req.status);
     return true;
   } catch (e) {
     return false;

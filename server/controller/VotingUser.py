@@ -9,7 +9,7 @@ from validations.Auth import Auth as authValidator
 from utils.Error import error
 
 
-router_voting_user = APIRouter(prefix="/votinguser", tags=["VotingUser"])
+router_voting_user = APIRouter(prefix="/api/votinguser", tags=["VotingUser"])
 
 # Variáveis globais
 entity_name = "votinguser"

@@ -8,10 +8,11 @@ from validations.Auth import Auth as authValidator
 from utils.Error import error
 
 
-router_user = APIRouter(prefix="/user", tags=["User"])
+router_user = APIRouter(prefix="/api/user", tags=["User"])
 
 msg_404 = {"en-US": "User not found!", "pt-BR": "Usuário não encontrado!"}
 msg_500 = {"en-US": "Internal server error!", "pt-BR": "Erro interno do servidor!"}
+
 
 @router_user.get("/", response_model=list[UserResponse])
 async def get_all(request: Request):
@@ -48,7 +49,7 @@ async def get_all(request: Request):
             [
                 error(
                     "user",
-                    msg_500['en-US'],
+                    msg_500["en-US"],
                 )
             ],
             status_code=500,
@@ -93,7 +94,7 @@ async def get_by_id(id: str, request: Request):
             [
                 error(
                     "user",
-                    msg_500['en-US'],
+                    msg_500["en-US"],
                 )
             ],
             status_code=500,
@@ -125,7 +126,7 @@ async def create(user: UserRequest):
             [
                 error(
                     "user",
-                    msg_500['en-US'],
+                    msg_500["en-US"],
                 )
             ],
             status_code=500,
@@ -178,7 +179,7 @@ async def activate(id: str):
             [
                 error(
                     "user",
-                    msg_500['en-US'],
+                    msg_500["en-US"],
                 )
             ],
             status_code=500,
@@ -218,7 +219,7 @@ async def authenticate(user_auth: AuthRequest):
             [
                 error(
                     "user",
-                    msg_500['en-US'],
+                    msg_500["en-US"],
                 )
             ],
             status_code=500,
@@ -270,6 +271,7 @@ async def inactivate(id: str):
             status_code=500,
         )
 
+
 @router_user.put("/{id}", response_model=UserResponse)
 async def update(id: str, user: UserRequest):
     # ! Atualizando usuário
@@ -292,7 +294,7 @@ async def update(id: str, user: UserRequest):
             [
                 error(
                     "user",
-                    msg_500['en-US'],
+                    msg_500["en-US"],
                 )
             ],
             status_code=500,
@@ -314,7 +316,7 @@ async def update(id: str, user: UserRequest):
             [
                 error(
                     "user",
-                    msg_500['en-US'],
+                    msg_500["en-US"],
                 )
             ],
             status_code=422,
@@ -322,6 +324,7 @@ async def update(id: str, user: UserRequest):
 
     # ! Retornando usuário
     return user
+
 
 @router_user.post("/sendEmail")
 async def send_email():

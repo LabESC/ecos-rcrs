@@ -61,7 +61,7 @@ async function filtraArrayRequestGit(array) {
       issueBody = issueBody.replace(/\s+/g, " ");
 
       // . Se o corpo da issue acabar ficando nulo, retorne
-      if (issueBody !== null) return;
+      if (issueBody === null) return;
 
       // . Se o id da issue não for falso e o tamanho do corpo da issue for maior que 0, adicione no array
       if (issueId !== false && issueBody.length > 0) {
@@ -97,8 +97,54 @@ function hasNextLinkString(link) {
 
   return false;
 }
+
+/**
+  Função que retorna um array a partir da manipulação de um dicionario com a estrutura:
+
+    {
+    "repo_name": [
+      {
+        "id": 1,
+        "body": "content",
+        "tags": "null"
+      }, ...
+    ], ...
+  }
+
+  Para um array da estrutura:
+
+  [
+    {
+      "repo": "repo_name",
+      "id": 1,
+      "body": "content",
+      "tags": "null"
+    }, ...
+  ]
+ * @param {object} issues - Um dicionário definido com a estrutura acima.
+ * @return {Array} Retorna o array descrito.
+ **/
+function formatIssuesToArray(issues) {
+  const outputArray = [];
+
+  for (const [repo, items] of Object.entries(issues)) {
+    for (const item of items) {
+      const outputItem = {
+        repo: repo,
+        id: item.id,
+        body: item.body,
+        tags: item.tags,
+      };
+      outputArray.push(outputItem);
+    }
+  }
+
+  return outputArray;
+}
+
 module.exports = {
   filtraArrayRequestGit,
   hasNextLinkDict,
   hasNextLinkString,
+  formatIssuesToArray,
 };

@@ -16,3 +16,7 @@ class Credentials:
     @staticmethod
     def get_user_pwd():
         return os.getenv("USER_PWD")
+
+    @staticmethod
+    def get_db_microsservice_base():
+        return os.getenv("DB_MICROSERVICE_BASE")

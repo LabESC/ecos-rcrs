@@ -108,14 +108,12 @@ class Environment:
 
     # ! Altera os dados de mineração
     async def update_mining(
-        self, environment_id: str, mining_data: list[dict], status: str = "mining_done"
+        self, environment_id: str, mining_data: dict, status: str = "mining_done"
     ):
         try:
             db = next(conn())
-            environment = EnvironmentRepository.update_mining(
-                db, environment_id, mining_data, status
-            )
-            return environment
+            EnvironmentRepository.update_mining(db, environment_id, mining_data, status)
+            return True
         except Exception as e:
             print(e)
             return -1

@@ -16,7 +16,7 @@ from validations.Auth import Auth as authValidator
 from utils.Error import error
 
 
-router_environment = APIRouter(prefix="/environment", tags=["Environment"])
+router_environment = APIRouter(prefix="/api/environment", tags=["Environment"])
 
 # Variáveis globais
 entity_name = "environment"
@@ -287,7 +287,7 @@ async def update_status(id: str, status: str, request: Request):
     return environment
 
 
-@router_environment.post("/{id}/miningdata", response_model=EnvironmentResponse)
+@router_environment.post("/{id}/miningdata")
 async def update_mining_data(
     id: str, body: EnvironmentUpdateMiningDataRequest, request: Request
 ):
@@ -304,7 +304,9 @@ async def update_mining_data(
         )
 
     # ! Atualizando status do ambiente
-    environment = await environmentService().update_mining(id, body.mining_data)
+    environment = await environmentService().update_mining(
+        id, body.mining_data.dict(), body.status
+    )
 
     # ! Validando retorno
     if not environment:
@@ -330,10 +332,10 @@ async def update_mining_data(
         )
 
     # ! Retornando ambiente
-    return environment
+    return True
 
 
-@router_environment.post("/{id}/topicdata", response_model=EnvironmentResponse)
+@router_environment.post("/{id}/topicdata")
 async def update_topic_data(
     id: str, body: EnvironmentUpdateTopicDataRequest, request: Request
 ):
@@ -350,7 +352,7 @@ async def update_topic_data(
         )
 
     # ! Atualizando status do ambiente
-    environment = await environmentService().update_topics(id, body.topic_data)
+    environment = await environmentService().update_topics(id, body.topic_data.dict())
 
     # ! Validando retorno
     if not environment:
@@ -379,7 +381,7 @@ async def update_topic_data(
     return environment
 
 
-@router_environment.post("/{id}/prioritydata", response_model=EnvironmentResponse)
+@router_environment.post("/{id}/prioritydata")
 async def update_priority_data(
     id: str, body: EnvironmentUpdatePriorityDataRequest, request: Request
 ):
@@ -436,7 +438,7 @@ async def update_priority_data(
     return environment
 
 
-@router_environment.post("/{id}/finaldata", response_model=EnvironmentResponse)
+@router_environment.post("/{id}/finaldata")
 async def update_final_data(
     id: str, body: EnvironmentUpdateFinalDataRequest, request: Request
 ):

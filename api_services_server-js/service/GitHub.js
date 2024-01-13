@@ -45,7 +45,7 @@ async function getRepos(repos) {
       }
 
       // * Se houver issues, filtra-las
-      issuesResponse = filtraArrayRequestGit(response.data);
+      issuesResponse = await filtraArrayRequestGit(response.data);
 
       // * Se após a filtragem, não houver issues, retornar
       if (issuesResponse.length != 0) {
@@ -62,6 +62,7 @@ async function getRepos(repos) {
       page++;
     }
   }
+  return { issues, errors };
 }
 
 module.exports = getRepos;

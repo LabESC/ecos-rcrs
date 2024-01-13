@@ -1,5 +1,6 @@
 const getRepos = require("./GitHub");
 const { updateEnvironmentMiningData } = require("./DBRequests");
+const { formatIssuesToArray } = require("./Words");
 
 class GitHubRequest {
   #requestsQueue;
@@ -23,7 +24,14 @@ class GitHubRequest {
     try {
       // * Executando requisições
       result = await getRepos(repos);
+
+      // * Finalizando serviço
+      this.#isRunning = false;
+
+      // !! LOG: Imprimindo que acabou
+      console.log("Acabou mineração");
     } catch (e) {
+      console.log(e);
       // * Finalizando serviço
       this.#isRunning = false;
 
@@ -35,7 +43,9 @@ class GitHubRequest {
           "mining_error"
         );
         return;
-      } catch (e) {}
+      } catch (e) {
+        console.log(e);
+      }
 
       // * Tente converter o erro para string via stringify() -> objetos JSON
       try {
@@ -56,14 +66,30 @@ class GitHubRequest {
       return;
     }
 
-    // * Finalizando serviço
-    this.#isRunning = false;
-
-    // !! LOG: Imprimindo que acabou
-    console.log("Acabou mineração");
+    // . Formatando resultado
+    try {
+      const newIssuesResult = formatIssuesToArray(result.issues);
+      result.issues = newIssuesResult;
+    } catch (e) {
+      // * Se não conseguir, retorne erro generico
+      await updateEnvironmentMiningData(
+        environment_id,
+        {
+          error:
+            "Error formatting result, it may be caused by a bad mining, try again.",
+        },
+        "mining_error"
+      );
+      return;
+    }
 
     // * Enviando resultado para o banco de dados
-    await updateEnvironmentMiningData(environment_id, result, "mining_done");
+    const sendToDB = await updateEnvironmentMiningData(
+      environment_id,
+      result,
+      "mining_done"
+    );
+    if (sendToDB) console.log("Mineração enviada");
 
     // * Verificando se há requisições na fila
     if (this.#requestsQueue.length != 0) {

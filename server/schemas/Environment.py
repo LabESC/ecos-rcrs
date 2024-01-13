@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, Union
 
 
 """class EnvironmentDataBase(BaseModel):
@@ -45,14 +45,29 @@ class EnvironmentResponseFiltered(BaseModel):
     status: str
 
 
+class DataError(BaseModel):
+    error: dict
+
+
+class MiningData(BaseModel):
+    issues: list[dict]
+    errors: dict
+
+
 class EnvironmentUpdateMiningDataRequest(BaseModel):
-    mining_data: Optional[list[dict]] = None
-    status: Optional[str] = None
+    mining_data: Union[MiningData, DataError]
+    status: str
+
+
+# !! Avaliar este objeto  - ERRO
+class TopicData(BaseModel):
+    comparisons: list[dict]
+    topics: list[list[str]]
 
 
 class EnvironmentUpdateTopicDataRequest(BaseModel):
-    topic_data: Optional[list[dict]] = None
-    status: Optional[str] = None
+    topic_data: Union[TopicData, DataError]
+    status: str
 
 
 class EnvironmentUpdatePriorityDataRequest(BaseModel):

@@ -71,15 +71,15 @@ class Environment:
             .first()
         )
         environment.mining_data = mining_data
-        environment.last_updated = datetime.now()
 
         # * Se existir status, altere-o
         if status:
             environment.status = status
 
+        environment.last_updated = datetime.now()
+
         db.commit()
-        db.refresh(environment)
-        return environment
+        return True
 
     # ! Alterando dados de tópicos
     @staticmethod

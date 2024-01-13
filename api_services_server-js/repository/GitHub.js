@@ -5,6 +5,7 @@ class GitHub {
   #request_headers = {
     Authorization: `Bearer ${GITHUB_TOKEN}`, //`token ${GITHUB_TOKEN}`
   };
+
   constructor() {
     this.requests = axios.create({
       baseURL: "https://api.github.com",
@@ -55,7 +56,7 @@ class GitHub {
   async getRepositoriesIssues(repo, page) {
     // * Fazendo requisição
     let response = await this.requests.get(
-      `repos/${repo}/issues?page=${page}&per_page=100?`,
+      `repos/${repo}/issues?page=${page}&per_page=100`,
       // ! - PRODUÇÃO: `repos/${repo}/issues?page=${page}&per_page=100?&state=all`,
       {
         headers: this.#request_headers,
