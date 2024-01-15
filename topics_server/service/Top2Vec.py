@@ -155,7 +155,16 @@ class Top2VecImpl:
         # iterando sobre os topicos e obtendo os documentos para cada
         i = 0
         doc_dict = []
-        while i < len(topic_sizes):
+        for i, size in enumerate(topic_sizes):
+            documents, document_scores, document_ids = model.search_documents_by_topic(
+                topic_num=i, num_docs=size
+            )
+
+            doc_dict.extend(
+                {"id": int(doc_id), "score": float(score), "topicNum": int(i)}
+                for _, score, doc_id in zip(documents, document_scores, document_ids)
+            )
+        """while i < len(topic_sizes):
             documents, document_scores, document_ids = model.search_documents_by_topic(
                 topic_num=i, num_docs=topic_sizes[i]
             )
@@ -168,7 +177,10 @@ class Top2VecImpl:
                     )
                 }
             )
-
-            i += 1
+            for _, score, doc_id in zip(documents, document_scores, document_ids):
+                doc_dict.append(
+                    {"id": int(doc_id), "score": float(score), "topicNum": int(i)}
+                )
+        """
 
         return {"comparisons": doc_dict, "topics": topic_words.tolist()}

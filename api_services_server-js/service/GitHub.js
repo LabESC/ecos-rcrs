@@ -18,8 +18,9 @@ async function getRepos(repos) {
     // !! LOG
     console.log(`Buscando issues do repositório ${repo}`);
 
-    // * Iniciando página
+    // * Iniciando página e id de issues (sistema)
     let page = 1;
+    let sysId = 0;
 
     // * Iniciando array de issues e erros
     issues[repo] = [];
@@ -40,17 +41,18 @@ async function getRepos(repos) {
       }
 
       // * Se não houve erro, verificar se há issues
-      if (response.data.length == 0) {
+      if (response.data.length === 0) {
         break;
       }
 
       // * Se houver issues, filtra-las
-      issuesResponse = await filtraArrayRequestGit(response.data);
+      issuesResponse = await filtraArrayRequestGit(response.data, sysId);
 
+      sysId = issuesResponse.sysIdUpdated;
       // * Se após a filtragem, não houver issues, retornar
-      if (issuesResponse.length != 0) {
+      if (issuesResponse.result.length !== 0) {
         // * Iterando sobre as issues obtidas
-        issues[repo] = issues[repo].concat(issuesResponse);
+        issues[repo] = issues[repo].concat(issuesResponse.result);
       } else {
         break;
       }

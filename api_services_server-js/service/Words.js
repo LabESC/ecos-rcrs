@@ -13,9 +13,10 @@ const regexCode = /```[\s\S]*?```/;
  * Retorna um array somente com o body das issues.
  *
  * @param {array} array - Um array de objetos do tipo issue (vindo do GitHub).
+ * @param {number} sysId - Um array de objetos do tipo issue (vindo do GitHub).
  * @return {array} Um array com o body das issues.
  **/
-async function filtraArrayRequestGit(array) {
+async function filtraArrayRequestGit(array, sysId) {
   // * Inicializando variáveis
   let arrayFiltrado = [];
   let issueId = false;
@@ -66,16 +67,19 @@ async function filtraArrayRequestGit(array) {
       // . Se o id da issue não for falso e o tamanho do corpo da issue for maior que 0, adicione no array
       if (issueId !== false && issueBody.length > 0) {
         arrayFiltrado.push({
-          id: issueId,
+          id: sysId,
+          issueId: issueId,
           body: issueBody,
           tags: issueTags,
         });
+
+        sysId++;
       }
     }
   }
 
-  // * Retorne o array filtrado
-  return arrayFiltrado;
+  // * Retorne o array filtrado e o id do sistema atualizado
+  return {result: arrayFiltrado, sysIdUpdated: sysId};
 }
 
 /***
@@ -132,6 +136,7 @@ function formatIssuesToArray(issues) {
       const outputItem = {
         repo: repo,
         id: item.id,
+        issueId: item.issueId,
         body: item.body,
         tags: item.tags,
       };

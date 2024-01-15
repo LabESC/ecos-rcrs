@@ -108,8 +108,6 @@ async def busca_repos_top2vec(body: TopicReposRequest, request: Request):
         "topics_done",
     )
 
-    return topic_generation
-
 
 """
 @router_topic.get("/buscaPython/t2v")

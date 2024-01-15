@@ -15,7 +15,7 @@ class GitHubRequest {
    * Minera os repositórios, e envia o resultado para o banco de dados.
    *
    * @param {Array} repos Array de repositórios (strings).
-   * @param {string} pwd Id do ambiente (BD) que solicitou a mineração.
+   * @param {string} environment_id O id do ambiente (BD) que solicitou a mineração.
    **/
   async run(repos, environment_id) {
     // * Iniciando serviço
@@ -92,7 +92,7 @@ class GitHubRequest {
     if (sendToDB) console.log("Mineração enviada");
 
     // * Verificando se há requisições na fila
-    if (this.#requestsQueue.length != 0) {
+    if (this.#requestsQueue.length !== 0) {
       // * Executando requisição da fila
       this.runQueue(); // ! Não aguardo (await), para otimizar
     }
@@ -103,7 +103,7 @@ class GitHubRequest {
    **/
   async runQueue() {
     // * Enquanto houver requisições na fila, executar
-    while (this.#requestsQueue.length != 0) {
+    while (this.#requestsQueue.length !== 0) {
       // * Executando requisição
       const nextRequest = this.#requestsQueue.shift();
       this.run(nextRequest.repos, nextRequest.environment_id);
@@ -114,7 +114,7 @@ class GitHubRequest {
    * Insere uma nova mineração em fila.
    *
    * @param {Array} repos Array de repositórios (strings).
-   * @param {string} pwd Id do ambiente (BD) que solicitou a mineração.
+   * @param {string} environment_id Id do ambiente (BD) que solicitou a mineração.
    **/
   async addQueue(repos, environment_id) {
     // * Adicionando requisição na fila

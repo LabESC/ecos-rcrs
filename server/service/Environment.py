@@ -168,7 +168,10 @@ class Environment:
         try:
             db = next(conn())
             environment = EnvironmentRepository.get_mining_data(db, environment_id)
-            return environment
+            if environment is None or environment is False:
+                return environment
+
+            return environment[0]
         except Exception as e:
             print(e)
             return -1
@@ -178,7 +181,10 @@ class Environment:
         try:
             db = next(conn())
             environment = EnvironmentRepository.get_topic_data(db, environment_id)
-            return environment
+            if environment is None or environment is False:
+                return environment
+
+            return environment[0]
         except Exception as e:
             print(e)
             return -1
@@ -188,7 +194,10 @@ class Environment:
         try:
             db = next(conn())
             environment = EnvironmentRepository.get_priority_data(db, environment_id)
-            return environment
+            if environment is None or environment is False:
+                return environment
+
+            return environment[0]
         except Exception as e:
             print(e)
             return -1
@@ -198,7 +207,10 @@ class Environment:
         try:
             db = next(conn())
             environment = EnvironmentRepository.get_final_rcr(db, environment_id)
-            return environment
+            if environment is None or environment is False:
+                return environment
+
+            return environment[0]
         except Exception as e:
             print(e)
             return -1

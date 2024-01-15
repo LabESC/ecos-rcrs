@@ -242,7 +242,7 @@ async def update_status(id: str, status: str, request: Request):
         grant_access = True
 
     # ! Validando credenciais de usuário
-    if authValidator().validate_user(request):
+    if authValidator().validate(request):
         grant_access = True
 
     # ! Se não teve acesso por nenhum dos dois, retorne erro
@@ -389,11 +389,11 @@ async def update_priority_data(
     grant_access = False
 
     # ! Validando credenciais de serviço
-    if authValidator().validate_service(request):
+    if authValidator.validate_service(request):
         grant_access = True
 
     # ! Validando credenciais de usuário
-    if authValidator().validate_user(request):
+    if authValidator().validate(request):
         grant_access = True
 
     # ! Se não teve acesso por nenhum dos dois, retorne erro
@@ -450,7 +450,7 @@ async def update_final_data(
         grant_access = True
 
     # ! Validando credenciais de usuário
-    if authValidator().validate_user(request):
+    if authValidator().validate(request):
         grant_access = True
 
     # ! Se não teve acesso por nenhum dos dois, retorne erro
@@ -498,7 +498,7 @@ async def update_final_data(
 @router_environment.get("/{id}/miningdata")  # , response_model=EnvironmentResponse)
 async def get_mining_data(id: str, request: Request):
     # ! Validando credenciais de usuário
-    if authValidator().validate_user(request):
+    if authValidator().validate(request):
         return JSONResponse(
             [
                 error(
@@ -542,7 +542,7 @@ async def get_mining_data(id: str, request: Request):
 @router_environment.get("/{id}/topicdata")  # , response_model=EnvironmentResponse)
 async def get_topic_data(id: str, request: Request):
     # ! Validando credenciais de usuário
-    if authValidator().validate_user(request):
+    if authValidator().validate(request):
         return JSONResponse(
             [
                 error(
@@ -586,7 +586,7 @@ async def get_topic_data(id: str, request: Request):
 @router_environment.get("/{id}/prioritydata")  # , response_model=EnvironmentResponse)
 async def get_priority_data(id: str, request: Request):
     # ! Validando credenciais de usuário
-    if authValidator().validate_user(request):
+    if authValidator().validate(request):
         return JSONResponse(
             [
                 error(
@@ -630,7 +630,7 @@ async def get_priority_data(id: str, request: Request):
 @router_environment.get("/{id}/finaldata")  # , response_model=EnvironmentResponse)
 async def get_final_data(id: str, request: Request):
     # ! Validando credenciais de usuário
-    if authValidator().validate_user(request):
+    if authValidator().validate(request):
         return JSONResponse(
             [
                 error(
