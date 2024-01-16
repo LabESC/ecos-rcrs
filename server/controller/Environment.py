@@ -10,8 +10,10 @@ from schemas.Environment import (
     EnvironmentUpdateTopicDataRequest,
     EnvironmentUpdatePriorityDataRequest,
     EnvironmentUpdateFinalDataRequest,
+    EnvironmentVotingUsers,
 )
 from service.Environment import Environment as environmentService
+from service.APIRequests import APIRequests
 from validations.Auth import Auth as authValidator
 from utils.Error import error
 
@@ -43,8 +45,8 @@ msg_user_not_active = {
 # Rotas
 @router_environment.get("/", response_model=list[EnvironmentResponse])
 async def get_all(request: Request):
-    """# ! Obtendo usuário logado e validando permissão
-    user = await authValidator().validate(request)
+    # ! Obtendo login de serviço e validando permissão
+    user = authValidator.validate_service(request)
 
     # ! Validando retorno
     if not user:
@@ -56,10 +58,10 @@ async def get_all(request: Request):
                 )
             ],
             status_code=401,
-        )"""
+        )
 
     # ! Obtendo todos os ambientes
-    environments = await environmentService().get_all()
+    environments = await environmentService.get_all()
 
     # ! Validando retorno
     if not environments:  # * Se não houver usuários (None)
@@ -89,12 +91,12 @@ async def get_all(request: Request):
 
 
 @router_environment.get("/{id}", response_model=EnvironmentResponse)
-async def get_by_id(id: str):
-    """# ! Obtendo usuário logado e validando permissão
-    user = await authValidator().validate(request)
+async def get_by_id(id: str, request: Request):
+    # ! Obtendo usuário logado e validando permissão
+    validate = await authValidator.validate_user(request)
 
     # ! Validando retorno
-    if not user:
+    if not validate:
         return JSONResponse(
             [
                 error(
@@ -103,10 +105,10 @@ async def get_by_id(id: str):
                 )
             ],
             status_code=401,
-        )"""
+        )
 
     # ! Obtendo usuário votante por id
-    user = await environmentService().get_by_id(id)
+    user = await environmentService.get_by_id(id)
 
     # ! Validando retorno
     if not user:  # * Se não houver usuário (None)
@@ -135,12 +137,10 @@ async def get_by_id(id: str):
     return user
 
 
-@router_environment.get(
-    "/user/{user_id}", response_model=list[EnvironmentResponseFiltered]
-)
+@router_environment.get("/user/{user_id}", response_model=list[EnvironmentResponse])
 async def get_by_user_id(user_id: str):
     # ! Obtendo usuário por id
-    environment = await environmentService().get_by_user_id(user_id)
+    environment = await environmentService.get_by_user_id(user_id)
 
     # ! Validando retorno
     if not environment:  # * Se não houver usuário (None)
@@ -172,7 +172,7 @@ async def get_by_user_id(user_id: str):
 @router_environment.post("/", response_model=EnvironmentResponse)
 async def create(environment: EnvironmentRequest):
     # ! Criando ambiente
-    environment = await environmentService().create(environment)
+    environment = await environmentService.create(environment)
 
     # ! Validando retorno
     if not environment:  # * Se não houver usuário (None)
@@ -228,21 +228,24 @@ async def create(environment: EnvironmentRequest):
             status_code=422,
         )
 
+    # !! Solicitando mineração do ambiente para o Microsserviço de API
+    await APIRequests.request_mining(environment.id, environment.repos)
+
     # ! Retornando usuário
     return environment
 
 
-@router_environment.put("/{id}/status/{status}", response_model=EnvironmentResponse)
+@router_environment.put("/{id}/status/{status}")
 async def update_status(id: str, status: str, request: Request):
     # . Variável de controle de acesso
     grant_access = False
 
     # ! Validando credenciais de serviço
-    if authValidator().validate_service(request):
+    if authValidator.validate_service(request):
         grant_access = True
 
     # ! Validando credenciais de usuário
-    if authValidator().validate(request):
+    if await authValidator.validate_user(request):
         grant_access = True
 
     # ! Se não teve acesso por nenhum dos dois, retorne erro
@@ -258,7 +261,7 @@ async def update_status(id: str, status: str, request: Request):
         )
 
     # ! Atualizando status do ambiente
-    environment = await environmentService().update_status(id, status)
+    environment = await environmentService.update_status(id, status)
 
     # ! Validando retorno
     if not environment:
@@ -283,16 +286,13 @@ async def update_status(id: str, status: str, request: Request):
             status_code=500,
         )
 
-    # ! Retornando ambiente
-    return environment
-
 
 @router_environment.post("/{id}/miningdata")
 async def update_mining_data(
     id: str, body: EnvironmentUpdateMiningDataRequest, request: Request
 ):
     # ! Validando credenciais de serviço
-    if not authValidator().validate_service(request):
+    if not authValidator.validate_service(request):
         return JSONResponse(
             [
                 error(
@@ -304,8 +304,8 @@ async def update_mining_data(
         )
 
     # ! Atualizando status do ambiente
-    environment = await environmentService().update_mining(
-        id, body.mining_data.dict(), body.status
+    environment = await environmentService.update_mining(
+        id, body.mining_data.model_dump(), body.status
     )
 
     # ! Validando retorno
@@ -340,7 +340,7 @@ async def update_topic_data(
     id: str, body: EnvironmentUpdateTopicDataRequest, request: Request
 ):
     # ! Validando credenciais de serviço
-    if not authValidator().validate_service(request):
+    if not authValidator.validate_service(request):
         return JSONResponse(
             [
                 error(
@@ -352,7 +352,9 @@ async def update_topic_data(
         )
 
     # ! Atualizando status do ambiente
-    environment = await environmentService().update_topics(id, body.topic_data.dict())
+    environment = await environmentService.update_topics(
+        id, body.topic_data.model_dump()
+    )
 
     # ! Validando retorno
     if not environment:
@@ -393,7 +395,7 @@ async def update_priority_data(
         grant_access = True
 
     # ! Validando credenciais de usuário
-    if authValidator().validate(request):
+    if await authValidator.validate_user(request):
         grant_access = True
 
     # ! Se não teve acesso por nenhum dos dois, retorne erro
@@ -409,7 +411,7 @@ async def update_priority_data(
         )
 
     # ! Atualizando status do ambiente
-    environment = await environmentService().update_priority(id, body.priority_data)
+    environment = await environmentService.update_priority(id, body.priority_data)
 
     # ! Validando retorno
     if not environment:
@@ -446,11 +448,11 @@ async def update_final_data(
     grant_access = False
 
     # ! Validando credenciais de serviço
-    if authValidator().validate_service(request):
+    if authValidator.validate_service(request):
         grant_access = True
 
     # ! Validando credenciais de usuário
-    if authValidator().validate(request):
+    if await authValidator.validate_user(request):
         grant_access = True
 
     # ! Se não teve acesso por nenhum dos dois, retorne erro
@@ -466,7 +468,7 @@ async def update_final_data(
         )
 
     # ! Atualizando status do ambiente
-    environment = await environmentService().update_final_rcr(id, body.final_rcr)
+    environment = await environmentService.update_final_rcr(id, body.final_rcr)
 
     # ! Validando retorno
     if not environment:
@@ -498,7 +500,7 @@ async def update_final_data(
 @router_environment.get("/{id}/miningdata")  # , response_model=EnvironmentResponse)
 async def get_mining_data(id: str, request: Request):
     # ! Validando credenciais de usuário
-    if authValidator().validate(request):
+    if not await authValidator.validate_user(request):
         return JSONResponse(
             [
                 error(
@@ -510,7 +512,7 @@ async def get_mining_data(id: str, request: Request):
         )
 
     # ! Obtendo dados de mineração
-    environment = await environmentService().get_mining_data(id)
+    environment = await environmentService.get_mining_data(id)
 
     # ! Validando retorno
     if not environment:
@@ -542,7 +544,7 @@ async def get_mining_data(id: str, request: Request):
 @router_environment.get("/{id}/topicdata")  # , response_model=EnvironmentResponse)
 async def get_topic_data(id: str, request: Request):
     # ! Validando credenciais de usuário
-    if authValidator().validate(request):
+    if not await authValidator.validate_user(request):
         return JSONResponse(
             [
                 error(
@@ -554,7 +556,7 @@ async def get_topic_data(id: str, request: Request):
         )
 
     # ! Obtendo dados de mineração
-    environment = await environmentService().get_topic_data(id)
+    environment = await environmentService.get_topic_data(id)
 
     # ! Validando retorno
     if not environment:
@@ -562,7 +564,7 @@ async def get_topic_data(id: str, request: Request):
             [
                 error(
                     entity_name,
-                    "Environment not found!",
+                    "Environment not found or no Data found!",
                 )
             ],
             status_code=404,
@@ -586,7 +588,7 @@ async def get_topic_data(id: str, request: Request):
 @router_environment.get("/{id}/prioritydata")  # , response_model=EnvironmentResponse)
 async def get_priority_data(id: str, request: Request):
     # ! Validando credenciais de usuário
-    if authValidator().validate(request):
+    if not await authValidator.validate_user(request):
         return JSONResponse(
             [
                 error(
@@ -598,7 +600,7 @@ async def get_priority_data(id: str, request: Request):
         )
 
     # ! Obtendo dados de mineração
-    environment = await environmentService().get_priority_data(id)
+    environment = await environmentService.get_priority_data(id)
 
     # ! Validando retorno
     if not environment:
@@ -630,7 +632,7 @@ async def get_priority_data(id: str, request: Request):
 @router_environment.get("/{id}/finaldata")  # , response_model=EnvironmentResponse)
 async def get_final_data(id: str, request: Request):
     # ! Validando credenciais de usuário
-    if authValidator().validate(request):
+    if not await authValidator.validate_user(request):
         return JSONResponse(
             [
                 error(
@@ -642,7 +644,7 @@ async def get_final_data(id: str, request: Request):
         )
 
     # ! Obtendo dados de mineração
-    environment = await environmentService().get_final_rcr(id)
+    environment = await environmentService.get_final_rcr(id)
 
     # ! Validando retorno
     if not environment:
@@ -669,3 +671,224 @@ async def get_final_data(id: str, request: Request):
 
     # ! Retornando ambiente
     return environment
+
+
+# ! Obtendo usuários votantes de um ambiente
+@router_environment.get("/{id}/votingusers")
+async def get_voting_users_by_environment_id(id: str, request: Request):
+    # ! Validando credenciais de usuário
+    if not await authValidator.validate_user(request):
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Service or user authentication failed!",
+                )
+            ],
+            status_code=401,
+        )
+
+    # ! Obtendo usuários por id do environment
+    users = await environmentService.get_voting_users(id)
+
+    # ! Validando retorno
+    if not users:  # * Se não houver usuário (None)
+        return JSONResponse(
+            [
+                error(
+                    "user",
+                    msg_404,
+                )
+            ],
+            status_code=404,
+        )
+
+    if users == -1:
+        return JSONResponse(
+            [
+                error(
+                    "user",
+                    msg_500["en-US"],
+                )
+            ],
+            status_code=500,
+        )
+
+    # ! Retornando usuário
+    return users
+
+
+# ! Verificando se há dados de mineração
+@router_environment.get("/{id}/hasminingdata")
+async def has_mining_data(id: str, request: Request):
+    # ! Validando credenciais de usuário
+    if not await authValidator.validate_user(request):
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Service or user authentication failed!",
+                )
+            ],
+            status_code=401,
+        )
+
+    # ! Obtendo dados de mineração
+    has_mining_data = await environmentService.has_mining_data(id)
+
+    if has_mining_data == -1:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    msg_500["en-US"],
+                )
+            ],
+            status_code=500,
+        )
+
+    # ! Retornando a variável
+    return has_mining_data if has_mining_data else False
+
+
+# ! Verificando se há dados de topicos
+@router_environment.get("/{id}/hastopicdata")
+async def has_topic_data(id: str, request: Request):
+    # ! Validando credenciais de usuário
+    if not await authValidator.validate_user(request):
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Service or user authentication failed!",
+                )
+            ],
+            status_code=401,
+        )
+
+    # ! Obtendo dados de mineração
+    has_topic_data = await environmentService.has_topic_data(id)
+
+    if has_topic_data == -1:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    msg_500["en-US"],
+                )
+            ],
+            status_code=500,
+        )
+
+    # ! Retornando a variável
+    return has_topic_data if has_topic_data else False
+
+
+# ! Verificando se há dados de prioridades
+@router_environment.get("/{id}/hasprioritydata")
+async def has_priority_data(id: str, request: Request):
+    # ! Validando credenciais de usuário
+    if not await authValidator.validate_user(request):
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Service or user authentication failed!",
+                )
+            ],
+            status_code=401,
+        )
+
+    # ! Obtendo dados de mineração
+    has_priority_data = await environmentService.has_priority_data(id)
+
+    if has_priority_data == -1:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    msg_500["en-US"],
+                )
+            ],
+            status_code=500,
+        )
+
+    # ! Retornando a variável
+    return has_priority_data if has_priority_data else False
+
+
+# ! Verificando se há dados de RCR final
+@router_environment.get("/{id}/hasfinaldata")
+async def has_final_data(id: str, request: Request):
+    # ! Validando credenciais de usuário
+    if not await authValidator.validate_user(request):
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Service or user authentication failed!",
+                )
+            ],
+            status_code=401,
+        )
+
+    # ! Obtendo dados de mineração
+    has_final_data = await environmentService.has_final_rcr(id)
+
+    if has_final_data == -1:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    msg_500["en-US"],
+                )
+            ],
+            status_code=500,
+        )
+
+    # ! Retornando a variável
+    return has_final_data if has_final_data else False
+
+
+# ! Solicitar nova mineração
+@router_environment.post("/{id}/requestmining")
+async def request_mining(id: str, request: Request):
+    # ! Validando credenciais de usuário
+    if not await authValidator.validate_user(request):
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Service or user authentication failed!",
+                )
+            ],
+            status_code=401,
+        )
+
+    # ! Solicitando mineração do ambiente novamente
+    await environmentService.request_mining(id)
+
+    # ! Retornando a variável
+    return True
+
+
+# ! Solicitar geração de tópicos
+@router_environment.post("/{id}/requesttopics")
+async def request_mining(id: str, request: Request):
+    # ! Validando credenciais de usuário
+    if not await authValidator.validate_user(request):
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Service or user authentication failed!",
+                )
+            ],
+            status_code=401,
+        )
+
+    # ! Solicitando geração de topicos do ambiente
+    await environmentService.request_topics(id)
+
+    # ! Retornando a variável
+    return True

@@ -1,11 +1,12 @@
 from fastapi import Request
-from repository.User import User as UserRepository
+from service.User import User as UserService
 from utils.Credentials import Credentials as credentials
 
 
 class Auth:
+    @staticmethod
     # ! Validar se o usuário possui permissão para acessar o recurso
-    def validate(self, request: Request):
+    async def validate_user(request: Request):
         # * Obtendo header
         header = request.headers
 
@@ -17,19 +18,16 @@ class Auth:
         if not (
             header.get("user-id")
             and header.get("user-token")
-            and header.get("user-language")
+            # and header.get("user-language")
         ):
             return False
 
         # * Validar token do usuário existente
-        validate_token = UserRepository.validate_token(
+        validate_token = await UserService.validate_token(
             header.get("user-id"), header.get("user-token")
         )
 
-        if not validate_token:
-            return False
-
-        return True
+        return validate_token
 
     @staticmethod
     def validate_service(request: Request):

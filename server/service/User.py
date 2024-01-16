@@ -6,31 +6,46 @@ from validations.Email import Email as ValidationEmail
 from database.db import conn
 from schemas.User import UserRequest, UserResponse, AuthRequest, AuthResponse
 
-from utils.EmailSender import send_email
+# from utils.EmailSender import send_email
+from service.APIRequests import APIRequests
+from utils.Credentials import Credentials
+
 
 class User:
     # ! Retorna todos os usuários
-    async def get_all(self):
+    @staticmethod
+    async def get_all():
         try:
             db = next(conn())
-            usuarios = UserRepository.get_all(db)
-            return usuarios if usuarios else None
+            users = UserRepository.get_all(db)
+            return users if users else None
         except Exception as e:
             print(e)
             return -1
 
     # ! Retorna um usuário pelo e-mail
-    async def get_by_id(self, id: str):
+    @staticmethod
+    async def get_by_id(id: str):
         try:
             db = next(conn())
-            usuario = UserRepository.get_by_id(db, id)
-            return usuario
+            user = UserRepository.get_by_id(db, id)
+            return user
         except Exception as e:
             print(e)
             return -1
 
     # ! Cria um usuário
-    async def create(self, user: UserRequest) -> UserRequest:
+    @staticmethod
+    async def create(user: UserRequest) -> UserRequest:
+        # * Validando se o e-mail já existe
+        try:
+            db = next(conn())
+            if UserRepository.exists_by_email(db, user.email):
+                return -3
+        except Exception as e:
+            print(e)
+            return -1
+
         # * Validando se o e-mail está no formato no correto e existe
         if ValidationEmail.validate(user.email) in [False, None]:
             return -2
@@ -38,48 +53,85 @@ class User:
         # * Gerando uuid como id do user e hasheando a senha
         user_id = str(uuid.uuid4())
         password_hash = bcrypt.hashpw(user.password.encode("utf-8"), bcrypt.gensalt())
-        usuario = None
+        new_user = None
 
-        # Inserindo usuário no BD
+        # * Inserindo usuário no BD
         try:
             db = next(conn())
-            usuario = UserRepository.create(db, user, user_id, password_hash)
+            new_user = UserRepository.create(db, user, user_id, password_hash)
         except Exception as e:
             print(e)
             return -1
 
-        if usuario is None:
+        if new_user is None:
             return None
 
         # * Enviando e-mail de confirmação
         try:
-            send_email(user.email, "Confirmação de cadastro", "Confirme seu cadastro")
+            text = f"Olá {user.name}, seu cadastro foi criado com sucesso!\n"
+            text += f"Nome: {user.name}\n"
+            text += f"E-mail: {user.email}\n"
+            text += f"Para confirmar seu cadastro, acesse o link: {Credentials.get_client_url_base}/activate?id={user_id}"
+
+            await APIRequests.send_email(
+                user.email, "ECOS_IC: Criação de cadastro", text
+            )
         except Exception as e:
             print(e)
 
-        return usuario
+        return new_user
 
     # ! Atualiza um usuário
-    async def update(self, user: UserRequest, id: str):
+    @staticmethod
+    async def update(user: UserRequest, id: str):
+        # * Validando se o e-mail já existe
+        try:
+            db = next(conn())
+            vrf_email = UserRepository.exists_by_email(db, user.email)
+
+            if vrf_email and vrf_email != id:
+                return -3
+
+        except Exception as e:
+            print(e)
+            return -1
+
         # * Validando se o e-mail está no formato no correto e existe
         if ValidationEmail.validate(user.email) in [False, None]:
             return -2
 
         # * Se foi recebido senha, hasheia ela
         if user.password:
-            user.password = bcrypt.hashpw(user.password.encode("utf-8"), bcrypt.gensalt())
+            user.password = bcrypt.hashpw(
+                user.password.encode("utf-8"), bcrypt.gensalt()
+            )
 
+        # * Atualize os dados no BD
         try:
-            db = next(conn())
-            usuario = UserRepository.update_by_id(db, id, user.name, user.email, user.password)
-            return usuario if usuario else None
+            user_updated = UserRepository.update_by_id(
+                db, id, user.name, user.email, user.password
+            )
         except Exception as e:
             print(e)
             return -1
 
+        # * Envie e-mail sobre alterações
+        try:
+            text = f"Olá {user.name}, seus dados foram atualizados com sucesso!\n"
+            text += f"Nome: {user.name}\n"
+            text += f"E-mail: {user.email}"
+
+            await APIRequests.send_email(
+                user.email, "ECOS_IC: Atualização de dados", text
+            )
+        except Exception as e:
+            print(e)
+
+        return user_updated
 
     # ! Autentica um usuário
-    async def authenticate(self, user_auth_request: AuthRequest) -> AuthResponse:
+    @staticmethod
+    async def authenticate(user_auth_request: AuthRequest) -> AuthResponse:
         try:
             db = next(conn())
             user_auth_request = UserRepository.authenticate(
@@ -94,28 +146,35 @@ class User:
             print(e)
             return -1
 
-    async def inactivate(self, id: str):
+    # ! Inativa um usuário
+    @staticmethod
+    async def inactivate(id: str):
         try:
             db = next(conn())
-            usuario = UserRepository.inactivate(db, id)
-            return usuario if usuario else None
+            user = UserRepository.inactivate(db, id)
+            return user if user else None
         except Exception as e:
             print(e)
             return -1
 
-    async def activate(self, id: str):
+    # ! Ativa um usuário
+    @staticmethod
+    async def activate(id: str):
         try:
             db = next(conn())
-            usuario = UserRepository.activate(db, id)
-            return usuario if usuario else None
+            user = UserRepository.activate(db, id)
+            return user if user else None
         except Exception as e:
             print(e)
             return -1
 
-    async def test_email_sender(self):
+    # ! Valida o token de um usuário
+    @staticmethod
+    async def validate_token(id: str, token: str):
         try:
-            email = send_email("edu.makermakers@gmail.com", "Teste", "Teste")
-            return email
+            db = next(conn())
+            user = UserRepository.validate_token(db, id, token)
+            return user
         except Exception as e:
             print(e)
             return -1

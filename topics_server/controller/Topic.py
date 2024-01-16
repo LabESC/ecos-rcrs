@@ -101,7 +101,7 @@ async def busca_repos_top2vec(body: TopicReposRequest, request: Request):
         )
         return
 
-    # !! . Senão, inserir o resultado no BD - Pendente
+    # !! . Senão, inserir o resultado no BD
     await DBRequests.update_enviroment_topic_data(
         body.environment_id,
         topic_generation,

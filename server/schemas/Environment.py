@@ -30,8 +30,13 @@ class EnvironmentRequest(EnvironmentBase):
     ...
 
 
-class EnvironmentResponse(EnvironmentBase):
+class EnvironmentResponse(BaseModel):
     id: str
+    user_id: str
+    name: str
+    details: str
+    mining_type: str
+    organization_name: Optional[str] = None
     status: str
 
     class Config:
@@ -78,3 +83,7 @@ class EnvironmentUpdatePriorityDataRequest(BaseModel):
 class EnvironmentUpdateFinalDataRequest(BaseModel):
     final_rcr: Optional[list[dict]] = None
     status: Optional[str] = None
+
+
+class EnvironmentVotingUsers(BaseModel):
+    voting_users: list[str]

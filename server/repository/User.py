@@ -43,12 +43,20 @@ class User:
     def exists_by_email(db: Session, email: str) -> bool:
         return db.query(UserModel).filter(UserModel.email == email).first() is not None
 
+    # ! Verificando existencia de usuário por e-mail e retornando o id se existir
+    @staticmethod
+    def exists_by_email(db: Session, email: str) -> bool:
+        user = db.query(UserModel).filter(UserModel.email == email).first()
+
+        return user.id if user is not None else False
+
     # ! Atualizando usuário por id
     @staticmethod
     def update_by_id(
         db: Session, id: str, name: str = None, email: str = None, password: str = None
     ) -> UserModel:
         user_db = db.query(UserModel).filter(UserModel.id == id).first()
+
         if user_db is not None:
             user_db.name = name
             user_db.email = email
@@ -107,8 +115,9 @@ class User:
     def validate_token(db: Session, id: str, token: str) -> bool:
         user = db.query(UserModel).filter(UserModel.id == id).first()
         if user is None:  # * Se não existir usuário
-            return False
+            return user
 
+        print(user.token)
         if user.token != token:  # * Se o token não for igual
             return False
 

@@ -34,7 +34,7 @@ const sendEmail = async (to, subject, text) => {
       from: EMAIL_LOGIN,
       to: to,
       subject: subject,
-      text: text,
+      html: text,
     });
     return true;
   } catch (error) {

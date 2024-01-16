@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
-# Importando dependencias locais
+# ! Importando dependencias locais
 from schemas.User import UserResponse, UserRequest, AuthRequest, AuthResponse
 from service.User import User as userService
 from validations.Auth import Auth as authValidator
@@ -12,13 +12,17 @@ router_user = APIRouter(prefix="/api/user", tags=["User"])
 
 msg_404 = {"en-US": "User not found!", "pt-BR": "Usuário não encontrado!"}
 msg_500 = {"en-US": "Internal server error!", "pt-BR": "Erro interno do servidor!"}
+msg_exists = {
+    "en-US": "User already exists!",
+    "pt-BR": "Usuário já existe!",
+}
 
 
 @router_user.get("/", response_model=list[UserResponse])
 async def get_all(request: Request):
-    """# ! Verificando autenticação
-    auth = authValidator().validate(request)
-    if auth is False:
+    # ! Verificando autenticação
+    auth = authValidator.validate_service(request)
+    if not auth:
         return JSONResponse(
             [
                 error(
@@ -28,9 +32,9 @@ async def get_all(request: Request):
             ],
             status_code=401,
         )
-    """
+
     # ! Obtendo todos os usuários
-    users = await userService().get_all()
+    users = await userService.get_all()
 
     # ! Validando retorno
     if not users:  # * Se não houver usuários (None)
@@ -61,9 +65,9 @@ async def get_all(request: Request):
 
 @router_user.get("/{id}", response_model=UserResponse)
 async def get_by_id(id: str, request: Request):
-    """# ! Verificando autenticação
-    auth = authValidator().validate(request)
-    if auth is False:
+    # ! Verificando autenticação
+    auth = await authValidator.validate_user(request)
+    if not auth:
         return JSONResponse(
             [
                 error(
@@ -73,9 +77,9 @@ async def get_by_id(id: str, request: Request):
             ],
             status_code=401,
         )
-    """
+
     # ! Obtendo usuário por id
-    user = await userService().get_by_id(id)
+    user = await userService.get_by_id(id)
 
     # ! Validando retorno
     if not user:  # * Se não houver usuário (None)
@@ -107,40 +111,50 @@ async def get_by_id(id: str, request: Request):
 @router_user.post("/", response_model=UserResponse)
 async def create(user: UserRequest):
     # ! Criando usuário
-    user = await userService().create(user)
+    user = await userService.create(user)
 
     # ! Validando retorno
-    if not user:  # * Se não houver usuário (None)
-        return JSONResponse(
-            [
-                error(
-                    "user",
-                    "User not created!",
-                )
-            ],
-            status_code=404,
-        )
-
-    if user == -1:
-        return JSONResponse(
-            [
-                error(
-                    "user",
-                    msg_500["en-US"],
-                )
-            ],
-            status_code=500,
-        )
-    if user == -2:
-        return JSONResponse(
-            [
-                error(
-                    "user",
-                    "Invalid e-mail!",
-                )
-            ],
-            status_code=422,
-        )
+    match user:
+        case None:  # * Se não houver usuário (None)
+            return JSONResponse(
+                [
+                    error(
+                        "user",
+                        "User not created!",
+                    )
+                ],
+                status_code=404,
+            )
+        case -1:
+            return JSONResponse(
+                [
+                    error(
+                        "user",
+                        msg_500["en-US"],
+                    )
+                ],
+                status_code=500,
+            )
+        case -2:
+            return JSONResponse(
+                [
+                    error(
+                        "user",
+                        "Invalid e-mail!",
+                    )
+                ],
+                status_code=422,
+            )
+        case -3:
+            return JSONResponse(
+                [
+                    error(
+                        "user",
+                        msg_exists["en-US"],
+                    )
+                ],
+                status_code=409,
+            )
 
     # ! Retornando usuário
     return user
@@ -149,7 +163,7 @@ async def create(user: UserRequest):
 @router_user.post("/{id}/activate")
 async def activate(id: str):
     # ! Ativando usuário
-    user = await userService().activate(id)
+    user = await userService.activate(id)
 
     # ! Validando retorno
     if user is False:  # * Se não houver usuário (None)
@@ -186,10 +200,10 @@ async def activate(id: str):
         )
 
 
-@router_user.post("/auth", response_model=AuthResponse)
+@router_user.post("/login", response_model=AuthResponse)
 async def authenticate(user_auth: AuthRequest):
     # ! Autenticando usuário
-    user_auth = await userService().authenticate(user_auth)
+    user_auth = await userService.authenticate(user_auth)
 
     # ! Validando retorno
     if user_auth is None:  # * Se não houver usuário (None)
@@ -230,9 +244,9 @@ async def authenticate(user_auth: AuthRequest):
 
 
 @router_user.delete("/{id}")
-async def inactivate(id: str):
-    """# ! Verificando autenticação
-    auth = authValidator().validate(request)
+async def inactivate(id: str, request: Request):
+    # ! Verificando autenticação
+    auth = await authValidator.validate_user(request)
     if auth is False:
         return JSONResponse(
             [
@@ -243,10 +257,9 @@ async def inactivate(id: str):
             ],
             status_code=401,
         )
-    """
 
     # ! Inativando usuário
-    user = await userService().inactivate(id)
+    user = await userService.inactivate(id)
 
     # ! Validando retorno
     if not user:  # * Se não houver usuário (None)
@@ -273,63 +286,68 @@ async def inactivate(id: str):
 
 
 @router_user.put("/{id}", response_model=UserResponse)
-async def update(id: str, user: UserRequest):
+async def update(id: str, user: UserRequest, request: Request):
+    # ! Verificando autenticação
+    auth = await authValidator.validate_user(request)
+    if auth is False:
+        return JSONResponse(
+            [
+                error(
+                    "auth",
+                    "Authentication failed!",
+                )
+            ],
+            status_code=401,
+        )
+
     # ! Atualizando usuário
-    user = await userService().update(user, id)
+    user = await userService.update(user, id)
 
     # ! Validando retorno
-    if not user:
-        return JSONResponse(
-            [
-                error(
-                    "user",
-                    msg_404,
-                )
-            ],
-            status_code=404,
-        )
+    match user:
+        case None:
+            return JSONResponse(
+                [
+                    error(
+                        "user",
+                        msg_404,
+                    )
+                ],
+                status_code=404,
+            )
 
-    if user == -1:
-        return JSONResponse(
-            [
-                error(
-                    "user",
-                    msg_500["en-US"],
-                )
-            ],
-            status_code=500,
-        )
+        case -1:
+            return JSONResponse(
+                [
+                    error(
+                        "user",
+                        msg_500["en-US"],
+                    )
+                ],
+                status_code=500,
+            )
 
-    if user == -2:
-        return JSONResponse(
-            [
-                error(
-                    "user",
-                    "Invalid e-mail!",
-                )
-            ],
-            status_code=422,
-        )
+        case -2:
+            return JSONResponse(
+                [
+                    error(
+                        "user",
+                        "Invalid e-mail!",
+                    )
+                ],
+                status_code=422,
+            )
 
-    if user == -3:
-        return JSONResponse(
-            [
-                error(
-                    "user",
-                    msg_500["en-US"],
-                )
-            ],
-            status_code=422,
-        )
+        case -3:
+            return JSONResponse(
+                [
+                    error(
+                        "user",
+                        msg_exists["en-US"],
+                    )
+                ],
+                status_code=409,
+            )
 
     # ! Retornando usuário
     return user
-
-
-@router_user.post("/sendEmail")
-async def send_email():
-    # ! Enviando e-mail
-    email = await userService().test_email_sender()
-
-    # ! Retornando usuário
-    return email

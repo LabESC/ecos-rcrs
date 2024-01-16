@@ -32,9 +32,9 @@ class VotingUser:
     def get_by_email(db: Session, email: str) -> VotingUserModel:
         return db.query(VotingUserModel).filter(VotingUserModel.email == email).first()
 
-    # ! Autenticando usuário
+    # ! Autenticando usuário por token e email
     @staticmethod
-    def validate_access_code(
+    def validate_access_code_by_email(
         db: Session, email: str, access_code: str
     ) -> VotingUserModel:
         voting_user = (
@@ -48,7 +48,21 @@ class VotingUser:
 
         return True
 
-    # ! Validando token
+    # ! Autenticando usuário por token e id
+    @staticmethod
+    def validate_access_code_by_id(
+        db: Session, id: str, access_code: str
+    ) -> VotingUserModel:
+        voting_user = db.query(VotingUserModel).filter(VotingUserModel.id == id).first()
+        if voting_user is None:
+            return None
+
+        if voting_user.access_code != access_code:
+            return False
+
+        return True
+
+    # ! Validando token e retornando o nome
     @staticmethod
     def generate_access_code(db: Session, email: str, access_code: str) -> bool:
         voting_user = (
@@ -66,24 +80,16 @@ class VotingUser:
     # ! Registrando votos de definição de rcr
     @staticmethod
     def register_definition_votes(
-        db: Session, voting_user_id: str, environment_id: str, votes: list[dict]
+        db: Session, voter_id: str, environment_id: str, votes: list[dict]
     ) -> bool:
-        voting_user_environment = (
-            db.query(VotingUserEnvironmentModel)
-            .filter(
-                and_(
-                    VotingUserEnvironmentModel.id == voting_user_id,
-                    VotingUserEnvironmentModel.environment_id == environment_id,
-                )
-            )
-            .first()
+        voting_user_add = VotingUserEnvironmentModel(
+            voting_user_id=voter_id,
+            environment_id=environment_id,
+            votes_rcr_definition=votes,
         )
-        if voting_user_environment is None:
-            return False
-
-        voting_user_environment.votes_rcr_definition = votes
+        db.add(voting_user_add)
         db.commit()
-        db.refresh(voting_user_environment)
+        db.refresh(voting_user_add)
 
         return True
 
@@ -96,7 +102,7 @@ class VotingUser:
             db.query(VotingUserEnvironmentModel)
             .filter(
                 and_(
-                    VotingUserEnvironmentModel.id == voting_user_id,
+                    VotingUserEnvironmentModel.voting_user_id == voting_user_id,
                     VotingUserEnvironmentModel.environment_id == environment_id,
                 )
             )

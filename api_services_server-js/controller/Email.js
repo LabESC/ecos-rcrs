@@ -11,6 +11,9 @@ const emailSender = require("../service/Email");
 
 // ! Rota de solicitação de mineração
 router.post("/api/email/send", async (req, res) => {
+  // !! LOG
+  console.log(`${req.method} ${req.url} - ${new Date().toLocaleString()}`);
+
   // * Obtendo dados da requisição
   const { body, headers } = req;
 

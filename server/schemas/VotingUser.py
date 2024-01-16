@@ -14,3 +14,8 @@ class VotingUserResponse(VotingUserBase):
 
     class Config:
         from_attributes = True
+
+
+class VotingUserVote(BaseModel):
+    vote: list[dict]
+    token: str

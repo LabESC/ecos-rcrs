@@ -13,13 +13,16 @@ const gitHubRequest = new GitHubRequest();
 
 // ! Rota de solicitação de mineração
 router.post("/api/github/mining/repos", async (req, res) => {
+  // !! LOG
+  console.log(`${req.method} ${req.url} - ${new Date().toLocaleString()}`);
+
   // * Obtendo dados da requisição
   const { body, headers } = req;
 
   // * Validando variáveis
   const valid = await validation(headers, body);
 
-  // * Se não for válido, retorne erro
+  // * Se for inválido, retorne erro
   if (!valid) {
     return res.status(400).json({ error: "Invalid request." });
   }
