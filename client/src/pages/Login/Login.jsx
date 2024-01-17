@@ -15,6 +15,7 @@ import { useState, useEffect } from "react";
 import { loginUser } from "../../api/User.jsx";
 import theme from "../../components/MuiTheme.jsx";
 import { ThemeProvider } from "@mui/material/styles";
+import { PopUpError } from "../../components/PopUp.jsx";
 
 const Login = () => {
   // ! Variáveis de estado e padrões
@@ -22,7 +23,7 @@ const Login = () => {
   const [hasLoginError, setHasLoginError] = useState(false);
   const [errorCode, setErrorCode] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
+  //const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   // ! Executado ao iniciar o componente
   useEffect(() => {
@@ -48,6 +49,10 @@ const Login = () => {
   };
 
   const activeErrorDialog = (code, msg, status) => {
+    try {
+      code = code.toUpperCase();
+    } catch (e) {}
+
     setErrorCode(code);
     setErrorMessage(`${status}:\n${msg}`);
     setHasLoginError(true);
@@ -141,28 +146,8 @@ const Login = () => {
             SIGN-IN
           </div>
         </div>
-        {/*<Backdrop
-          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-          open={isLoading}
-        >
-          <Container
-            sx={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <CircularProgress 
-              sx={{ color: "#CDC1F8" }}
-            />
-            <div className="txtValidar">
-              Validando informações do usuário...
-            </div>
-          </Container>
-          </Backdrop>*/}
       </div>
-      <Dialog
+      {/*<Dialog
         fullScreen={fullScreen}
         open={hasLoginError}
         onClose={closeErrorDialog}
@@ -184,7 +169,13 @@ const Login = () => {
             FECHAR
           </Button>
         </DialogActions>
-      </Dialog>
+        </Dialog>*/}
+      <PopUpError
+        open={hasLoginError}
+        close={closeErrorDialog}
+        title={errorCode}
+        message={errorMessage}
+      />
     </ThemeProvider>
   );
 };

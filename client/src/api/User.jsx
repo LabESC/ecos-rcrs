@@ -17,7 +17,7 @@ export const loginUser = async (email, password) => {
       return res.data;
     })
     .catch((err) => {
-      return { error: err.data, status: err.status };
+      return { error: err.response.data, status: err.response.status };
     });
 
   return result;
