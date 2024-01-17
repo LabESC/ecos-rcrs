@@ -1,0 +1,155 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+@import url(https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap);
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Montserrat", sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.LoginCard {
+  width: 475px;
+  height: 640px;
+  /*left: 0px;
+  top: 0px;*/
+  position: relative;
+  background: white;
+  box-shadow: 2px 5px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+}
+.LoginCard > * {
+  position: absolute;
+}
+.LoginCard > * > * {
+  position: absolute;
+}
+.LoginCard > * > * > * {
+  position: absolute;
+}
+
+.Logo {
+  width: 169.5px;
+  height: 45.38px;
+  left: 66px;
+  top: 51.2px;
+  /*position: absolute;*/
+}
+
+.EcosIc {
+  width: 157px;
+  height: 45.38px;
+  left: 15px;
+  top: 0px;
+  /*position: absolute;*/
+  color: black;
+  font-size: 32px;
+  font-weight: 700;
+  word-wrap: break-word;
+}
+
+.LogoLine {
+  width: 45.38px;
+  height: 0;
+  left: 0;
+  top: 0;
+  transform: rotate(90deg);
+  transform-origin: 0 0;
+  border: 6px #0084fe solid;
+}
+
+.ForgotYourPassword {
+  left: 155px;
+  top: 498px;
+  /* position: absolute;*/
+  color: #0067c7;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ForgotYourPassword:hover {
+  cursor: pointer;
+  text-decoration: underline;
+  transition: 2s;
+}
+
+.LoginBtnSignIn {
+  width: 415px;
+  height: 51.2px;
+  left: 30px;
+  top: 410px;
+  position: absolute;
+  background: #0084fe;
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-weight: bold;
+}
+
+.LoginBtnSignIn:hover {
+  background: #0067c7;
+  cursor: pointer;
+  transition: 0.5s;
+}
+
+.LoginBtnSignOut {
+  width: 180px;
+  height: 25px;
+  left: 155px;
+  top: 546px;
+  position: absolute;
+  background: #0084fe;
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-weight: bold;
+  font-size: 11px;
+}
+
+.LoginBtnSignOut:hover {
+  background: #0067c7;
+  cursor: pointer;
+  transition: 0.5s;
+}
+
+.TextFieldLabel {
+  color: rgb(108, 108, 108);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.DivLoginTextAndButtons {
+  width: 415px;
+  height: 82.62px;
+  left: 30px;
+  top: 190.47px;
+  position: absolute;
+  display: flex;
+}
+
+#root {
+  /*line-height: 1.5;*/
+  font-weight: 400;
+  margin: 0;
+  padding: 0;
+
+  /*color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+*/
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

@@ -39,23 +39,19 @@ async def get_all(request: Request):
     # ! Validando retorno
     if not users:  # * Se não houver usuários (None)
         return JSONResponse(
-            [
-                error(
-                    "user",
-                    "Users not found!",
-                )
-            ],
+            error(
+                "user",
+                "Users not found!",
+            ),
             status_code=404,
         )
 
     if users == -1:  # * Se ocorrer erro na obtenção
         return JSONResponse(
-            [
-                error(
-                    "user",
-                    msg_500["en-US"],
-                )
-            ],
+            error(
+                "user",
+                msg_500["en-US"],
+            ),
             status_code=500,
         )
 
@@ -69,12 +65,10 @@ async def get_by_id(id: str, request: Request):
     auth = await authValidator.validate_user(request)
     if not auth:
         return JSONResponse(
-            [
-                error(
-                    "auth",
-                    "Authentication failed!",
-                )
-            ],
+            error(
+                "auth",
+                "Authentication failed!",
+            ),
             status_code=401,
         )
 
@@ -84,23 +78,19 @@ async def get_by_id(id: str, request: Request):
     # ! Validando retorno
     if not user:  # * Se não houver usuário (None)
         return JSONResponse(
-            [
-                error(
-                    "user",
-                    msg_404,
-                )
-            ],
+            error(
+                "user",
+                msg_404,
+            ),
             status_code=404,
         )
 
     if user == -1:
         return JSONResponse(
-            [
-                error(
-                    "user",
-                    msg_500["en-US"],
-                )
-            ],
+            error(
+                "user",
+                msg_500["en-US"],
+            ),
             status_code=500,
         )
 
@@ -117,42 +107,34 @@ async def create(user: UserRequest):
     match user:
         case None:  # * Se não houver usuário (None)
             return JSONResponse(
-                [
-                    error(
-                        "user",
-                        "User not created!",
-                    )
-                ],
+                error(
+                    "user",
+                    "User not created!",
+                ),
                 status_code=404,
             )
         case -1:
             return JSONResponse(
-                [
-                    error(
-                        "user",
-                        msg_500["en-US"],
-                    )
-                ],
+                error(
+                    "user",
+                    msg_500["en-US"],
+                ),
                 status_code=500,
             )
         case -2:
             return JSONResponse(
-                [
-                    error(
-                        "user",
-                        "Invalid e-mail!",
-                    )
-                ],
+                error(
+                    "user",
+                    "Invalid e-mail!",
+                ),
                 status_code=422,
             )
         case -3:
             return JSONResponse(
-                [
-                    error(
-                        "user",
-                        msg_exists["en-US"],
-                    )
-                ],
+                error(
+                    "user",
+                    msg_exists["en-US"],
+                ),
                 status_code=409,
             )
 
@@ -168,74 +150,62 @@ async def activate(id: str):
     # ! Validando retorno
     if user is False:  # * Se não houver usuário (None)
         return JSONResponse(
-            [
-                error(
-                    "user",
-                    msg_404,
-                )
-            ],
+            error(
+                "user",
+                msg_404,
+            ),
             status_code=404,
         )
 
     if user is None:
         return JSONResponse(
-            [
-                error(
-                    "user",
-                    "User already active!",
-                )
-            ],
+            error(
+                "user",
+                "User already active!",
+            ),
             status_code=400,
         )
 
     if user == -1:
         return JSONResponse(
-            [
-                error(
-                    "user",
-                    msg_500["en-US"],
-                )
-            ],
+            error(
+                "user",
+                msg_500["en-US"],
+            ),
             status_code=500,
         )
 
 
 @router_user.post("/login", response_model=AuthResponse)
-async def authenticate(user_auth: AuthRequest):
+async def authenticate(user_request_auth: AuthRequest):
     # ! Autenticando usuário
-    user_auth = await userService.authenticate(user_auth)
+    user_auth = await userService.authenticate(user_request_auth)
 
     # ! Validando retorno
     if user_auth is None:  # * Se não houver usuário (None)
         return JSONResponse(
-            [
-                error(
-                    "password",
-                    "Wrong password!",
-                )
-            ],
+            error(
+                "password",
+                "Wrong password!",
+            ),
             status_code=401,
         )
 
     if user_auth is False:
         return JSONResponse(
-            [
-                error(
-                    "user",
-                    "User not found!",
-                )
-            ],
+            error(
+                "user",
+                "User not found!",
+            ),
             status_code=404,
         )
 
     if user_auth == -1:
         return JSONResponse(
-            [
-                error(
-                    "user",
-                    msg_500["en-US"],
-                )
-            ],
+            error(
+                "user",
+                msg_500["en-US"],
+            ),
             status_code=500,
         )
 
@@ -249,12 +219,10 @@ async def inactivate(id: str, request: Request):
     auth = await authValidator.validate_user(request)
     if auth is False:
         return JSONResponse(
-            [
-                error(
-                    "auth",
-                    "Authentication failed!",
-                )
-            ],
+            error(
+                "auth",
+                "Authentication failed!",
+            ),
             status_code=401,
         )
 
@@ -264,23 +232,19 @@ async def inactivate(id: str, request: Request):
     # ! Validando retorno
     if not user:  # * Se não houver usuário (None)
         return JSONResponse(
-            [
-                error(
-                    "user",
-                    msg_404,
-                )
-            ],
+            error(
+                "user",
+                msg_404,
+            ),
             status_code=404,
         )
 
     if user == -1:
         return JSONResponse(
-            [
-                error(
-                    "user",
-                    "Internal server error!",
-                )
-            ],
+            error(
+                "user",
+                "Internal server error!",
+            ),
             status_code=500,
         )
 
@@ -291,12 +255,10 @@ async def update(id: str, user: UserRequest, request: Request):
     auth = await authValidator.validate_user(request)
     if auth is False:
         return JSONResponse(
-            [
-                error(
-                    "auth",
-                    "Authentication failed!",
-                )
-            ],
+            error(
+                "auth",
+                "Authentication failed!",
+            ),
             status_code=401,
         )
 
@@ -307,45 +269,37 @@ async def update(id: str, user: UserRequest, request: Request):
     match user:
         case None:
             return JSONResponse(
-                [
-                    error(
-                        "user",
-                        msg_404,
-                    )
-                ],
+                error(
+                    "user",
+                    msg_404,
+                ),
                 status_code=404,
             )
 
         case -1:
             return JSONResponse(
-                [
-                    error(
-                        "user",
-                        msg_500["en-US"],
-                    )
-                ],
+                error(
+                    "user",
+                    msg_500["en-US"],
+                ),
                 status_code=500,
             )
 
         case -2:
             return JSONResponse(
-                [
-                    error(
-                        "user",
-                        "Invalid e-mail!",
-                    )
-                ],
+                error(
+                    "user",
+                    "Invalid e-mail!",
+                ),
                 status_code=422,
             )
 
         case -3:
             return JSONResponse(
-                [
-                    error(
-                        "user",
-                        msg_exists["en-US"],
-                    )
-                ],
+                error(
+                    "user",
+                    msg_exists["en-US"],
+                ),
                 status_code=409,
             )
 
