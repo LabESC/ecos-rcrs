@@ -122,3 +122,39 @@ class User:
             return False
 
         return True
+
+    # ! Gerando token para senha esquecida
+    @staticmethod
+    def set_token_for_password(db: Session, email: str, token: str) -> bool:
+        user = db.query(UserModel).filter(UserModel.email == email).first()
+        if user is None:  # * Se não existir usuário
+            return user
+
+        user.token = token
+        db.commit()
+        db.refresh(user)
+        return user
+
+    # ! Validando token por e-mail e token
+    @staticmethod
+    def validate_token_by_email(db: Session, email: str, token: str) -> bool:
+        user = db.query(UserModel).filter(UserModel.email == email).first()
+        if user is None:
+            return False
+
+        if user.token != token:
+            return False
+
+        return user.id
+
+    # ! Alterando senha
+    @staticmethod
+    def update_password(db: Session, email: str, password: str) -> bool:
+        user = db.query(UserModel).filter(UserModel.email == email).first()
+        if user is None:
+            return False
+
+        user.password = password
+        user.token = None
+        db.commit()
+        return True

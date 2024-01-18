@@ -2,7 +2,13 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
 # ! Importando dependencias locais
-from schemas.User import UserResponse, UserRequest, AuthRequest, AuthResponse
+from schemas.User import (
+    UserResponse,
+    UserRequest,
+    AuthRequest,
+    AuthResponse,
+    PasswordRequest,
+)
 from service.User import User as userService
 from validations.Auth import Auth as authValidator
 from utils.Error import error
@@ -78,10 +84,7 @@ async def get_by_id(id: str, request: Request):
     # ! Validando retorno
     if not user:  # * Se não houver usuário (None)
         return JSONResponse(
-            error(
-                "user",
-                msg_404,
-            ),
+            error("user", msg_404["en-US"]),
             status_code=404,
         )
 
@@ -150,10 +153,7 @@ async def activate(id: str):
     # ! Validando retorno
     if user is False:  # * Se não houver usuário (None)
         return JSONResponse(
-            error(
-                "user",
-                msg_404,
-            ),
+            error("user", msg_404["en-US"]),
             status_code=404,
         )
 
@@ -232,10 +232,7 @@ async def inactivate(id: str, request: Request):
     # ! Validando retorno
     if not user:  # * Se não houver usuário (None)
         return JSONResponse(
-            error(
-                "user",
-                msg_404,
-            ),
+            error("user", msg_404["en-US"]),
             status_code=404,
         )
 
@@ -269,10 +266,7 @@ async def update(id: str, user: UserRequest, request: Request):
     match user:
         case None:
             return JSONResponse(
-                error(
-                    "user",
-                    msg_404,
-                ),
+                error("user", msg_404["en-US"]),
                 status_code=404,
             )
 
@@ -305,3 +299,89 @@ async def update(id: str, user: UserRequest, request: Request):
 
     # ! Retornando usuário
     return user
+
+
+# ! Gerando token ára alterar senha
+@router_user.post("/{email}/forgot-password/token")
+async def forgot_password(email: str):
+    # ! Gerando token
+    token = await userService.get_token_for_password(email)
+
+    # ! Validando retorno
+    if not token:
+        return JSONResponse(
+            error(
+                "user",
+                msg_404["en-US"],
+            ),
+            status_code=404,
+        )
+
+    if token == -1:
+        return JSONResponse(
+            error(
+                "user",
+                msg_500["en-US"],
+            ),
+            status_code=500,
+        )
+
+
+# ! Validando token para alterar senha
+@router_user.get("/{email}/validate-password-token/{token}")
+async def validate_password_token(email: str, token: str):
+    # ! Validando token
+    token = await userService.validate_token_by_email(email, token)
+
+    # ! Validando retorno
+    match token:
+        case False:
+            return JSONResponse(
+                error(
+                    "token",
+                    "Token invalid!",
+                ),
+                status_code=401,
+            )
+
+        case -1:
+            return JSONResponse(
+                error(
+                    "user",
+                    msg_500["en-US"],
+                ),
+                status_code=500,
+            )
+
+
+# ! Alterando senha
+@router_user.put("/{email}/update-password")
+async def update_password(email: str, body: PasswordRequest):
+    # ! Alterando senha
+    user = await userService.update_password(email, body.password, body.token)
+
+    # ! Validando retorno
+    match user:
+        case False:
+            return JSONResponse(
+                error(
+                    "token",
+                    "Token invalid!",
+                ),
+                status_code=401,
+            )
+
+        case None:
+            return JSONResponse(
+                error("user", msg_404["en-US"]),
+                status_code=404,
+            )
+
+        case -1:
+            return JSONResponse(
+                error(
+                    "user",
+                    msg_500["en-US"],
+                ),
+                status_code=500,
+            )

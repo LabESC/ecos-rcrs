@@ -29,3 +29,8 @@ class AuthRequest(BaseModel):
 class AuthResponse(BaseModel):
     id: str
     token: str
+
+
+class PasswordRequest(BaseModel):
+    password: str
+    token: str

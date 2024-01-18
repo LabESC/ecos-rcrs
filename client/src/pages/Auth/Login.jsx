@@ -10,6 +10,7 @@ import {
   DialogTitle,
   Button,
   useMediaQuery,
+  Link,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { loginUser } from "../../api/User.jsx";
@@ -79,7 +80,13 @@ const Login = () => {
             <div className="EcosIc">ECOS - IC</div>
             <div className="LogoLine"></div>
           </div>
-          <div className="ForgotYourPassword">Forgot your password?</div>
+          <Link
+            href="/forgot-password" // ! Alterar
+            underline="hover"
+            className="ForgotYourPassword"
+          >
+            Forgot your password?
+          </Link>
           <div
             className="LoginBtnSignIn"
             onClick={() => {

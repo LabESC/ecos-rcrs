@@ -4,11 +4,12 @@ from repository.User import User as UserRepository
 from validations.Email import Email as ValidationEmail
 
 from database.db import conn
-from schemas.User import UserRequest, UserResponse, AuthRequest, AuthResponse
+from schemas.User import UserRequest, AuthRequest, AuthResponse
 
-# from utils.EmailSender import send_email
 from service.APIRequests import APIRequests
 from utils.Credentials import Credentials
+
+from utils.AccessCode import AccessCode as AccessCodeUtil
 
 
 class User:
@@ -175,6 +176,64 @@ class User:
             db = next(conn())
             user = UserRepository.validate_token(db, id, token)
             return user
+        except Exception as e:
+            print(e)
+            return -1
+
+    # ! Retorna um token para uma solicitação de senha perdida
+    @staticmethod
+    async def get_token_for_password(email: str):
+        access_code = AccessCodeUtil.generate()
+        try:
+            db = next(conn())
+            user = UserRepository.set_token_for_password(db, email, access_code)
+        except Exception as e:
+            print(e)
+            return -1
+
+        if user in [False, None]:
+            return False
+
+        # * Enviando e-mail com o token
+        try:
+            text = f"{user.name}, here's the token for your password reset:\n"
+            text += f"<h4> <strong> {user.token} </strong> </h4>\n"
+
+            await APIRequests.send_email(user.email, "SECO_RCR: Token", text)
+        except Exception as e:
+            print(e)
+            return -1
+
+        return True
+
+    # ! Valida o token de recuperação de senha um usuário
+    @staticmethod
+    async def validate_token_by_email(email: str, token: str):
+        try:
+            db = next(conn())
+            user = UserRepository.validate_token_by_email(db, email, token)
+            return user
+        except Exception as e:
+            print(e)
+            return -1
+
+    # ! Altera a senha de um usuário
+    @staticmethod
+    async def update_password(email: str, password: str, token: str):
+        try:
+            db = next(conn())
+            # . Validando token
+            print(email + " - " + token)
+            is_token_valid = UserRepository.validate_token_by_email(db, email, token)
+            if not is_token_valid:
+                return False
+
+            # . Hasheando senha
+            new_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+
+            # . Se valido, alterar senha
+            user = UserRepository.update_password(db, email, new_password)
+            return user if user else None
         except Exception as e:
             print(e)
             return -1

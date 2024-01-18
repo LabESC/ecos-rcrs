@@ -1,7 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
-import Login from "./pages/Login/Login.jsx";
+import Login from "./pages/Auth/Login.jsx";
+import SignUp from "./pages/Auth/SignUp.jsx";
+import ForgotPassword from "./pages/Auth/ForgotPassword.jsx";
 import "./indexNew.css";
 
 // ! Criando rotas
@@ -12,6 +14,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />}></Route>
+        <Route path="/register" element={<SignUp />}></Route>
+        <Route path="/forgot-password" element={<ForgotPassword />}></Route>
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

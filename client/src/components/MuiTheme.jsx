@@ -18,6 +18,10 @@ const theme = createTheme({
       main: "#8458f3",
       darker: "#492ae0",
     },
+    white: {
+      main: "#ffffff",
+      darker: "#e0e0e0",
+    },
   },
 });
 
