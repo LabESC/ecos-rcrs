@@ -13,6 +13,7 @@ body {
   padding: 0;
   height: 100%;
   width: 100%;
+  background: linear-gradient(71deg, #0084fe 0%, #42edf8 100%);
 }
 
 .LoginCard {

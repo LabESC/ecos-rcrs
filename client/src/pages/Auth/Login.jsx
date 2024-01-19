@@ -11,14 +11,20 @@ import {
   Button,
   useMediaQuery,
   Link,
+  Typography,
+  Box,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { loginUser } from "../../api/User.jsx";
 import theme from "../../components/MuiTheme.jsx";
 import { ThemeProvider } from "@mui/material/styles";
 import { PopUpError } from "../../components/PopUp.jsx";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  // ! Instanciando o useNavigate para redirecionar o usuário pra alguma página
+  const redirect = useNavigate();
+
   // ! Variáveis de estado e padrões
   const [isLoading, setIsLoading] = useState(false);
   const [hasLoginError, setHasLoginError] = useState(false);
@@ -46,7 +52,12 @@ const Login = () => {
       activeErrorDialog(res.error.code, res.error.message, res.status);
     } else {
       console.log(res);
+      return redirect("/forgot-password"); // !! TESTE, trocar
     }
+  };
+
+  const goToSignUp = async () => {
+    return redirect("/register");
   };
 
   const activeErrorDialog = (code, msg, status) => {
@@ -65,7 +76,7 @@ const Login = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <div
+      <Box
         style={{
           width: "100vw",
           height: "100vh",
@@ -75,108 +86,77 @@ const Login = () => {
           background: "linear-gradient(71deg, #0084FE 0%, #42EDF8 100%)",
         }}
       >
-        <div className="LoginCard">
-          <div className="Logo">
-            <div className="EcosIc">ECOS - IC</div>
-            <div className="LogoLine"></div>
-          </div>
-          <Link
-            href="/forgot-password" // ! Alterar
-            underline="hover"
-            className="ForgotYourPassword"
-          >
-            Forgot your password?
-          </Link>
-          <div
-            className="LoginBtnSignIn"
-            onClick={() => {
-              authUser();
-            }}
-          >
-            {isLoading ? "Authenticating..." : "SIGN IN"}
-          </div>
-          <div className="LoginBtnSignOut">SIGN UP</div>
-          <div className="DivLoginTextAndButtons">
-            <p className="TextFieldLabel">E-mail</p>
-            <TextField
-              id="txtemail"
-              variant="outlined"
-              fullWidth
-              style={{ top: "30px", position: "absolute" }}
-              placeholder="Insert your e-mail"
-            />
-            <p className="TextFieldLabel" style={{ top: "108px" }}>
-              Password
-            </p>
-            <TextField
-              id="txtpass"
-              fullWidth
-              variant="outlined"
-              type="password"
-              style={{ top: "134px", position: "absolute" }}
-              placeholder="Insert your password"
-            />
-          </div>
-          <div
-            className="EnterYourLoginCredentialsToAccess"
-            style={{
-              width: 265,
-              height: 19.78,
-              left: 104,
-              top: 151.35,
-              position: "absolute",
-              color: "#6C6C6C",
-              fontSize: 14,
-              fontFamily: "Montserrat",
-              fontWeight: "400",
-              wordWrap: "break-word",
-            }}
-          >
-            Enter your login credentials to access!
-          </div>
-          <div
-            className="SignIn"
-            style={{
-              width: 89,
-              height: 31.42,
-              left: 193,
-              top: 114.11,
-              position: "absolute",
-              color: "black",
-              fontSize: 22,
-              fontFamily: "Montserrat",
-              fontWeight: "600",
-              textTransform: "uppercase",
-              wordWrap: "break-word",
-            }}
-          >
-            SIGN-IN
-          </div>
-        </div>
-      </div>
-      {/*<Dialog
-        fullScreen={fullScreen}
-        open={hasLoginError}
-        onClose={closeErrorDialog}
-        aria-labelledby="responsive-dialog-title"
-      >
-        <DialogTitle
-          id="responsive-dialog-title"
-          style={{ color: "red", fontWeight: "bold" }}
-        >
-          {errorCode}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText style={{ fontWeight: "500" }}>
-            {errorMessage}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button variant="contained" color="error" onClick={closeErrorDialog}>
-            FECHAR
-          </Button>
-        </DialogActions>
-        </Dialog>*/}
+        <Box className="LoginCard">
+          <Box className="LogoWithBackButton">
+            <Box
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Box
+                style={{
+                  borderLeft: "6px solid #0084fe",
+                  height: "50px",
+                  marginRight: "10px",
+                  color: "#0084fe",
+                }}
+              />
+              <Box className="EcosIc">ECOS - IC</Box>
+            </Box>
+          </Box>
+          <Box className="LoginCardContent">
+            <Typography
+              variant="h5"
+              style={{ fontWeight: "600", marginBottom: "0.3em" }}
+              className="SignInText"
+            >
+              SIGN-IN
+            </Typography>
+            <Typography className="LoginCardMessage">
+              Enter your login credentials to access!
+            </Typography>
+
+            <Box className="DivLoginTextAndButtons">
+              <Box className="ButtonArea">
+                <Typography className="TextFieldLabel">E-mail</Typography>
+                <TextField
+                  id="txtemail"
+                  variant="outlined"
+                  fullWidth
+                  placeholder="Insert your e-mail"
+                />
+              </Box>
+
+              <Box className="ButtonArea">
+                <Typography className="TextFieldLabel">Password</Typography>
+                <TextField
+                  id="txtpass"
+                  fullWidth
+                  variant="outlined"
+                  type="password"
+                  placeholder="Insert your password"
+                />
+              </Box>
+            </Box>
+            <Button className="LoginBtnSignIn" onClick={() => authUser()}>
+              {isLoading ? "Authenticating..." : "SIGN IN"}
+            </Button>
+            <Link
+              href="/forgot-password"
+              underline="hover"
+              className="ForgotYourPassword"
+            >
+              Forgot your password?
+            </Link>
+            <Button className="LoginBtnSignUp" onClick={() => goToSignUp()}>
+              SIGN UP
+            </Button>
+          </Box>
+        </Box>
+      </Box>
+
       <PopUpError
         open={hasLoginError}
         close={closeErrorDialog}

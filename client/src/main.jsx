@@ -4,7 +4,7 @@ import App from "./App.jsx";
 import Login from "./pages/Auth/Login.jsx";
 import SignUp from "./pages/Auth/SignUp.jsx";
 import ForgotPassword from "./pages/Auth/ForgotPassword.jsx";
-import "./indexNew.css";
+import "./index.css";
 
 // ! Criando rotas
 import { Routes, BrowserRouter, Link, Route } from "react-router-dom";

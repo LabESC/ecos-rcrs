@@ -10,6 +10,7 @@ import {
   TextField,
   Link,
   CircularProgress,
+  Box,
 } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../../components/MuiTheme.jsx";
@@ -20,6 +21,7 @@ import {
   validatingTokenForPassword,
   updatePassword,
 } from "../../api/User.jsx";
+import { useNavigate } from "react-router-dom";
 
 function getSteps() {
   return [
@@ -39,6 +41,9 @@ function getSteps() {
 }
 
 export default function ForgotPassword() {
+  // ! Instanciando o useNavigate para redirecionar o usuário pra alguma página
+  const redirect = useNavigate();
+
   // ! Executado ao iniciar o componente
   useEffect(() => {
     document.title = "ECOS-IC: Password reset";
@@ -190,8 +195,10 @@ export default function ForgotPassword() {
     setActiveStep(3);
   };
 
-  // !! Função para voltar a homepage
-  // const goToHome = async () => {};
+  // ! Função para voltar a homepage
+  const goToHome = async () => {
+    redirect("/");
+  };
 
   // ! Elementos
   const getStepContent = (step) => {
@@ -312,7 +319,7 @@ export default function ForgotPassword() {
 
   return (
     <ThemeProvider theme={theme}>
-      <div
+      <Box
         style={{
           width: "100vw",
           height: "100vh",
@@ -322,25 +329,64 @@ export default function ForgotPassword() {
           background: "linear-gradient(71deg, #0084FE 0%, #42EDF8 100%)",
         }}
       >
-        <div
-          className="LoginCardPwd"
-          style={{ display: "flex", flexDirection: "column" }}
-        >
-          <Typography variant="h5" style={{ fontWeight: "bold" }}>
-            Reset your password
-          </Typography>
-          <Stepper activeStep={activeStep} orientation="vertical">
-            {steps.map((label, index) => (
-              <Step key={`STP_${index}`}>
-                <StepLabel key={`STP_L_${index}`}>{label}</StepLabel>
-                <StepContent className="ContainerStep" key={`STP_C_${index}`}>
-                  {getStepContent(index)}
-                </StepContent>
-              </Step>
-            ))}
-          </Stepper>
-        </div>
-      </div>
+        <Box className="LoginCard">
+          <Box
+            className="LogoWithBackButton"
+            style={{ marginBottom: "0px !important" }}
+          >
+            <Box
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Box
+                style={{
+                  borderLeft: "6px solid #0084fe",
+                  height: "50px",
+                  marginRight: "10px",
+                  color: "#0084fe",
+                }}
+              />
+              <Box className="EcosIc">ECOS - IC</Box>
+            </Box>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="BackButton"
+              onClick={() => {
+                goToHome();
+              }}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3"
+              />
+            </svg>
+          </Box>
+
+          <Box className="LoginCardContent">
+            <Typography variant="h5" style={{ fontWeight: "bold" }}>
+              Reset your password
+            </Typography>
+            <Stepper activeStep={activeStep} orientation="vertical">
+              {steps.map((label, index) => (
+                <Step key={`STP_${index}`}>
+                  <StepLabel key={`STP_L_${index}`}>{label}</StepLabel>
+                  <StepContent className="ContainerStep" key={`STP_C_${index}`}>
+                    {getStepContent(index)}
+                  </StepContent>
+                </Step>
+              ))}
+            </Stepper>
+          </Box>
+        </Box>
+      </Box>
       <PopUpError
         open={hasError}
         close={closeErrorDialog}

@@ -23,12 +23,22 @@ export const loginUser = async (email, password) => {
   return result;
 };
 
-export const registerUser = async (name, email, password) => {
-  if (!name || !email || !password) {
+export const registerUser = async (name, email, password, confirmPassword) => {
+  if (!name || !email || !password || !confirmPassword) {
     return {
       error: {
         code: "Name, email or password",
         message: "Missing name, email or password",
+      },
+      status: 400,
+    };
+  }
+
+  if (password !== confirmPassword) {
+    return {
+      error: {
+        code: "Password",
+        message: "Passwords do not match",
       },
       status: 400,
     };
