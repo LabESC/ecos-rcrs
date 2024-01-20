@@ -159,3 +159,11 @@ body {
   cursor: pointer !important;
   color: #0067c7 !important;
 }
+
+.SideBar > div {
+  background: #e1ecf2 !important;
+  padding: 0.7em !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}

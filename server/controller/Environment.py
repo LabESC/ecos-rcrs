@@ -170,9 +170,17 @@ async def get_by_user_id(user_id: str):
 
 
 @router_environment.post("/", response_model=EnvironmentResponse)
-async def create(environment: EnvironmentRequest):
-    # ! Criando ambiente
-    environment = await environmentService.create(environment)
+async def create(environment: EnvironmentRequest, request: Request):
+    # ! Verificando autenticação
+    auth = await authValidator.validate_user(request)
+    if not auth:
+        return JSONResponse(
+            error(
+                "auth",
+                "Authentication failed!",
+            ),
+            status_code=401,
+        )
 
     # ! Validando retorno
     if not environment:  # * Se não houver usuário (None)

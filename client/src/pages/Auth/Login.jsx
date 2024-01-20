@@ -1,25 +1,11 @@
-import {
-  TextField,
-  Backdrop,
-  Container,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Button,
-  useMediaQuery,
-  Link,
-  Typography,
-  Box,
-} from "@mui/material";
+import { TextField, Button, Link, Typography, Box } from "@mui/material";
 import { useState, useEffect } from "react";
 import { loginUser } from "../../api/User.jsx";
 import theme from "../../components/MuiTheme.jsx";
 import { ThemeProvider } from "@mui/material/styles";
 import { PopUpError } from "../../components/PopUp.jsx";
 import { useNavigate } from "react-router-dom";
+import { registerLoggedUser } from "../../api/Auth.jsx";
 
 const Login = () => {
   // ! Instanciando o useNavigate para redirecionar o usuário pra alguma página
@@ -30,7 +16,6 @@ const Login = () => {
   const [hasLoginError, setHasLoginError] = useState(false);
   const [errorCode, setErrorCode] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  //const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   // ! Executado ao iniciar o componente
   useEffect(() => {
@@ -52,7 +37,8 @@ const Login = () => {
       activeErrorDialog(res.error.code, res.error.message, res.status);
     } else {
       console.log(res);
-      return redirect("/forgot-password"); // !! TESTE, trocar
+      await registerLoggedUser(res.id, res.token);
+      return redirect("/my-environments"); // !! TESTE, trocar
     }
   };
 

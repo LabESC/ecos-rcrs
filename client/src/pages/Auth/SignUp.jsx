@@ -1,19 +1,4 @@
-import {
-  TextField,
-  Backdrop,
-  Container,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Button,
-  Box,
-  Typography,
-  Link,
-  useMediaQuery,
-} from "@mui/material";
+import { TextField, Button, Box, Typography, Link } from "@mui/material";
 import { useState, useEffect } from "react";
 import { registerUser } from "../../api/User.jsx";
 import theme from "../../components/MuiTheme.jsx";
