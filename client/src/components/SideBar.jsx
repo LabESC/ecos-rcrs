@@ -1,5 +1,6 @@
 // Sidebar.js
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // ! Componentes MUI + Estilização
 import { Drawer, Button, Container, Box } from "@mui/material";
@@ -7,10 +8,18 @@ import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import MenuIcon from "@mui/icons-material/Menu";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../components/MuiTheme.jsx";
+import {
+  MyEnvironmentsButtonOpened,
+  MyEnvironmentsButtonClosed,
+  LogOutButtonOpened,
+  LogOutButtonClosed,
+} from "../components/Buttons.jsx";
 
 const Sidebar = (props) => {
+  // ! Instanciando o useNavigate para redirecionar o usuário pra alguma página
+  const redirect = useNavigate();
+
   const { pageContent } = props;
-  //const pageContentShow = pageContent ? pageContent() : "";
   const [open, setOpen] = useState(false);
   const openWidth = 265; // Fixed width when the sidebar is open
   const closeWidth = 145; // Fixed width when the sidebar is closed
@@ -39,7 +48,9 @@ const Sidebar = (props) => {
             width: open ? openWidth : closeWidth,
           }}
         >
-          <Box style={{ display: "flex", flexDirection: "row" }}>
+          <Box
+            style={{ display: "flex", flexDirection: "row", marginTop: "1em" }}
+          >
             <Box
               style={{
                 display: "flex",
@@ -76,6 +87,28 @@ const Sidebar = (props) => {
                 <MenuIcon sx={{ fontSize: "medium" }} />
               )}
             </Button>
+          </Box>
+          <Box
+            style={{
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {open ? (
+              <MyEnvironmentsButtonOpened />
+            ) : (
+              <MyEnvironmentsButtonClosed />
+            )}
+          </Box>
+
+          <Box
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              marginBottom: "1em",
+            }}
+          >
+            {open ? <LogOutButtonOpened /> : <LogOutButtonClosed />}
           </Box>
         </Drawer>
 

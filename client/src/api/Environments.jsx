@@ -1,28 +1,37 @@
 import Axios from "axios";
 const baseUrl = import.meta.env.VITE_DB_MICROSERVICE_BASE;
+const { getServerError } = require("./ServerError.jsx");
 
 export const getMyEnvironments = async (userId) => {
-  await Axios.get(`${baseUrl}/environment/user/${userId}`)
+  const result = await Axios.get(`${baseUrl}/environment/user/${userId}`)
     .then((res) => {
       return res.data;
     })
     .catch((err) => {
-      console.log(err);
-
-      return { error: err.response.data, status: err.response.status };
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
     });
+
+  return result;
 };
 
 export const getEnvironmentById = async (id) => {
-  await Axios.get(`${baseUrl}/environment/${id}`)
+  const result = await Axios.get(`${baseUrl}/environment/${id}`)
     .then((res) => {
       return res.data;
     })
     .catch((err) => {
-      console.log(err);
-
-      return { error: err.response.data, status: err.response.status };
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
     });
+
+  return result;
 };
 
 export const createEnvironment = async (
@@ -34,7 +43,7 @@ export const createEnvironment = async (
   miningType,
   organizationName
 ) => {
-  await Axios.post(
+  const result = await Axios.post(
     `${baseUrl}/environment`,
     {
       user_id: userId,
@@ -54,8 +63,12 @@ export const createEnvironment = async (
       return res.data;
     })
     .catch((err) => {
-      console.log(err);
-
-      return { error: err.response.data, status: err.response.status };
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
     });
+
+  return result;
 };

@@ -22,7 +22,7 @@ const SignUp = () => {
 
   // ! Executado ao iniciar o componente
   useEffect(() => {
-    document.title = "ECOS-IC: Sign Up";
+    document.title = "SECO - RCR: Sign Up";
   }, []);
 
   const signUpUser = async () => {
@@ -110,7 +110,7 @@ const SignUp = () => {
                   color: "#0084fe",
                 }}
               />
-              <Box className="EcosIc">ECOS - IC</Box>
+              <Box className="EcosIc">SECO - RCR</Box>
             </Box>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -197,6 +197,7 @@ const SignUp = () => {
               href="/forgot-password"
               underline="hover"
               className="ForgotYourPassword"
+              style={{ marginBottom: "2em" }}
             >
               Forgot your password?
             </Link>

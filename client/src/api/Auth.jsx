@@ -8,22 +8,18 @@ export const registerLoggedUser = async (userId, userToken) => {
 };
 
 // ! Verifica se existe dados para o usuário logado registrados no locationStore
-export const verifyLoggedUser = async () => {
+export const verifyLoggedUser = () => {
   // . Verificando se há dados no localStorage
-  let userId = false;
-  let userToken = false;
+  let userId = null;
+  let userToken = null;
 
   try {
     userId = localStorage.getItem("SECO_24_user-id");
-    console.log("ENCONTROU ID: ", userId);
     userToken = localStorage.getItem("SECO_24_user-id");
-    console.log("ENCONTROU TOKEN: ", userToken);
-  } catch (e) {
-    console.log("NÃO ENCONTROU: ", userId);
-  }
+  } catch (e) {}
 
   // . Se não houver dados, retorne null
-  if (userId === false || userToken === false) {
+  if (userId === null || userToken === null) {
     return null;
   }
 
@@ -32,7 +28,7 @@ export const verifyLoggedUser = async () => {
 };
 
 // ! Remove os dados do usuário logado do locationStore
-export const logOut = async () => {
+export const removeLoggedUser = async () => {
   // . Removendo dados do localStorage
   localStorage.removeItem("SECO_24_user-id");
   localStorage.removeItem("SECO_24_user-token");

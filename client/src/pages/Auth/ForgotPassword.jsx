@@ -46,7 +46,7 @@ export default function ForgotPassword() {
 
   // ! Executado ao iniciar o componente
   useEffect(() => {
-    document.title = "ECOS-IC: Password reset";
+    document.title = "SECO - RCR: Password reset";
   }, []);
 
   // ! Variáveis de estado e padrões
@@ -349,7 +349,7 @@ export default function ForgotPassword() {
                   color: "#0084fe",
                 }}
               />
-              <Box className="EcosIc">ECOS - IC</Box>
+              <Box className="EcosIc">SECO - RCR</Box>
             </Box>
             <svg
               xmlns="http://www.w3.org/2000/svg"

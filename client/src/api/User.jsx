@@ -1,5 +1,6 @@
 import Axios from "axios";
 const baseUrl = import.meta.env.VITE_DB_MICROSERVICE_BASE;
+const { getServerError } = await import("./ServerError.jsx");
 
 export const loginUser = async (email, password) => {
   if (!email || !password) {
@@ -17,7 +18,11 @@ export const loginUser = async (email, password) => {
       return res.data;
     })
     .catch((err) => {
-      return { error: err.response.data, status: err.response.status };
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
     });
 
   return result;
@@ -49,46 +54,65 @@ export const registerUser = async (name, email, password, confirmPassword) => {
       return res.data;
     })
     .catch((err) => {
-      return { error: err.response.data, status: err.response.status };
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
     });
 
   return result;
 };
 
 export const getUsers = async () => {
-  await Axios.get(`${baseUrl}/user`)
+  const result = await Axios.get(`${baseUrl}/user`)
     .then((res) => {
       return res.data;
     })
     .catch((err) => {
-      console.log(err);
-
-      return { error: err.response.data, status: err.response.status };
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
     });
+
+  return result;
 };
 
 export const getUserById = async (id) => {
-  await Axios.get(`${baseUrl}/user/${id}`)
+  const result = await Axios.get(`${baseUrl}/user/${id}`)
     .then((res) => {
       return res.data;
     })
     .catch((err) => {
-      console.log(err);
-
-      return { error: err.response.data, status: err.response.status };
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
     });
+
+  return result;
 };
 
 export const createUser = async (email, pwd) => {
-  await Axios.post(`${baseUrl}/user`, { email: email, password: pwd })
+  const result = await Axios.post(`${baseUrl}/user`, {
+    email: email,
+    password: pwd,
+  })
     .then((res) => {
       return res.data;
     })
     .catch((err) => {
-      console.log(err);
-
-      return { error: err.response.data, status: err.response.status };
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
     });
+
+  return result;
 };
 
 export const getTokenForPassword = async (email) => {
@@ -99,8 +123,11 @@ export const getTokenForPassword = async (email) => {
       return res.status;
     })
     .catch((err) => {
-      console.log(err);
-      return { error: err.response.data, status: err.response.status };
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
     });
 
   return result;
@@ -114,10 +141,13 @@ export const validatingTokenForPassword = async (email, token) => {
       return res.status;
     })
     .catch((err) => {
-      console.log(err);
-
-      return { error: err.response.data, status: err.response.status };
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
     });
+
   return result;
 };
 
@@ -130,9 +160,12 @@ export const updatePassword = async (email, password, token) => {
       return res.status;
     })
     .catch((err) => {
-      console.log(err);
-
-      return { error: err.response.data, status: err.response.status };
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
     });
+
   return result;
 };

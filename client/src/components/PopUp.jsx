@@ -29,7 +29,7 @@ export function PopUpError(props) {
       </DialogContent>
 
       <DialogActions>
-        <Button autoFocus onClick={close}>
+        <Button autoFocus onClick={close} color="error">
           CLOSE
         </Button>
       </DialogActions>

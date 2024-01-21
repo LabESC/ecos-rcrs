@@ -1,15 +1,18 @@
 import { TextField, Button, Link, Typography, Box } from "@mui/material";
 import { useState, useEffect } from "react";
-import theme from "../../components/MuiTheme.jsx";
 import { ThemeProvider } from "@mui/material/styles";
 import { PopUpError } from "../../components/PopUp.jsx";
 import { useNavigate } from "react-router-dom";
-import { EnvironmentCard } from "../../components/EnvironmentCard.jsx";
+import { DiffAddedIcon } from "@primer/octicons-react";
+
 // ! Importações de componentes criados
+import theme from "../../components/MuiTheme.jsx";
 import SideBar from "../../components/SideBar.jsx";
+import { EnvironmentCard } from "../../components/EnvironmentCard.jsx";
+import { SuccessButton } from "../../components/Buttons.jsx";
 
 // ! Importações de códigos
-import { verifyLoggedUser, logOut } from "../../api/Auth.jsx";
+import { verifyLoggedUser, removeLoggedUser } from "../../api/Auth.jsx";
 
 const MyEnvironment = () => {
   // ! Instanciando o useNavigate para redirecionar o usuário pra alguma página
@@ -20,6 +23,7 @@ const MyEnvironment = () => {
     userId: null,
     userToken: null,
   }); // . Armazena os dados do usuário
+  const headerHeight = 60; // . Altura do header
 
   // ! Executado ao iniciar o componente
   useEffect(() => {
@@ -57,18 +61,75 @@ const MyEnvironment = () => {
   };
 
   // ! Funções para manipulação de dados na página
-  const [environments, setEnvironments] = useState([{}]); // . Armazena os ambientes do usuário
+  const [environments, setEnvironments] = useState([
+    { status: "mining", name: "Env1" },
+    { status: "mining_error", name: "Env2" },
+    { status: "mining_done", name: "Env3" },
+    { status: "making_topics", name: "Env4" },
+    { status: "topics_error", name: "Env5" },
+    { status: "topics_done", name: "Env6" },
+    { status: "waiting_rcr_voting", name: "Env7" },
+    { status: "rcr_voting_done", name: "Env8" },
+    { status: "waiting_rcr_priority", name: "Env9" },
+    { status: "rcr_priority_done", name: "Env10" },
+    { status: "done", name: "Env11" },
+  ]); // . Armazena os ambientes do usuário
+
+  const getEnvironments = async () => {
+    // . Obtendo os ambientes do usuário
+    const response = await fetch(
+      `http://localhost:3001/environments/${loggedUser.userId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${loggedUser.userToken}`,
+        },
+      }
+    );
+
+    // . Verificando se houve algum erro
+    if (!response.ok) {
+      const error = await response.json();
+      activeErrorDialog(error.code, error.message, response.status);
+      return;
+    }
+
+    // . Obtendo os ambientes
+    const data = await response.json();
+    setEnvironments(data);
+  };
+
   const goToLogOut = async () => {
-    await logOut();
+    await removeLoggedUser();
     return redirect("/");
   };
 
   // . Declarando elementos da página
   const pageContent = () => {
     return (
-      <EnvironmentCard
-        environment={{ status: "mining", name: "Environment 1" }}
-      />
+      <Box className="ContainerMyEnvironments">
+        <Box
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            marginBottom: "1.5em",
+          }}
+        >
+          <SuccessButton
+            icon={<DiffAddedIcon size={18} />}
+            message={"New environment"}
+            width={"200px"}
+            height={"30px"}
+            uppercase={false}
+          />
+        </Box>
+        <Box className="ContainerEnvironments">
+          {environments.map((env) => (
+            <EnvironmentCard environment={env} />
+          ))}
+        </Box>
+      </Box>
     );
   };
 

@@ -19,7 +19,7 @@ const Login = () => {
 
   // ! Executado ao iniciar o componente
   useEffect(() => {
-    document.title = "ECOS-IC: Login";
+    document.title = "SECO - RCR: Login";
   }, []);
 
   const authUser = async () => {
@@ -89,7 +89,7 @@ const Login = () => {
                   color: "#0084fe",
                 }}
               />
-              <Box className="EcosIc">ECOS - IC</Box>
+              <Box className="EcosIc">SECO - RCR</Box>
             </Box>
           </Box>
           <Box className="LoginCardContent">
