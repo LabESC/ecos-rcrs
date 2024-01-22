@@ -1,6 +1,6 @@
 import Axios from "axios";
 const baseUrl = import.meta.env.VITE_DB_MICROSERVICE_BASE;
-const { getServerError } = await import("./ServerError.jsx");
+const { getServerError } = import("./ServerError.jsx");
 
 export const loginUser = async (email, password) => {
   if (!email || !password) {
