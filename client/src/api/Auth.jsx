@@ -8,14 +8,14 @@ export const registerLoggedUser = async (userId, userToken) => {
 };
 
 // ! Verifica se existe dados para o usuário logado registrados no locationStore
-export const verifyLoggedUser = () => {
+export const verifyLoggedUser = async () => {
   // . Verificando se há dados no localStorage
   let userId = null;
   let userToken = null;
 
   try {
     userId = localStorage.getItem("SECO_24_user-id");
-    userToken = localStorage.getItem("SECO_24_user-id");
+    userToken = localStorage.getItem("SECO_24_user-token");
   } catch (e) {}
 
   // . Se não houver dados, retorne null

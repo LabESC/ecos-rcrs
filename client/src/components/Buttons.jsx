@@ -130,7 +130,7 @@ export const LogOutButtonClosed = () => {
 
 export const SuccessButton = (props) => {
   const { icon, message, uppercase, width, height, action } = props;
-  console.log(message);
+
   return (
     <Button
       className="Button"

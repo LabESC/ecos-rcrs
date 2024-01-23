@@ -1,4 +1,4 @@
-export const getServerError = () => {
+const getServerError = () => {
   return {
     error: {
       code: "SERVER",
@@ -7,3 +7,5 @@ export const getServerError = () => {
     status: 500,
   };
 };
+
+export default getServerError;

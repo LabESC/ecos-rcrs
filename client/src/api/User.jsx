@@ -1,6 +1,6 @@
 import Axios from "axios";
 const baseUrl = import.meta.env.VITE_DB_MICROSERVICE_BASE;
-const { getServerError } = import("./ServerError.jsx");
+import getServerError from "./ServerError.jsx";
 
 export const loginUser = async (email, password) => {
   if (!email || !password) {
@@ -17,7 +17,7 @@ export const loginUser = async (email, password) => {
     .then((res) => {
       return res.data;
     })
-    .catch((err) => {
+    .catch(async (err) => {
       try {
         return { error: err.response.data, status: err.response.status };
       } catch (e) {

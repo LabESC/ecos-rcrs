@@ -1,9 +1,12 @@
 import Axios from "axios";
 const baseUrl = import.meta.env.VITE_DB_MICROSERVICE_BASE;
-const { getServerError } = require("./ServerError.jsx");
+import getServerError from "./ServerError.jsx";
 
-export const getMyEnvironments = async (userId) => {
-  const result = await Axios.get(`${baseUrl}/environment/user/${userId}`)
+export const getMyEnvironments = async (userId, userToken) => {
+  console.log(" userId, userToken", userId, userToken);
+  const result = await Axios.get(`${baseUrl}/environment/user/${userId}`, {
+    headers: { "user-id": userId, "user-token": userToken },
+  })
     .then((res) => {
       return res.data;
     })

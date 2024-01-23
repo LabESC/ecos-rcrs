@@ -38,7 +38,7 @@ const Login = () => {
     } else {
       console.log(res);
       await registerLoggedUser(res.id, res.token);
-      return redirect("/my-environments"); // !! TESTE, trocar
+      return redirect("/my-environments"); // ! Redireciona para a página de ambientes
     }
   };
 

@@ -138,7 +138,22 @@ async def get_by_id(id: str, request: Request):
 
 
 @router_environment.get("/user/{user_id}", response_model=list[EnvironmentResponse])
-async def get_by_user_id(user_id: str):
+async def get_by_user_id(user_id: str, request: Request):
+    # ! Obtendo usuário logado e validando permissão
+    validate = await authValidator.validate_user(request)
+
+    # ! Validando retorno
+    if not validate:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Authentication failed!",
+                )
+            ],
+            status_code=401,
+        )
+
     # ! Obtendo usuário por id
     environment = await environmentService.get_by_user_id(user_id)
 

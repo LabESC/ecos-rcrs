@@ -3,7 +3,14 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 // ! Componentes MUI + Estilização
-import { Drawer, Button, Container, Box } from "@mui/material";
+import {
+  Drawer,
+  Button,
+  Container,
+  Box,
+  Backdrop,
+  CircularProgress,
+} from "@mui/material";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import MenuIcon from "@mui/icons-material/Menu";
 import { ThemeProvider } from "@mui/material/styles";
@@ -117,9 +124,9 @@ const Sidebar = (props) => {
           sx={{
             transition: "margin .2s",
             width: `calc(100% - ${open ? openWidth : closeWidth}px)`,
-            background: "white",
             marginTop: "1.5em",
           }}
+          id="page-content"
         >
           {pageContent()}
         </Container>

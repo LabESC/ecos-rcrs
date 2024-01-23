@@ -1,4 +1,12 @@
-import { TextField, Button, Link, Typography, Box } from "@mui/material";
+import {
+  TextField,
+  Button,
+  Link,
+  Typography,
+  Box,
+  CircularProgress,
+  Backdrop,
+} from "@mui/material";
 import { useState, useEffect } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import { PopUpError } from "../../components/PopUp.jsx";
@@ -13,35 +21,58 @@ import { SuccessButton } from "../../components/Buttons.jsx";
 
 // ! Importações de códigos
 import { verifyLoggedUser, removeLoggedUser } from "../../api/Auth.jsx";
+import { getMyEnvironments } from "../../api/Environments.jsx";
 
 const MyEnvironment = () => {
   // ! Instanciando o useNavigate para redirecionar o usuário pra alguma página
   const redirect = useNavigate();
-
-  // ! Variáveis de estado e padrões
-  const [loggedUser, setLoggedUser] = useState({
-    userId: null,
-    userToken: null,
-  }); // . Armazena os dados do usuário
-  const headerHeight = 60; // . Altura do header
 
   // ! Executado ao iniciar o componente
   useEffect(() => {
     // . Mudando nome da página
     document.title = "ECOS-IC: My Environments";
 
-    // . Verificando se o usuário está logado e obtendo seus dados
-    const verifyUser = verifyLoggedUser();
-    if (verifyUser === null) {
-      redirect("/");
-    }
+    // . Função para obter os ambientes do usuário
+    const getEnvironments = async (userId, userToken) => {
+      // . Obtendo os ambientes do usuário
+      const response = await getMyEnvironments(userId, userToken);
 
-    // . Armazenando os dados do usuário
-    setLoggedUser(verifyUser);
+      // . Verificando se ocorreu algum erro
+      if (response.error) {
+        setIsLoading(false);
+        activeErrorDialog(
+          `${response.error.code}: Getting environments`,
+          response.error.message,
+          response.status
+        );
+        return;
+      }
+
+      // . Armazenando os ambientes
+      setEnvironments(response);
+      setIsLoading(false);
+    };
+
+    // . Verificando se o usuário está logado e obtendo seus dados
+    const checkUser = async () => {
+      const verifyUser = await verifyLoggedUser();
+
+      // . Se não houver usuário logado, redireciona para a página de login
+      if (verifyUser === null) {
+        redirect("/");
+        return;
+      }
+
+      // . Obtendo os ambientes do usuário
+      await getEnvironments(verifyUser.userId, verifyUser.userToken);
+    };
+
+    // . Executando a função
+    checkUser();
   }, []);
 
   // ! Variáveis e funções para manipulação dos Dialogs
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [hasLoginError, setHasLoginError] = useState(false);
   const [errorCode, setErrorCode] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -61,49 +92,7 @@ const MyEnvironment = () => {
   };
 
   // ! Funções para manipulação de dados na página
-  const [environments, setEnvironments] = useState([
-    { status: "mining", name: "Env1" },
-    { status: "mining_error", name: "Env2" },
-    { status: "mining_done", name: "Env3" },
-    { status: "making_topics", name: "Env4" },
-    { status: "topics_error", name: "Env5" },
-    { status: "topics_done", name: "Env6" },
-    { status: "waiting_rcr_voting", name: "Env7" },
-    { status: "rcr_voting_done", name: "Env8" },
-    { status: "waiting_rcr_priority", name: "Env9" },
-    { status: "rcr_priority_done", name: "Env10" },
-    { status: "done", name: "Env11" },
-  ]); // . Armazena os ambientes do usuário
-
-  const getEnvironments = async () => {
-    // . Obtendo os ambientes do usuário
-    const response = await fetch(
-      `http://localhost:3001/environments/${loggedUser.userId}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${loggedUser.userToken}`,
-        },
-      }
-    );
-
-    // . Verificando se houve algum erro
-    if (!response.ok) {
-      const error = await response.json();
-      activeErrorDialog(error.code, error.message, response.status);
-      return;
-    }
-
-    // . Obtendo os ambientes
-    const data = await response.json();
-    setEnvironments(data);
-  };
-
-  const goToLogOut = async () => {
-    await removeLoggedUser();
-    return redirect("/");
-  };
+  const [environments, setEnvironments] = useState([]); // . Armazena os ambientes do usuário
 
   // . Declarando elementos da página
   const pageContent = () => {
@@ -126,7 +115,7 @@ const MyEnvironment = () => {
         </Box>
         <Box className="ContainerEnvironments">
           {environments.map((env) => (
-            <EnvironmentCard environment={env} />
+            <EnvironmentCard environment={env} key={`ENV_${env.id}`} />
           ))}
         </Box>
       </Box>
@@ -135,8 +124,16 @@ const MyEnvironment = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <SideBar pageContent={pageContent} />
-
+      <SideBar pageContent={pageContent} isLoading={isLoading} />
+      <Backdrop
+        sx={{
+          background: "rgba(0,0,0,0.5)",
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+        }}
+        open={isLoading}
+      >
+        <CircularProgress sx={{ color: "#0084fe" }} />
+      </Backdrop>
       <PopUpError
         open={hasLoginError}
         close={closeErrorDialog}
