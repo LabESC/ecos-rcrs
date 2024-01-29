@@ -18,6 +18,7 @@ basic_fields = [
     EnvironmentModel.mining_type,
     EnvironmentModel.organization_name,
     EnvironmentModel.status,
+    EnvironmentModel.repos,
 ]
 
 

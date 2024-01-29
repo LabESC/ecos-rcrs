@@ -375,9 +375,7 @@ async def update_topic_data(
         )
 
     # ! Atualizando status do ambiente
-    environment = await environmentService.update_topics(
-        id, body.topic_data.model_dump()
-    )
+    environment = await environmentService.update_topics(id, body.topic_data)
 
     # ! Validando retorno
     if not environment:

@@ -13,3 +13,4 @@ beautifulsoup4
 requests
 python-dotenv
 uvicorn
+sentence-transformers

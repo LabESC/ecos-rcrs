@@ -8,6 +8,7 @@ from service.Databases import Database
 from service.Auth import Auth as authValidator
 from service.DBRequests import DBRequests
 from schemas.Topic import TopicReposRequest
+from service.Similarity import gera_similares_de_topicos
 
 """from schemas.Environment import (
     EnvironmentResponse,
@@ -82,7 +83,7 @@ async def busca_repos_top2vec(body: TopicReposRequest, request: Request):
 
     # * Modelando issues recebidas
     try:
-        topic_generation = await Top2VecImpl.obtem_topicos_pd_body(df)
+        topic_generation = await Top2VecImpl.obtem_topicos_pd_body_com_formatacao(df)
     except Exception as e:
         try:
             topic_generation = {"error": str(e)}
@@ -94,6 +95,7 @@ async def busca_repos_top2vec(body: TopicReposRequest, request: Request):
 
     # . Se ocorrer erro, enviar o erro pro BD
     if "error" in topic_generation:
+        print("sending error")
         await DBRequests.update_enviroment_topic_data(
             body.environment_id,
             topic_generation,
@@ -101,10 +103,15 @@ async def busca_repos_top2vec(body: TopicReposRequest, request: Request):
         )
         return
 
+    # !! Senão, obter a similaridade das issues em um topico
+    print("gerando topicos")
+    topic_generation = gera_similares_de_topicos(topic_generation["comparisons"])
+    print("sending result")
+
     # !! . Senão, inserir o resultado no BD
     await DBRequests.update_enviroment_topic_data(
         body.environment_id,
-        topic_generation,
+        topic_generation,  # topic_generation["comparisons"],
         "topics_done",
     )
 

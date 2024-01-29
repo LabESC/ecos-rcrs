@@ -43,4 +43,34 @@ router.post("/api/github/mining/repos", async (req, res) => {
   return res.status(200).json({ message: "Mining request received." });
 });
 
+// ! Rota de obtencao de repositorios a partir de uma organizacao
+router.get("/api/github/organization/:org/repos", async (req, res) => {
+  // !! LOG
+
+  console.log(`${req.method} ${req.url} - ${new Date().toLocaleString()}`);
+
+  // * Obtendo dados da requisição
+  const { params } = req;
+
+  // * Obtendo organização
+  let org = null;
+  try {
+    org = params.org;
+  } catch (e) {
+    return res.status(400).json({ error: "Invalid organization." });
+  }
+
+  // * Obtendo repositórios da organização
+  const repos = await gitHubRequest.searchOrganizationRepos(org);
+
+  // * Se não houver repositórios, retorne erro
+  if (repos === null) {
+    return res.status(400).json({ error: "Invalid organization." });
+  }
+
+  // * Se houver repositórios, retorne-os
+
+  return res.status(200).json({ repos: repos });
+});
+
 module.exports = router;

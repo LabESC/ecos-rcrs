@@ -5,6 +5,7 @@ from model.Environment import Environment as EnvironmentModel
 from database.db import conn
 from schemas.Environment import EnvironmentRequest
 from service.APIRequests import APIRequests
+from utils.Environment import Environment as EnvironmentUtils
 
 # ! Outras dependencias
 from repository.User import User as UserRepository
@@ -232,11 +233,22 @@ class Environment:
     async def get_topic_data(environment_id: str):
         try:
             db = next(conn())
-            environment = EnvironmentRepository.get_topic_data(db, environment_id)
-            if environment in [False, None]:
-                return environment
+            topic_data = EnvironmentRepository.get_topic_data(db, environment_id)
+            if topic_data in [False, None]:
+                return topic_data
 
-            return environment[0]
+            topic_data = topic_data[0]
+
+            return topic_data
+            """mining_data = EnvironmentRepository.get_mining_data(db, environment_id)
+
+            if mining_data in [False, None]:
+                return mining_data
+
+            mining_data = mining_data[0]
+
+            # Juntando os dados de comparacoes agrupados por topicos
+            return EnvironmentUtils.join_comparisons_and_topics(topic_data, mining_data)"""
         except Exception as e:
             print(e)
             return -1

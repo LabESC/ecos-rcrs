@@ -112,6 +112,9 @@ const Login = () => {
                   variant="outlined"
                   fullWidth
                   placeholder="Insert your e-mail"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") authUser();
+                  }}
                 />
               </Box>
 
@@ -123,6 +126,9 @@ const Login = () => {
                   variant="outlined"
                   type="password"
                   placeholder="Insert your password"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") authUser();
+                  }}
                 />
               </Box>
             </Box>

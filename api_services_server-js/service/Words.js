@@ -79,7 +79,7 @@ async function filtraArrayRequestGit(array, sysId) {
   }
 
   // * Retorne o array filtrado e o id do sistema atualizado
-  return {result: arrayFiltrado, sysIdUpdated: sysId};
+  return { result: arrayFiltrado, sysIdUpdated: sysId };
 }
 
 /***
@@ -91,6 +91,11 @@ function hasNextLinkDict(links) {
   return "next" in links;
 }
 
+/**
+ * Função que retorna se existe o atributo "next" em uma string "link", a partir de um split feito nesta string seguindo os padroes do parametro "link" da resposta da API do GitHub.
+ * @param {string} links - Um dicionário com os links presentes no atributo "links" da resposta da API do GitHub.
+ * @return {boolean} Retorna se existe o atributo next no dicionário recebido.
+ **/
 function hasNextLinkString(link) {
   if (link === null || link === undefined) return false;
   const links = link.split(",");
@@ -147,9 +152,25 @@ function formatIssuesToArray(issues) {
   return outputArray;
 }
 
+/**
+ * Função que retorna um array de strings a partir de um array de dicionarios que contenham o atributo "full_name".
+ * @param {Array} repos - Um dicionário com a resposta da API contendo os repositorios de uma organizacao.
+ * @return {Array} Retorna um array de strings com o nome completo dos repositorios.
+ **/
+function formatReposToStringArray(repos) {
+  const outputArray = [];
+
+  for (const repo of repos) {
+    outputArray.push(repo.full_name);
+  }
+
+  return outputArray;
+}
+
 module.exports = {
   filtraArrayRequestGit,
   hasNextLinkDict,
   hasNextLinkString,
   formatIssuesToArray,
+  formatReposToStringArray,
 };

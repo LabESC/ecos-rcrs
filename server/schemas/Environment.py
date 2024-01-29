@@ -37,6 +37,7 @@ class EnvironmentResponse(BaseModel):
     details: str
     mining_type: str
     organization_name: Optional[str] = None
+    repos: list[str]
     status: str
 
     class Config:
@@ -64,14 +65,18 @@ class EnvironmentUpdateMiningDataRequest(BaseModel):
     status: str
 
 
+class TopicSuccessData(BaseModel):
+    comparisons: list[dict]
+
+
 # !! Avaliar este objeto  - ERRO
 class TopicData(BaseModel):
-    comparisons: list[dict]
+    comparisons: Union[TopicSuccessData, DataError]
     topics: list[list[str]]
 
 
 class EnvironmentUpdateTopicDataRequest(BaseModel):
-    topic_data: Union[TopicData, DataError]
+    topic_data: Union[list[dict], DataError]  # Union[TopicData, DataError]
     status: str
 
 

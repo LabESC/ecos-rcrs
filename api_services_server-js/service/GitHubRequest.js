@@ -1,4 +1,5 @@
 const getRepos = require("./GitHub");
+const getOrganizationRepositories = require("./GitHubOrg");
 const { updateEnvironmentMiningData } = require("./DBRequests");
 const { formatIssuesToArray } = require("./Words");
 
@@ -123,6 +124,17 @@ class GitHubRequest {
     console.log("this.#isRunning: ", this.#isRunning);
     // * Se não houver requisições em andamento, executar
     if (!this.#isRunning) await this.runQueue(); // ! Não aguardo (await), pois retorno ao usuário
+  }
+
+  /**
+   * Busca repositorios de uma organizacao.
+   * @param {string} organization - O nome da organização.
+   * @return {object} Retorna um objeto com os repositorios da organização.
+   **/
+  async searchOrganizationRepos(organization) {
+    const result = await getOrganizationRepositories(organization);
+
+    return result;
   }
 }
 

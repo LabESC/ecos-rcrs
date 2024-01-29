@@ -9,8 +9,13 @@ import {
   AlertFillIcon,
   CheckCircleIcon,
 } from "@primer/octicons-react";
+import { useNavigate } from "react-router-dom";
 
 export function EnvironmentCard(props) {
+  // ! Instanciando o useNavigate para redirecionar o usuário pra alguma página
+  const redirect = useNavigate();
+
+  // ! Extraindo variáveis do props
   const { environment } = props;
 
   const getColor = (status) => {
@@ -159,6 +164,10 @@ export function EnvironmentCard(props) {
     }
   };
 
+  const goToEnvironmentDetail = () => {
+    redirect(`/environment/${environment.id}`);
+  };
+
   return (
     <Box
       className="EnvironmentCard"
@@ -173,7 +182,10 @@ export function EnvironmentCard(props) {
         flexDirection: "column",
         justifyContent: "space-between",
       }}
-      // !! IMPLEMENTAR: onClick={() => {}}
+      // !! IMPLEMENTAR:
+      onClick={() => {
+        goToEnvironmentDetail();
+      }}
     >
       <Box>
         <OrganizationIcon size={28} />

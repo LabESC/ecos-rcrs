@@ -106,6 +106,67 @@ class GitHub {
       links: response.headers.link,
     };
   }
+
+  // ! Função para buscar repositorios de uma organização
+  async getOrganizationRepos(organization, page) {
+    // * Fazendo requisição
+    let response = null;
+    try {
+      response = await this.requests.get(
+        `orgs/${organization}/repos?page=${page}&per_page=100`,
+        {
+          headers: this.#request_headers,
+        }
+      );
+    } catch (e) {
+      if (e.response.status === 404)
+        return { error: "Organization not found." };
+      else return { error: "It was not possible" };
+    }
+
+    // * Verificando se o limite de requisições foi excedido
+    let checkExpiredLimit = await this.checkExpiredLimit(
+      response.status,
+      response.headers
+    );
+
+    // * Se retornar algum outro código, retorne erro
+    if (checkExpiredLimit === 4) {
+      return {
+        error:
+          "message" in response.data ? response.data.message : response.data,
+      };
+    }
+
+    // * Enquanto ele não for refeito, aguarde, refaça e valide novamente
+    while (checkExpiredLimit != 0) {
+      response = await this.requests.get(
+        `orgs/${organization}/repos?page=${page}&per_page=100`,
+        {
+          headers: this.#request_headers,
+        }
+      );
+
+      checkExpiredLimit = await this.checkExpiredLimit(
+        response.status,
+        response.headers
+      );
+
+      // * Se retornar algum outro código, retorne erro
+      if (checkExpiredLimit === 4) {
+        return {
+          error:
+            "message" in response.data ? response.data.message : response.data,
+        };
+      }
+    }
+
+    // * Retornando dados
+    return {
+      data: response.data,
+      links: response.headers.link,
+    };
+  }
 }
 
 module.exports = GitHub;

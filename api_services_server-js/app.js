@@ -13,5 +13,6 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(require("./controller/GitHub.js"));
 app.use(require("./controller/Email.js"));
+app.use(require("./controller/DB.js"));
 
 module.exports = app;

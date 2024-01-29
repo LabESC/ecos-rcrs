@@ -13,14 +13,16 @@ async function getRepos(repos) {
   // * Iniciando repositório de requisições
   const gitHubRepository = new GitHubRepository();
 
+  // * Iniciando id de issues (sistema)
+  let sysId = 0;
+
   // * Para cada repositório, buscar issues
   for (let repo of repos) {
     // !! LOG
     console.log(`Buscando issues do repositório ${repo}`);
 
-    // * Iniciando página e id de issues (sistema)
+    // * Iniciando página
     let page = 1;
-    let sysId = 0;
 
     // * Iniciando array de issues e erros
     issues[repo] = [];

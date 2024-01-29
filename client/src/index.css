@@ -201,3 +201,56 @@ body {
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   transform: scale(1.05, 1.05);
 }
+
+.IssueCard {
+  width: auto;
+  height: auto;
+  background: #eaeaea;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  transition: box-shadow 0.2s ease-in-out;
+  cursor: pointer;
+  padding: 0.6em 0.4em;
+  max-width: 250px;
+  /*max-height: 140px;*/
+  max-height: 100px;
+  min-height: 100px;
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+}
+
+.IssueCardRepoAndQuantity {
+  display: flex;
+  align-items: space-between;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.IssueCardTxt {
+  margin: 0.3em 0;
+}
+
+.IssueCardBody {
+  display: flex;
+  align-items: flex-start;
+  color: #313131;
+  font-size: 10px;
+  margin: 0.3em 0;
+  width: 100%;
+  height: 100%;
+}
+
+.IssueCardBodyChild {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+}
+
+.IssueCard:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  transform: scale(1.05, 1.05);
+}

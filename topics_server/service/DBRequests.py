@@ -29,11 +29,12 @@ class DBRequests:
 
     @staticmethod
     async def update_enviroment_topic_data(
-        environment_id: str, topic_data: dict, status: str
+        environment_id: str, topic_data: list[dict], status: str
     ):
         # * Definindo url
         url = f"{URLBASE}/environment/{environment_id}/topicdata"
 
+        print(url)
         # * Fazendo requisição
         try:
             resposta = requests.post(
@@ -41,11 +42,15 @@ class DBRequests:
                 headers={"service-login": SERVICE_LOGIN, "service-pwd": SERVICE_PWD},
                 json={"topic_data": topic_data, "status": status},
             )
-        except Exception:
+        except Exception as e:
+            print(e)
+            print("error sending to bd")
             return False
 
         # * Verificando se foi bem-sucedido
         if resposta.status_code == 200:
+            print("success sending to bd")
             return True
         else:
+            print("error sending to bd, but send")
             return False
