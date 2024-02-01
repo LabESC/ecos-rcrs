@@ -16,7 +16,7 @@ import { useState, useEffect } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import { PopUpError } from "../../components/PopUp.jsx";
 import { useNavigate } from "react-router-dom";
-import { DiffAddedIcon } from "@primer/octicons-react";
+import { DiffAddedIcon, RepoIcon } from "@primer/octicons-react";
 
 // ! Importações de componentes criados
 import theme from "../../components/MuiTheme.jsx";
@@ -27,9 +27,10 @@ import { SuccessButton } from "../../components/Buttons.jsx";
 // ! Importações de códigos
 import { verifyLoggedUser } from "../../api/Auth.jsx";
 import {
-  setIssueDataToLocalStorage,
+  setTopicDataToLocalStorage,
   getEnvironmentIdFromUrl,
   getTopicData,
+  getEnvironmentNameFromLocalStorage,
 } from "../../api/Environments.jsx";
 
 const EnvironmentDetail = () => {
@@ -39,7 +40,18 @@ const EnvironmentDetail = () => {
   // ! Executado ao iniciar o componente
   useEffect(() => {
     // . Mudando nome da página
-    document.title = "ECOS-IC: My Environments";
+    document.body.style.background = "white";
+
+    // . Função para ordenar as issues dos topicos pelo tamanho do  array "relatedTo"
+    const orderIssuesByRelatedTo = (topics) => {
+      // . Ordenando as issues
+      topics.forEach((topic) => {
+        topic.issues.sort((a, b) => {
+          return b.relatedTo.length - a.relatedTo.length;
+        });
+      });
+      return topics;
+    };
 
     // . Função para obter os topicos
     const getDetails = async (userId, userToken) => {
@@ -53,6 +65,17 @@ const EnvironmentDetail = () => {
 
       // . Armazenando o id do ambiente
       setEnvironmentId(environmentId);
+
+      // . Obtendo o nome do ambiente
+      const environmentName = getEnvironmentNameFromLocalStorage();
+
+      if (environmentName === null) {
+        redirect("/my-environments");
+        return;
+      }
+
+      setEnvironmentName(environmentName);
+      document.title = `ECOS-IC: ${environmentName}`;
 
       // . Obtendo os ambientes do usuário
       const response = await getTopicData(userId, userToken, environmentId);
@@ -69,7 +92,11 @@ const EnvironmentDetail = () => {
       }
 
       // . Armazenando os ambientes
-      setTopics(response);
+      const topics = orderIssuesByRelatedTo(response);
+      setTopics(topics);
+
+      // . Setando o topico atual no localStorage
+      setTopicDataToLocalStorage(topics[0]);
       setIsLoading(false);
     };
 
@@ -113,6 +140,7 @@ const EnvironmentDetail = () => {
 
   // ! Funções para manipulação de dados na página
   const [environmentId, setEnvironmentId] = useState(""); // . Armazena o id do ambiente [UUID]
+  const [environmentName, setEnvironmentName] = useState(""); // . Armazena o nome do ambiente
   const [topics, setTopics] = useState([
     { id: null, issues: "", name: "", topic: "" },
   ]); // . Armazena os ambientes do usuário
@@ -121,11 +149,11 @@ const EnvironmentDetail = () => {
   // . Função para mudar o topico atual (SELECT)
   const changeTopic = (event) => {
     setActualTopic(event.target.value);
+    setTopicDataToLocalStorage(topics[event.target.value]);
   };
 
   // . Função para ir a pagina da issue
-  const goToissueDetail = (issue, topic) => {
-    setIssueDataToLocalStorage(issue, topic);
+  const goToissueDetail = (issue) => {
     redirect(`/environment/${environmentId}/issue/${issue.id}`);
   };
 
@@ -135,17 +163,25 @@ const EnvironmentDetail = () => {
       <Box className="ContainerMyEnvironments">
         <Box
           style={{
-            display: "flex",
-            justifyContent: "flex-end",
             marginBottom: "1.5em",
           }}
+          className="ContainerTitle"
         >
+          <Typography
+            variant="h5"
+            style={{ textDecoration: "underline", marginLeft: "1em" }}
+          >
+            {environmentName}
+          </Typography>
           <SuccessButton
-            icon={<DiffAddedIcon size={18} />}
-            message={"New environment"}
+            icon={<RepoIcon size={18} />}
+            message={"List RCR"}
             width={"200px"}
             height={"30px"}
             uppercase={false}
+            marginLeft="0"
+            marginRight="4em"
+            backgroundColor={"#75d5ff"}
           />
         </Box>
         <FormControl

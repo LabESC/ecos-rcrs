@@ -9,6 +9,7 @@ from service.Auth import Auth as authValidator
 from service.DBRequests import DBRequests
 from schemas.Topic import TopicReposRequest
 from service.Similarity import gera_similares_de_topicos
+from service.Similarity2 import generate_topics_similarity
 
 """from schemas.Environment import (
     EnvironmentResponse,
@@ -105,7 +106,7 @@ async def busca_repos_top2vec(body: TopicReposRequest, request: Request):
 
     # !! Senão, obter a similaridade das issues em um topico
     print("gerando topicos")
-    topic_generation = gera_similares_de_topicos(topic_generation["comparisons"])
+    topic_generation = generate_topics_similarity(topic_generation["comparisons"])
     print("sending result")
 
     # !! . Senão, inserir o resultado no BD

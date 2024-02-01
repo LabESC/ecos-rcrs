@@ -129,14 +129,24 @@ export const LogOutButtonClosed = () => {
 };
 
 export const SuccessButton = (props) => {
-  const { icon, message, uppercase, width, height, action } = props;
+  const {
+    icon,
+    message,
+    uppercase,
+    width,
+    height,
+    action,
+    marginLeft,
+    marginRight,
+    backgroundColor,
+  } = props;
 
   return (
     <Button
       className="Button"
       variant="contained"
       style={{
-        background: "#9FFF64",
+        background: backgroundColor ? backgroundColor : "#B3DEF5",
         color: "#000000",
         borderRadius: "5px",
         height: height,
@@ -147,6 +157,8 @@ export const SuccessButton = (props) => {
         flexDirection: "row",
         justifyContent: "flex-start",
         textTransform: uppercase ? "uppercase" : "none",
+        marginLeft: marginLeft ? marginLeft : "auto",
+        marginRight: marginRight ? marginRight : "auto",
       }}
       onClick={action}
     >

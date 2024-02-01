@@ -167,6 +167,23 @@ class GitHub {
       links: response.headers.link,
     };
   }
+
+  // ! Função para buscar repositório
+  async getRepo(repo) {
+    // * Fazendo requisição
+    let response = null;
+    try {
+      response = await this.requests.get(`repos/${repo}`, {
+        headers: this.#request_headers,
+      });
+    } catch (e) {
+      if (e.response.status === 404) return false;
+      else return { error: "It was not possible" };
+    }
+
+    if (response.status === 200) return true;
+    return false;
+  }
 }
 
 module.exports = GitHub;

@@ -161,6 +161,7 @@ function formatReposToStringArray(repos) {
   const outputArray = [];
 
   for (const repo of repos) {
+    if (repo.full_name.includes("/.github")) continue;
     outputArray.push(repo.full_name);
   }
 

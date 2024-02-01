@@ -13,6 +13,10 @@ import ForgotPassword from "./pages/Auth/ForgotPassword.jsx";
 // . Environments
 import MyEnvironment from "./pages/Environments/My.jsx";
 import EnvironmentDetail from "./pages/Environments/Detail.jsx";
+import NewEnvironment from "./pages/Environments/New.jsx";
+
+// . Environments -> Issues
+import IssueDetail from "./pages/Environments/Issues/Detail.jsx";
 
 // ! Criando rotas
 import {
@@ -32,6 +36,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <Route path="/forgot-password" element={<ForgotPassword />}></Route>
         <Route path="/my-environments" element={<MyEnvironment />}></Route>
         <Route path="/environment/:id" element={<EnvironmentDetail />}></Route>
+        <Route
+          path="/environment/:enviroment-id/issue/:id"
+          element={<IssueDetail />}
+        ></Route>
+        <Route path="/new-environment" element={<NewEnvironment />}></Route>
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

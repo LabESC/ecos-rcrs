@@ -10,13 +10,17 @@ import {
   CheckCircleIcon,
 } from "@primer/octicons-react";
 import { useNavigate } from "react-router-dom";
+import {
+  setEnvironmentNameToLocalStorage,
+  requestMiningData,
+} from "../../api/Environments.jsx";
 
 export function EnvironmentCard(props) {
   // ! Instanciando o useNavigate para redirecionar o usuário pra alguma página
   const redirect = useNavigate();
 
   // ! Extraindo variáveis do props
-  const { environment } = props;
+  const { status, id, name, action } = props;
 
   const getColor = (status) => {
     switch (status) {
@@ -164,10 +168,6 @@ export function EnvironmentCard(props) {
     }
   };
 
-  const goToEnvironmentDetail = () => {
-    redirect(`/environment/${environment.id}`);
-  };
-
   return (
     <Box
       className="EnvironmentCard"
@@ -178,23 +178,18 @@ export function EnvironmentCard(props) {
         padding: "0.8em",
         width: 230,
         height: 125,
-        background: getColor(environment.status),
+        background: getColor(status),
         flexDirection: "column",
         justifyContent: "space-between",
       }}
-      // !! IMPLEMENTAR:
-      onClick={() => {
-        goToEnvironmentDetail();
-      }}
+      onClick={action}
     >
       <Box>
         <OrganizationIcon size={28} />
-        <Typography style={{ fontWeight: "500" }}>
-          {environment.name}
-        </Typography>
+        <Typography style={{ fontWeight: "500" }}>{name}</Typography>
       </Box>
       <Box>
-        <Typography> {getStatusMessage(environment.status)} </Typography>
+        <Typography> {getStatusMessage(status)} </Typography>
       </Box>
     </Box>
   );

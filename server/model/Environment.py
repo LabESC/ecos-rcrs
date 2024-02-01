@@ -41,6 +41,7 @@ class Environment(Base):
             "waiting_rcr_priority",
             "rcr_priority_done",
             "done",
+            "cancelled",
             name="environment_status",
         ),
         nullable=False,

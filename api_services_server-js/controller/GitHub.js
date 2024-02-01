@@ -46,7 +46,6 @@ router.post("/api/github/mining/repos", async (req, res) => {
 // ! Rota de obtencao de repositorios a partir de uma organizacao
 router.get("/api/github/organization/:org/repos", async (req, res) => {
   // !! LOG
-
   console.log(`${req.method} ${req.url} - ${new Date().toLocaleString()}`);
 
   // * Obtendo dados da requisição
@@ -68,9 +67,52 @@ router.get("/api/github/organization/:org/repos", async (req, res) => {
     return res.status(400).json({ error: "Invalid organization." });
   }
 
-  // * Se houver repositórios, retorne-os
+  // * Se a pesquisa de repositórios for feita, retorne-os
+  if (repos.errors.length > 0) {
+    console.log(repos.errors[0].error);
+    if (repos.errors[0].error === "Organization not found.") {
+      return res.status(404).json(repos.errors[0].error);
+    }
+    return res.status(400).json(repos.errors[0].error);
+  }
 
-  return res.status(200).json({ repos: repos });
+  return res.status(200).json(repos.repos);
+});
+
+// ! Rota de verificar se um repositório existe
+router.get("/api/github/repo/:organization/:repo/exists", async (req, res) => {
+  // !! LOG
+  console.log(`${req.method} ${req.url} - ${new Date().toLocaleString()}`);
+
+  // * Obtendo dados da requisição
+  const { params } = req;
+
+  // * Obtendo repositório
+  let organization = null;
+  let repo = null;
+  try {
+    organization = params.organization;
+    repo = params.repo;
+  } catch (e) {
+    return res.status(400).json({ error: "Invalid repository." });
+  }
+
+  // * Verificando se o repositório existe
+  const exists = await gitHubRequest.doesRepoExist(organization + "/" + repo);
+
+  // * Se ocorrer um erro não identificado, retorne erro
+  try {
+    if (exists.error) {
+      return res.status(400).json(exists.error);
+    }
+  } catch (e) {}
+
+  // * Se for falso, retorne erro
+  if (!exists) {
+    return res.status(200).json(false);
+  }
+
+  return res.status(200).json(true);
 });
 
 module.exports = router;

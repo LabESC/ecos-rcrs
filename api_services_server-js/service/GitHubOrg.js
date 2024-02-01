@@ -17,7 +17,6 @@ async function getOrganizationRepos(organization) {
 
   // * Enquanto houver issues, buscar
   while (true) {
-    console.log(page);
     // * Buscando issues
     const response = await gitHubRepository.getOrganizationRepos(
       organization,

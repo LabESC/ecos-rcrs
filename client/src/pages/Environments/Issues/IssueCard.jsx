@@ -4,14 +4,14 @@ import { setIssueDataToLocalStorage } from "../../../api/Environments";
 
 export function IssueCard(props) {
   // ! Instanciando o useNavigate para redirecionar o usuário pra alguma página
-  const redirect = useNavigate();
+  //const redirect = useNavigate();
 
   // ! Extraindo variáveis do props
   const { issue, onClick } = props;
 
   return (
     <Badge
-      badgeContent={"issue.relatedTo.length"}
+      badgeContent={issue.relatedTo.length}
       color="info"
       showZero
       key={`badge-${issue.id}`}

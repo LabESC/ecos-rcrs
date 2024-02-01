@@ -197,6 +197,9 @@ async def create(environment: EnvironmentRequest, request: Request):
             status_code=401,
         )
 
+    # ! Criando ambiente
+    environment = await environmentService.create(environment)
+
     # ! Validando retorno
     if not environment:  # * Se não houver usuário (None)
         return JSONResponse(

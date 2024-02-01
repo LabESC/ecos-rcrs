@@ -220,7 +220,7 @@ class Top2VecImpl:
                     "repo": df["repo"][doc_id],
                     "issueId": int(df["issueId"][doc_id]),
                     "tags": df["tags"][doc_id],
-                    "embedding": gera_embedding(doc),
+                    # "embedding": gera_embedding(doc),
                     "relatedTo": [],
                 }
                 for doc, score, doc_id in zip(documents, document_scores, document_ids)

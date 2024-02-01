@@ -1,5 +1,6 @@
 const getRepos = require("./GitHub");
 const getOrganizationRepositories = require("./GitHubOrg");
+const doesRepoExist = require("./GitHubRepo");
 const { updateEnvironmentMiningData } = require("./DBRequests");
 const { formatIssuesToArray } = require("./Words");
 
@@ -135,6 +136,18 @@ class GitHubRequest {
     const result = await getOrganizationRepositories(organization);
 
     return result;
+  }
+
+  /**
+   * Busca se um repositorio existe.
+   * @param {Array} repo - Array com 2 elementos: organização e repositório.
+   * @return {boolean} Retorna true se o repositório for encontrado e false se não.
+   **/
+  async doesRepoExist(repo) {
+    // * Buscando se existe e retornando
+    const response = await doesRepoExist(repo);
+
+    return response;
   }
 }
 
