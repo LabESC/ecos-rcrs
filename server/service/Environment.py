@@ -88,17 +88,17 @@ class Environment:
 
         # * Enviando e-mail informando da mineração
         try:
-            subject = f"ECOS_IC: Criação do ambiente {ambiente.name}"
-            text = f"Olá, {user.name}! Sseu ambiente foi criado com sucesso e a mineração logo será iniciada!\n"
-            text += f"<strong>Nome do ambiente</strong>: {ambiente.name}\n"
-            text += f"<strong>Tipo de mineração</strong>: {ambiente.mining_type}\n"
-            text += f"<strong>Repositórios</strong>: {ambiente.repos}\n"
+            subject = f"SECO - RCR: {ambiente.name} created"
+            text = f"<br/>{user.name}, your environment was created and the mining starts soon!\n"
+            text += f"<br/><strong>Environment name</strong>: {ambiente.name}\n"
+            text += f"<br/><strong>Mining type</strong>: {ambiente.mining_type}\n"
+            text += f"<br/><strong>Repositories</strong>: {ambiente.repos}\n"
             text += (
-                f"<strong>Organização</strong>: {ambiente.organization_name}\n"
+                f"<br/><strong>Organization</strong>: {ambiente.organization_name}\n"
                 if ambiente.mining_type == "organization"
                 else ""
             )
-            text += f"<strong>Detalhes</strong>: {ambiente.details}\n"
+            text += f"<br/><strong>Details</strong>: {ambiente.details}\n"
 
             await APIRequests.send_email(user.email, subject, text)
         except Exception as e:
@@ -141,9 +141,11 @@ class Environment:
                 )
             )
 
-            subject = f"ECOS_IC: Mineração do ambiente {user_environment[1]}"
-            text = f"Olá, a mineração do seu ambiente {user_environment[1]} foi concluída!\n"
-            text += f"É necessário que você acesse o sistema para solicitar a geração de tópicos do ambiente.\n"
+            subject = f"SECO - RCR: {user_environment[1]} mining done"
+            text = (
+                f"<br/>The mining for your environment {user_environment[1]} is done!\n"
+            )
+            text += f"<br/>You need to log on the system to request the topics generation.\n"
 
             await APIRequests.send_email(user_environment[0], subject, text)
         except Exception as e:
@@ -171,9 +173,9 @@ class Environment:
                 )
             )
 
-            subject = f"ECOS_IC: Tópicos do ambiente {user_environment[1]}"
-            text = f"Olá, a geração de tópicos do seu ambiente {user_environment[1]} foi concluída!\n"
-            text += f"Você já pode visualizar os tópicos e as issues associadas no sistema.\n"
+            subject = f"SECO - RCR: {user_environment[1]} topics generation done"
+            text = f"<br/>The topics generation for the environment {user_environment[1]} is done!\n"
+            text += f"<br/>You can already log on the system to read them.\n"
 
             await APIRequests.send_email(user_environment[0], subject, text)
         except Exception as e:

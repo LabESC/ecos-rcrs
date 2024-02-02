@@ -181,8 +181,7 @@ class GitHub {
       else return { error: "It was not possible" };
     }
 
-    if (response.status === 200) return true;
-    return false;
+    return response.status === 200;
   }
 }
 

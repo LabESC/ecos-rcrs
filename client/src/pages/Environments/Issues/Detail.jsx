@@ -208,7 +208,7 @@ const IssueDetail = () => {
           <Box className="SubContainerMainIssueDetail1">
             <Typography>
               <strong> Topic: </strong>
-              {issueDetailed.id}
+              {issueDetailed.topicNum}
             </Typography>
             <Typography>
               <strong> Issue: </strong>
@@ -216,7 +216,11 @@ const IssueDetail = () => {
             </Typography>
             <Typography>
               <strong> Repository: </strong>
-              {`#${issueDetailed.repo}`}
+              {issueDetailed.repo}
+            </Typography>
+            <Typography>
+              <strong> Topic Score: </strong>
+              {issueDetailed.score}
             </Typography>
           </Box>
           <Box className="SubContainerMainIssueDetail2">

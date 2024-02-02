@@ -69,13 +69,13 @@ class User:
 
         # * Enviando e-mail de confirmação
         try:
-            text = f"Olá {user.name}, seu cadastro foi criado com sucesso!\n"
-            text += f"Nome: {user.name}\n"
-            text += f"E-mail: {user.email}\n"
-            text += f"Para confirmar seu cadastro, acesse o link: {Credentials.get_client_url_base}/activate?id={user_id}"
+            text = f"{user.name}, your account was created with success!\n"
+            text += f"<br/>Name: {user.name}\n"
+            text += f"<br/>E-mail: {user.email}\n"
+            text += f"<br/>To activate your account, visit: {Credentials.get_client_url_base}/activate?id={user_id}"
 
             await APIRequests.send_email(
-                user.email, "ECOS_IC: Criação de cadastro", text
+                user.email, "SECO - RCR: Account created", text
             )
         except Exception as e:
             print(e)
@@ -118,12 +118,12 @@ class User:
 
         # * Envie e-mail sobre alterações
         try:
-            text = f"Olá {user.name}, seus dados foram atualizados com sucesso!\n"
-            text += f"Nome: {user.name}\n"
-            text += f"E-mail: {user.email}"
+            text = f"{user.name}, your personal data was updated with success!\n"
+            text += f"<br/>Name: {user.name}\n"
+            text += f"<br/>E-mail: {user.email}"
 
             await APIRequests.send_email(
-                user.email, "ECOS_IC: Atualização de dados", text
+                user.email, "SECO - RCR: Personal data updated", text
             )
         except Exception as e:
             print(e)
@@ -197,9 +197,11 @@ class User:
         # * Enviando e-mail com o token
         try:
             text = f"{user.name}, here's the token for your password reset:\n"
-            text += f"<h4> <strong> {user.token} </strong> </h4>\n"
+            text += f"<br/><h4> <strong> {user.token} </strong> </h4>\n"
 
-            await APIRequests.send_email(user.email, "SECO_RCR: Token", text)
+            await APIRequests.send_email(
+                user.email, "SECO - RCR: Password reset token", text
+            )
         except Exception as e:
             print(e)
             return -1

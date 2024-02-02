@@ -35,7 +35,9 @@ export function IssueCardForDetailedIssue(props) {
           fontSize: 10,
         }}
       >
-        <strong style={{ marginRight: "4px" }}> Score: </strong>
+        <strong style={{ marginRight: "4px" }}>
+          Related to main issue score:
+        </strong>
         {issue.relatedToScore}
       </Typography>
       <Box className="IssueCardBody">

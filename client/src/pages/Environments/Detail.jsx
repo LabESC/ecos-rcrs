@@ -169,10 +169,16 @@ const EnvironmentDetail = () => {
         >
           <Typography
             variant="h5"
-            style={{ textDecoration: "underline", marginLeft: "1em" }}
+            style={{
+              textDecoration: "underline",
+              marginLeft: "1em",
+              fontWeight: "bold",
+            }}
           >
             {environmentName}
           </Typography>
+
+          <Typography variant="h6"> {"Topics: " + topics.length}</Typography>
           <SuccessButton
             icon={<RepoIcon size={18} />}
             message={"List RCR"}

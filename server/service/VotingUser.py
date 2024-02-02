@@ -75,9 +75,9 @@ class VotingUser:
 
         # * Envie e-mail sobre a geração do codigo
         try:
-            text = f"Olá, seu código de acesso para confirmar o voto é:\n <strong> {access_code} </strong>"
+            text = f"The access code for your vote confirm is:<br/>\n <strong> {access_code} </strong>"
 
-            await APIRequests.send_email(email, "ECOS_IC: Código de acesso", text)
+            await APIRequests.send_email(email, "SECO - RCR: Access Code", text)
         except Exception as e:
             return -2
 

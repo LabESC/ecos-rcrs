@@ -124,7 +124,7 @@ const MyEnvironment = () => {
     setHasEnvironmentError(true);
   };
 
-  const cardClick = (environmentId, status) => {
+  const cardClick = (environmentId, name, status) => {
     switch (status) {
       case "mining_error":
         setAction({
@@ -303,7 +303,7 @@ const MyEnvironment = () => {
               name={env.name}
               status={env.status}
               action={() => {
-                cardClick(env.id, env.status);
+                cardClick(env.id, env.name, env.status);
               }}
               key={`ENV_${env.id}`}
             />

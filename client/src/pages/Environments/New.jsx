@@ -64,6 +64,12 @@ const NewEnvironment = () => {
   const [errorMessage, setErrorMessage] = useState("");
 
   const closeErrorDialog = () => {
+    if (errorMessage.startsWith("201:")) {
+      setHasCreatedError(false);
+      redirect("/my-environments");
+      return;
+    }
+
     setHasCreatedError(false);
   };
 
@@ -81,6 +87,7 @@ const NewEnvironment = () => {
   const [loggedUser, setLoggedUser] = useState({ userId: "", userToken: "" });
   const [miningType, setMiningType] = useState("organization");
   const [repositories, setRepositories] = useState([]);
+  const [orgRepositories, setOrgRepositories] = useState([]);
   const [isLoadingSearch, setIsLoadingSearch] = useState(false);
   const [hasSearchError, setHasSearchError] = useState(false);
   const [searchError, setSearchError] = useState({ title: "", message: "" });
@@ -114,7 +121,7 @@ const NewEnvironment = () => {
     }
 
     if (res.length > 0) {
-      setRepositories(res);
+      setOrgRepositories(res);
       setIsLoadingSearch(false);
     }
   };
@@ -175,7 +182,16 @@ const NewEnvironment = () => {
       return;
     }
 
-    if (repositories.length === 0) {
+    if (miningType === "organization" && orgRepositories.length === 0) {
+      setSearchError({
+        title: "Organization",
+        message: "Organization has no repositories",
+      });
+      setHasSearchError(true);
+      return;
+    }
+
+    if (miningType === "repos" && repositories.length === 0) {
       setSearchError({
         title: "Repositories",
         message: "At least one repository is required",
@@ -190,7 +206,7 @@ const NewEnvironment = () => {
       userToken,
       name,
       details,
-      repositories,
+      miningType === "repos" ? repositories : orgRepositories,
       miningType,
       organization
     );
@@ -205,11 +221,6 @@ const NewEnvironment = () => {
         201
       );
     }
-  };
-
-  const closeAndRedirectToMyEnvironments = () => {
-    setHasCreatedError(false);
-    redirect("/my-environments");
   };
 
   // . Declarando elementos da página
@@ -303,7 +314,9 @@ const NewEnvironment = () => {
                     miningType === "organization" ? "visible" : "collapse",
                 }}
               >
-                <Typography className="TextFieldLabel">Organization</Typography>
+                <Typography className="TextFieldLabel">
+                  GitHub Organization
+                </Typography>
                 <Box
                   style={{
                     display: "flex",
@@ -315,7 +328,7 @@ const NewEnvironment = () => {
                     id="txt-organization"
                     fullWidth
                     variant="outlined"
-                    placeholder="Insert the disered organization"
+                    placeholder="Insert the disered GitHub organization"
                   />
                   <Button
                     onClick={getOrganizationRepositories}
@@ -341,7 +354,9 @@ const NewEnvironment = () => {
                   visibility: miningType === "repos" ? "visible" : "collapse",
                 }}
               >
-                <Typography className="TextFieldLabel">Repository</Typography>
+                <Typography className="TextFieldLabel">
+                  GitHub Repository
+                </Typography>
                 <Box
                   style={{
                     display: "flex",
@@ -353,7 +368,7 @@ const NewEnvironment = () => {
                     id="txt-add-repository"
                     fullWidth
                     variant="outlined"
-                    placeholder="Insert the disered repository"
+                    placeholder="Insert the disered GitHub repository"
                   />
                   <Button
                     onClick={checkRepoAvailable}
@@ -377,7 +392,7 @@ const NewEnvironment = () => {
                     visibility: repositories.length > 0 ? "visible" : "hidden",
                   }}
                 >
-                  Selected repositories
+                  Selected GitHub repositories
                 </Typography>
                 <Box
                   style={{
@@ -389,18 +404,31 @@ const NewEnvironment = () => {
                     width: "inherit",
                   }}
                 >
-                  {repositories.map((repo, index) => {
-                    return (
-                      <Chip
-                        label={repo}
-                        key={`CHP_${index}`}
-                        style={{ margin: "0.25em" }}
-                        onDelete={() => {
-                          removeRepositoryFromRepositories(repo);
-                        }}
-                      />
-                    );
-                  })}
+                  {miningType === "repos"
+                    ? repositories.map((repo, index) => {
+                        return (
+                          <Chip
+                            label={repo}
+                            key={`CHP_${index}`}
+                            style={{ margin: "0.25em" }}
+                            onDelete={() => {
+                              removeRepositoryFromRepositories(repo);
+                            }}
+                          />
+                        );
+                      })
+                    : orgRepositories.map((repo, index) => {
+                        return (
+                          <Chip
+                            label={repo}
+                            key={`CHP_${index}`}
+                            style={{ margin: "0.25em" }}
+                            onDelete={() => {
+                              removeRepositoryFromRepositories(repo);
+                            }}
+                          />
+                        );
+                      })}
                 </Box>
               </Box>
             </Box>
