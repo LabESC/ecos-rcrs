@@ -16,7 +16,7 @@ import { useState, useEffect } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import { PopUpError } from "../../../components/PopUp.jsx";
 import { useNavigate } from "react-router-dom";
-import { DiffAddedIcon } from "@primer/octicons-react";
+import { DiffAddedIcon, BookIcon } from "@primer/octicons-react";
 import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
 
 // ! Importações de componentes criados
@@ -25,6 +25,7 @@ import SideBar from "../../../components/SideBar.jsx";
 import { IssueCardForDetailedIssue } from "./IssueCardForDetailedIssue.jsx";
 import { SuccessButton } from "../../../components/Buttons.jsx";
 import { IssueModalDetail } from "./IssueModalDetail.jsx";
+import { RequestRCRPopUp } from "../RCR/RequestPopUp.jsx";
 
 // ! Importações de códigos
 import { verifyLoggedUser } from "../../../api/Auth.jsx";
@@ -32,6 +33,7 @@ import {
   getEnvironmentIdAndIssueIdFromUrl,
   getEnvironmentNameFromLocalStorage,
   getIssueDataFromLocalStorage,
+  getPriorityRCRsByEnvironmentIdAndIssueId,
 } from "../../../api/Environments.jsx";
 
 const IssueDetail = () => {
@@ -44,7 +46,7 @@ const IssueDetail = () => {
     document.body.style.background = "white";
 
     // . Função para obter a issue selecionada junto ao seu topico e as issues relacionadas a ela
-    const getDetails = async () => {
+    const getDetails = async (loggedUser) => {
       // . Obtendo o id do ambiente
       const data = getEnvironmentIdAndIssueIdFromUrl();
 
@@ -86,6 +88,28 @@ const IssueDetail = () => {
         return;
       }
 
+      //. Obtendo as RCRs de prioridade
+      const priorityRCRs = await getPriorityRCRsByEnvironmentIdAndIssueId(
+        loggedUser.userId,
+        loggedUser.userToken,
+        data.environmentId,
+        data.issueId
+      );
+
+      // . Verificando se ocorreu algum erro
+      if (priorityRCRs.error) {
+        setIsLoading(false);
+        activeErrorDialog(
+          `${priorityRCRs.error.code}: Getting rcrs associated with issue`,
+          priorityRCRs.error.message,
+          priorityRCRs.status
+        );
+        return;
+      }
+      console.log(priorityRCRs);
+      // . Armazenando as RCRs associadas
+      setRcrAssociated(priorityRCRs);
+
       // . Armazenando os ambientes
       const { issueData, relatedToIssues, topic } = response;
       setRelatedToIssues(relatedToIssues);
@@ -105,7 +129,7 @@ const IssueDetail = () => {
       }
 
       // . Obtendo a issue selecionada e o topico dela
-      await getDetails();
+      await getDetails(verifyUser);
     };
 
     // . Executando a função
@@ -135,6 +159,7 @@ const IssueDetail = () => {
   // ! Funções para manipulação de dados na página
   const [environmentName, setEnvironmentName] = useState(""); // . Armazena o nome do ambiente [String]
   const [topicData, setTopicData] = useState({ id: null, name: "" }); // . Armazena os dados do topico [Object]
+  const [rcrAssociated, setRcrAssociated] = useState([]); // . Armazena as RCRs associadas [Array]
   const [environmentId, setEnvironmentId] = useState(""); // . Armazena o id do ambiente [UUID]
   const [relatedToIssues, setRelatedToIssues] = useState([
     { id: null, repo: "", body: "", tags: "", score: "", relatedToScore: "" },
@@ -172,6 +197,17 @@ const IssueDetail = () => {
     setIssueModalOpen(false);
   };
 
+  // ! Variáveis e funções para manipulação do Dialog de RCR
+  const [rcrModalOpen, setRcrModalOpen] = useState(false);
+
+  const openRcrModal = () => {
+    setRcrModalOpen(true);
+  };
+
+  const closeRcrModal = () => {
+    setRcrModalOpen(false);
+  };
+
   // . Declarando elementos da página
   const pageContent = () => {
     return (
@@ -193,15 +229,32 @@ const IssueDetail = () => {
               {environmentName}
             </Typography>
           </Box>
-          <SuccessButton
-            icon={<DiffAddedIcon size={18} />}
-            message={"Register RCR"}
-            width={"200px"}
-            height={"30px"}
-            uppercase={false}
-            marginRight={"2em"}
-            backgroundColor={"#9fff64"}
-          />
+          <Box style={{ display: "flex", flexDirection: "row" }}>
+            <SuccessButton
+              icon={<BookIcon size={18} />}
+              message={"List associated RCRs"}
+              width={"200px"}
+              height={"30px"}
+              uppercase={false}
+              marginRight={"2em"}
+              backgroundColor={"#b3def5"}
+              visibility={rcrAssociated.length > 0 ? "visible" : "hidden"}
+              action={() => {
+                console.log("");
+              }}
+              // !! CRIAR MODAL PARA VERIFICAR RCRs JA ASSOCIADAS
+            />
+            <SuccessButton
+              icon={<DiffAddedIcon size={18} />}
+              message={"Register RCR"}
+              width={"200px"}
+              height={"30px"}
+              uppercase={false}
+              marginRight={"2em"}
+              backgroundColor={"#9fff64"}
+              action={openRcrModal}
+            />
+          </Box>
         </Box>
         <Typography variant="h6">{topicData.name}</Typography>
         <Box className="ContainerMainIssueDetail">
@@ -233,7 +286,7 @@ const IssueDetail = () => {
           <Box className="ContainerEnvironments">
             {relatedToIssues.map((issue, index) => (
               <IssueCardForDetailedIssue
-                key={index}
+                key={`issue-${issue.id}`}
                 issue={issue}
                 environmentId={environmentId}
                 onClick={() => {
@@ -265,14 +318,19 @@ const IssueDetail = () => {
         title={errorCode}
         message={errorMessage}
       />
-      {
-        <IssueModalDetail
-          open={issueModalOpen}
-          close={closeIssueModal}
-          closeMessage={"Back"}
-          issue={issueModal}
-        />
-      }
+      <IssueModalDetail
+        open={issueModalOpen}
+        close={closeIssueModal}
+        closeMessage={"Back"}
+        issue={issueModal}
+      />
+      <RequestRCRPopUp
+        open={rcrModalOpen}
+        close={closeRcrModal}
+        relatedTo={relatedToIssues.concat(issueDetailed)}
+        environmentId={environmentId}
+        topicNum={issueDetailed.topicNum}
+      />
     </ThemeProvider>
   );
 };

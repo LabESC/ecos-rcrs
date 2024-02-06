@@ -12,7 +12,7 @@ async function updateEnvironmentStatus(environmentId, status) {
 
   // * Fazendo requisição
   try {
-    await axios.put(url, {
+    await axios.put(url, null, {
       headers: {
         "service-login": USER_LOGIN,
         "service-pwd": USER_PWD,

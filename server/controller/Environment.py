@@ -9,6 +9,7 @@ from schemas.Environment import (
     EnvironmentUpdateMiningDataRequest,
     EnvironmentUpdateTopicDataRequest,
     EnvironmentUpdatePriorityDataRequest,
+    EnvironmentUpdatePriorityDataStatusRequest,
     EnvironmentUpdateFinalDataRequest,
     EnvironmentVotingUsers,
 )
@@ -271,7 +272,7 @@ async def update_status(id: str, status: str, request: Request):
         grant_access = True
 
     # ! Validando credenciais de usuário
-    if await authValidator.validate_user(request):
+    if grant_access is False and await authValidator.validate_user(request):
         grant_access = True
 
     # ! Se não teve acesso por nenhum dos dois, retorne erro
@@ -462,6 +463,124 @@ async def update_priority_data(
 
     # ! Retornando ambiente
     return environment
+
+
+@router_environment.patch("/{id}/prioritydata")
+async def update_priority_data_with_status(
+    id: str, body: EnvironmentUpdatePriorityDataStatusRequest, request: Request
+):
+    # . Variável de controle de acesso
+    grant_access = False
+
+    # ! Validando credenciais de serviço
+    if authValidator.validate_service(request):
+        grant_access = True
+
+    # ! Validando credenciais de usuário
+    if await authValidator.validate_user(request):
+        grant_access = True
+
+    # ! Se não teve acesso por nenhum dos dois, retorne erro
+    if not grant_access:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Service or user authentication failed!",
+                )
+            ],
+            status_code=401,
+        )
+
+    # ! Atualizando status do ambiente
+    environment = await environmentService.update_priority_with_status(
+        id, body.closing_date, body.status
+    )
+
+    # ! Validando retorno
+    if not environment:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Environment not updated!",
+                )
+            ],
+            status_code=404,
+        )
+
+    if environment == -1:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    msg_500["en-US"],
+                )
+            ],
+            status_code=500,
+        )
+
+    # ! Retornando ambiente
+    return environment
+
+
+@router_environment.get("/{id}/prioritydata/{issue_id}")
+async def get_rcr_by_environment_id_and_issue_id(
+    id: str, issue_id: int, request: Request
+):
+    # . Variável de controle de acesso
+    grant_access = False
+
+    # ! Validando credenciais de serviço
+    if authValidator.validate_service(request):
+        grant_access = True
+
+    # ! Validando credenciais de usuário
+    if await authValidator.validate_user(request):
+        grant_access = True
+
+    # ! Se não teve acesso por nenhum dos dois, retorne erro
+    if not grant_access:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Service or user authentication failed!",
+                )
+            ],
+            status_code=401,
+        )
+
+    # ! Atualizando status do ambiente
+    rcrs = await environmentService.get_priority_rcrs_by_environment_id_and_issue_id(
+        id, issue_id
+    )
+
+    # ! Validando retorno
+    if not rcrs:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    "Environment not updated!",
+                )
+            ],
+            status_code=404,
+        )
+
+    if rcrs == -1:
+        return JSONResponse(
+            [
+                error(
+                    entity_name,
+                    msg_500["en-US"],
+                )
+            ],
+            status_code=500,
+        )
+
+    # ! Retornando ambiente
+    return rcrs
 
 
 @router_environment.post("/{id}/finaldata")

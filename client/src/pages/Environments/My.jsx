@@ -29,6 +29,7 @@ import {
   getMyEnvironments,
   setEnvironmentNameToLocalStorage,
   requestMiningData,
+  requestTopicData,
 } from "../../api/Environments.jsx";
 
 const MyEnvironment = () => {
@@ -124,7 +125,7 @@ const MyEnvironment = () => {
     setHasEnvironmentError(true);
   };
 
-  const cardClick = (environmentId, name, status) => {
+  const cardClick = async (environmentId, name, status) => {
     switch (status) {
       case "mining_error":
         setAction({
@@ -223,6 +224,11 @@ const MyEnvironment = () => {
       case "mining_done":
         setHasEnvironmentError(false);
         // !! IMPLEMENTAR... (AGUARDANDO FUNÇÃO/ENDPOINT) await...
+        await requestTopicData(
+          loggedUser.userId,
+          loggedUser.userToken,
+          action.environmentId
+        );
         setRequest({
           title: "Topics generation requested",
           message: "The generation of topics has been requested.",

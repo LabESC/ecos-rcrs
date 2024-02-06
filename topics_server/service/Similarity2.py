@@ -16,7 +16,6 @@ def find_related_dicts(target_dict, array, model):
 
     for d in array:
         if d["id"] != target_dict["id"]:
-            print(d["id"])
             similarity = compute_similarity(target_dict, d, model)
             if similarity > 0.6:
                 related_dicts.append({"id": d["id"], "score": similarity})

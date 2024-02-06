@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 from repository.Environment import Environment as EnvironmentRepository
 from model.Environment import Environment as EnvironmentModel
 
@@ -187,13 +188,59 @@ class Environment:
     @staticmethod
     async def update_priority(
         environment_id: str,
-        priority_data: list[dict],
-        status: str = "rcr_priority_done",
+        priority_data: dict,
     ):
         try:
             db = next(conn())
+            existing_priority_data = EnvironmentRepository.get_priority_data(
+                db, environment_id
+            )
+            if existing_priority_data in [False, None]:
+                return existing_priority_data
+
+            if existing_priority_data[0] in [False, None]:
+                existing_priority_data = [
+                    {"rcrs": [], "status": "elaborating", "closing_date": None}
+                ]
+
+            existing_priority_data = existing_priority_data[0]
+
+            # . Adicionando nova rcr
+            existing_priority_data["rcrs"].append(priority_data)
+
+            # . Atualizando prioridades
             EnvironmentRepository.update_priority(
-                db, environment_id, priority_data, status
+                db, environment_id, existing_priority_data
+            )
+        except Exception as e:
+            print(e)
+            return -1
+
+        return True
+
+    # ! Altera os dados de prioridades junto ao status
+    @staticmethod
+    async def update_priority_with_status(
+        environment_id: str,
+        closing_date: datetime,
+        status: str,
+    ):
+        try:
+            db = next(conn())
+            priority_data = EnvironmentRepository.get_priority_data(db, environment_id)
+
+            if priority_data in [False, None]:
+                return priority_data
+
+            priority_data = priority_data[0]
+
+            # . Adicionando data de fechamento e status
+            priority_data["status"] = status
+            priority_data["closing_date"] = closing_date
+
+            # . Atualizando prioridades
+            EnvironmentRepository.up(
+                db, environment_id, priority_data, "waiting_rcr_voting"
             )
         except Exception as e:
             print(e)
@@ -369,3 +416,36 @@ class Environment:
         except Exception as e:
             print(e)
             return False
+
+    # ! Verificando se a issue esta contida em alguma RCR prioritaria
+    @staticmethod
+    async def get_priority_rcrs_by_environment_id_and_issue_id(
+        environment_id: str, issue_id: str
+    ):
+        try:
+            db = next(conn())
+            existing_priority_data = EnvironmentRepository.get_priority_data(
+                db, environment_id
+            )
+
+            if existing_priority_data in [False, None]:
+                return existing_priority_data
+
+            if existing_priority_data[0] in [False, None]:
+                existing_priority_data = [
+                    {"rcrs": [], "status": "elaborating", "closing_date": None}
+                ]
+
+            existing_priority_data = existing_priority_data[0]
+
+            # . Verificando se a issue esta contida em alguma RCR prioritaria
+            rcr_founded = []
+
+            for rcr in existing_priority_data["rcrs"]:
+                if issue_id in rcr["relatedToIssues"]:
+                    rcr_founded.append(rcr)
+
+            return rcr_founded if len(rcr_founded) > 0 else False
+        except Exception as e:
+            print(e)
+            return -1

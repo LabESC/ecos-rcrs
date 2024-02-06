@@ -139,6 +139,7 @@ export const SuccessButton = (props) => {
     marginLeft,
     marginRight,
     backgroundColor,
+    visibility,
   } = props;
 
   return (
@@ -159,6 +160,7 @@ export const SuccessButton = (props) => {
         textTransform: uppercase ? "uppercase" : "none",
         marginLeft: marginLeft ? marginLeft : "auto",
         marginRight: marginRight ? marginRight : "auto",
+        visibility: visibility ? visibility : "visible",
       }}
       onClick={action}
     >

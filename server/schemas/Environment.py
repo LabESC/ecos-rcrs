@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional, Union
+from datetime import datetime
 
 
 """class EnvironmentDataBase(BaseModel):
@@ -26,8 +27,7 @@ class EnvironmentBase(BaseModel):
     final_rcr: Optional[list[dict]] = None
 
 
-class EnvironmentRequest(EnvironmentBase):
-    ...
+class EnvironmentRequest(EnvironmentBase): ...
 
 
 class EnvironmentResponse(BaseModel):
@@ -81,8 +81,12 @@ class EnvironmentUpdateTopicDataRequest(BaseModel):
 
 
 class EnvironmentUpdatePriorityDataRequest(BaseModel):
-    priority_data: Optional[list[dict]] = None
-    status: Optional[str] = None
+    priority_data: dict
+
+
+class EnvironmentUpdatePriorityDataStatusRequest(BaseModel):
+    closing_date: Optional[datetime] = None
+    status: str
 
 
 class EnvironmentUpdateFinalDataRequest(BaseModel):

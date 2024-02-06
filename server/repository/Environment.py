@@ -99,15 +99,32 @@ class Environment:
     # ! Alterando dados de prioridades
     @staticmethod
     def update_priority(
-        db: Session, environment_id: str, priority_data: list[dict], status: str = None
+        db: Session,
+        environment_id: str,
+        priority_data: list[dict],
+        status: str = None,
     ) -> EnvironmentModel:
-        db.query(EnvironmentModel).filter(EnvironmentModel.id == environment_id).update(
-            {
-                EnvironmentModel.priority_data: priority_data,
-                EnvironmentModel.last_updated: datetime.now(),
-                EnvironmentModel.status: status,
-            }
-        )
+        if status is None:
+            db.query(EnvironmentModel).filter(
+                EnvironmentModel.id == environment_id
+            ).update(
+                {
+                    EnvironmentModel.priority_data: priority_data,
+                    EnvironmentModel.last_updated: datetime.now(),
+                }
+            )
+
+        else:
+            db.query(EnvironmentModel).filter(
+                EnvironmentModel.id == environment_id
+            ).update(
+                {
+                    EnvironmentModel.priority_data: priority_data,
+                    EnvironmentModel.last_updated: datetime.now(),
+                    EnvironmentModel.status: status,
+                }
+            )
+
         db.commit()
         return True
 

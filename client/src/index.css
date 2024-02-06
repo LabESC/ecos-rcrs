@@ -121,7 +121,7 @@ body {
 }
 
 .LoginBtnSignIn:hover,
-.LoginBtnSignOut:hover {
+.LoginBtnSignUp:hover {
   background: #0067c7 !important;
 }
 
@@ -327,4 +327,21 @@ body {
 .GoBackIcon:hover {
   color: #0067c7;
   cursor: pointer;
+}
+
+.ContainerRCRModal {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  height: 100%;
+  justify-content: flex-start;
+  margin: 0.5em 0.3em;
+  background-color: #e5e5e5;
+  padding: 0;
+}
+
+.ContainerRCRModal > * {
+  margin-left: 1em;
 }

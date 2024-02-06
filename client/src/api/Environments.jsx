@@ -144,22 +144,7 @@ export const getTopicData = async (userId, userToken, environmentId) => {
 
   return result;
 };
-/* 
-export const getIssueDataFromLocalStorage = () => {
-  let topicData = localStorage.getItem("SECO_24_topic-data");
-  let issueData = localStorage.getItem("SECO_24_issue-data");
 
-  if (!topicData || !issueData) {
-    return null;
-  }
-
-  // . Parseando JSON string para JSON objeto
-  topicData = JSON.parse(topicData);
-  issueData = JSON.parse(issueData);
-
-  return { issue: issueData, topic: topicData };
-};
- */
 export const setIssueDataToLocalStorage = (issueData, topicData) => {
   if (!issueData || !topicData) {
     return;
@@ -249,6 +234,73 @@ export const requestMiningData = async (userId, userToken, environmentId) => {
     `${apiUrl}/request/mining`,
     { environment_id: environmentId },
     { headers: { "user-id": userId, "user-token": userToken } }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+
+  return result;
+};
+
+export const requestTopicData = async (userId, userToken, environmentId) => {
+  const result = await Axios.post(
+    `${apiUrl}/request/topics`,
+    { environment_id: environmentId },
+    { headers: { "user-id": userId, "user-token": userToken } }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+
+  return result;
+};
+
+export const registerRCR = async (userId, userToken, environmentId, rcr) => {
+  console.log("userId, userToken", userId, userToken);
+  const result = await Axios.post(
+    `${baseUrl}/environment/${environmentId}/prioritydata`,
+    { priority_data: rcr },
+    { headers: { "user-id": userId, "user-token": userToken } }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+
+  return result;
+};
+
+export const getPriorityRCRsByEnvironmentIdAndIssueId = async (
+  userId,
+  userToken,
+  environmentId,
+  issueId
+) => {
+  const result = await Axios.get(
+    `${baseUrl}/environment/${environmentId}/prioritydata/${issueId}`,
+    {
+      headers: { "user-id": userId, "user-token": userToken },
+    }
   )
     .then((res) => {
       return res.data;

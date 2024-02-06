@@ -11,6 +11,7 @@ const validation = require("../validations/Requests");
 const {
   getEnvironmentMiningData,
   getEnvironmentRepos,
+  updateEnvironmentStatus,
 } = require("../service/DBRequests");
 
 const {
@@ -49,6 +50,9 @@ router.post("/api/request/topics", async (req, res) => {
   if (!miningData) {
     return res.status(400).json({ error: "Invalid request." });
   }
+
+  // * Atualizando status de mineração no BD
+  await updateEnvironmentStatus(environment_id, "making_topics");
 
   res.status(200).json({ message: "Topics generation request sent." });
 
@@ -101,8 +105,10 @@ router.post("/api/request/mining", async (req, res) => {
     return res.status(400).json({ error: "Invalid request." });
   }
 
-  // * Solicitando a rota de mineração github
+  // * Atualizando status de mineração no BD
+  await updateEnvironmentStatus(environment_id, "mining");
 
+  // * Solicitando a rota de mineração github
   const baseURL = `${req.protocol}://${req.get("host")}/api`;
 
   res.status(200).json({ message: "Mining request sent1." });
