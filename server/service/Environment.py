@@ -205,6 +205,13 @@ class Environment:
 
             existing_priority_data = existing_priority_data[0]
 
+            # . Verificando se existe id em alguma rcr, se sim, atualiza
+            new_id = 1
+            for rcr in existing_priority_data["rcrs"]:
+                new_id = rcr["id"] + 1
+
+            priority_data["id"] = new_id
+
             # . Adicionando nova rcr
             existing_priority_data["rcrs"].append(priority_data)
 
@@ -443,9 +450,10 @@ class Environment:
 
             for rcr in existing_priority_data["rcrs"]:
                 if issue_id in rcr["relatedToIssues"]:
+                    del rcr["relatedToIssues"]
                     rcr_founded.append(rcr)
 
-            return rcr_founded if len(rcr_founded) > 0 else False
+            return rcr_founded if len(rcr_founded) > 0 else []
         except Exception as e:
             print(e)
             return -1

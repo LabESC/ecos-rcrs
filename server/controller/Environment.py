@@ -557,7 +557,7 @@ async def get_rcr_by_environment_id_and_issue_id(
     )
 
     # ! Validando retorno
-    if not rcrs:
+    if rcrs in [None, False]:
         return JSONResponse(
             [
                 error(

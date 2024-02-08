@@ -26,6 +26,7 @@ import { IssueCardForDetailedIssue } from "./IssueCardForDetailedIssue.jsx";
 import { SuccessButton } from "../../../components/Buttons.jsx";
 import { IssueModalDetail } from "./IssueModalDetail.jsx";
 import { RequestRCRPopUp } from "../RCR/RequestPopUp.jsx";
+import { ListAssociatedRCRsPopUp } from "../RCR/ListAssociatedRCRs.jsx";
 
 // ! Importações de códigos
 import { verifyLoggedUser } from "../../../api/Auth.jsx";
@@ -197,7 +198,7 @@ const IssueDetail = () => {
     setIssueModalOpen(false);
   };
 
-  // ! Variáveis e funções para manipulação do Dialog de RCR
+  // ! Variáveis e funções para manipulação do Dialog de Criacao de RCR
   const [rcrModalOpen, setRcrModalOpen] = useState(false);
 
   const openRcrModal = () => {
@@ -206,6 +207,17 @@ const IssueDetail = () => {
 
   const closeRcrModal = () => {
     setRcrModalOpen(false);
+  };
+
+  // ! Variáveis e funções para manipulação do Dialog de Lista de RCR
+  const [rcrListModalOpen, setRcrListModalOpen] = useState(false);
+
+  const openListRcrModal = () => {
+    setRcrListModalOpen(true);
+  };
+
+  const closeListRcrModal = () => {
+    setRcrListModalOpen(false);
   };
 
   // . Declarando elementos da página
@@ -239,10 +251,7 @@ const IssueDetail = () => {
               marginRight={"2em"}
               backgroundColor={"#b3def5"}
               visibility={rcrAssociated.length > 0 ? "visible" : "hidden"}
-              action={() => {
-                console.log("");
-              }}
-              // !! CRIAR MODAL PARA VERIFICAR RCRs JA ASSOCIADAS
+              action={openListRcrModal}
             />
             <SuccessButton
               icon={<DiffAddedIcon size={18} />}
@@ -330,6 +339,11 @@ const IssueDetail = () => {
         relatedTo={relatedToIssues.concat(issueDetailed)}
         environmentId={environmentId}
         topicNum={issueDetailed.topicNum}
+      />
+      <ListAssociatedRCRsPopUp
+        open={rcrListModalOpen}
+        close={closeListRcrModal}
+        rcrs={rcrAssociated}
       />
     </ThemeProvider>
   );
