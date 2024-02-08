@@ -315,3 +315,24 @@ export const getPriorityRCRsByEnvironmentIdAndIssueId = async (
 
   return result;
 };
+
+export const getPriorityRCRs = async (userId, userToken, environmentId) => {
+  const result = await Axios.get(
+    `${baseUrl}/environment/${environmentId}/prioritydata`,
+    {
+      headers: { "user-id": userId, "user-token": userToken },
+    }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+
+  return result;
+};

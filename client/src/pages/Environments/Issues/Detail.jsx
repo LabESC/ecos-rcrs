@@ -26,7 +26,7 @@ import { IssueCardForDetailedIssue } from "./IssueCardForDetailedIssue.jsx";
 import { SuccessButton } from "../../../components/Buttons.jsx";
 import { IssueModalDetail } from "./IssueModalDetail.jsx";
 import { RequestRCRPopUp } from "../RCR/RequestPopUp.jsx";
-import { ListAssociatedRCRsPopUp } from "../RCR/ListAssociatedRCRs.jsx";
+import { ListAssociatedRCRsPopUp } from "../RCR/ListAssociatedRCRsIssue.jsx";
 
 // ! Importações de códigos
 import { verifyLoggedUser } from "../../../api/Auth.jsx";

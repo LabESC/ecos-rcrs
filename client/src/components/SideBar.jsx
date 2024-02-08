@@ -1,5 +1,5 @@
 // Sidebar.js
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 // ! Componentes MUI + Estilização
@@ -23,15 +23,27 @@ import {
 } from "../components/Buttons.jsx";
 
 const Sidebar = (props) => {
-  // ! Instanciando o useNavigate para redirecionar o usuário pra alguma página
-  const redirect = useNavigate();
-
   const { pageContent } = props;
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const openWidth = 265; // Fixed width when the sidebar is open
   const closeWidth = 145; // Fixed width when the sidebar is closed
+  useEffect(() => {
+    const checkOpenSidebarLocalStorage = () => {
+      const openSidebar = localStorage.getItem("SECO_24_open-sidebar");
+      if (openSidebar === null) {
+        localStorage.setItem("SECO_24_open-sidebar", "1");
+      } else if (openSidebar === "1") {
+        setOpen(true);
+      } else {
+        setOpen(false);
+      }
+    };
+
+    checkOpenSidebarLocalStorage();
+  }, []);
 
   const handleToggle = () => {
+    localStorage.setItem("SECO_24_open-sidebar", open ? "0" : "1"); // . Salvando o estado novo do sidebar no localStorage
     setOpen(!open);
   };
 

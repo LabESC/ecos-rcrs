@@ -16,13 +16,14 @@ import { useState, useEffect } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import { PopUpError } from "../../components/PopUp.jsx";
 import { useNavigate } from "react-router-dom";
-import { DiffAddedIcon, RepoIcon } from "@primer/octicons-react";
+import { DiffAddedIcon, RepoIcon, PeopleIcon } from "@primer/octicons-react";
 
 // ! Importações de componentes criados
 import theme from "../../components/MuiTheme.jsx";
 import SideBar from "../../components/SideBar.jsx";
 import { IssueCard } from "./Issues/IssueCard.jsx";
 import { SuccessButton } from "../../components/Buttons.jsx";
+import { ListAssociatedRCRsEnvPopUp } from "./RCR/ListAssociatedRCRsEnvironment.jsx";
 
 // ! Importações de códigos
 import { verifyLoggedUser } from "../../api/Auth.jsx";
@@ -31,6 +32,7 @@ import {
   getEnvironmentIdFromUrl,
   getTopicData,
   getEnvironmentNameFromLocalStorage,
+  getPriorityRCRs,
 } from "../../api/Environments.jsx";
 
 const EnvironmentDetail = () => {
@@ -97,6 +99,28 @@ const EnvironmentDetail = () => {
 
       // . Setando o topico atual no localStorage
       setTopicDataToLocalStorage(topics[0]);
+
+      // . Obtendo rcrs prioritarias associadas
+      const priorityRCRs = await getPriorityRCRs(
+        userId,
+        userToken,
+        environmentId
+      );
+
+      if (priorityRCRs.error) {
+        setIsLoading(false);
+        activeErrorDialog(
+          `${priorityRCRs.error.code}: Getting priority RCRs`,
+          priorityRCRs.error.message,
+          priorityRCRs.status
+        );
+        return;
+      }
+
+      // . Setando as rcrs prioritarias
+      setPriorityRCRs(priorityRCRs.rcrs);
+
+      // . Finalizando o carregamento
       setIsLoading(false);
     };
 
@@ -145,6 +169,7 @@ const EnvironmentDetail = () => {
     { id: null, issues: "", name: "", topic: "" },
   ]); // . Armazena os ambientes do usuário
   const [actualTopic, setActualTopic] = useState(0); // . Armazena o ambiente atual
+  const [priorityRCRs, setPriorityRCRs] = useState([]); // . Armazena as RCRs prioritarias [Array
 
   // . Função para mudar o topico atual (SELECT)
   const changeTopic = (event) => {
@@ -155,6 +180,18 @@ const EnvironmentDetail = () => {
   // . Função para ir a pagina da issue
   const goToissueDetail = (issue) => {
     redirect(`/environment/${environmentId}/issue/${issue.id}`);
+  };
+
+  // ! Variáveis e funções para manipulação do Dialog de Lista de RCR
+  const [priorityRCRListModalOpen, setPriorityRCRListModalOpen] =
+    useState(false);
+
+  const openPriorityListRcrModal = () => {
+    setPriorityRCRListModalOpen(true);
+  };
+
+  const closePriorityListRcrModal = () => {
+    setPriorityRCRListModalOpen(false);
   };
 
   // . Declarando elementos da página
@@ -178,7 +215,32 @@ const EnvironmentDetail = () => {
             {environmentName}
           </Typography>
 
-          <Typography variant="h6"> {"Topics: " + topics.length}</Typography>
+          <Typography
+            variant="h6"
+            visibility={
+              topics.length > 0
+                ? topics[0].id !== null
+                  ? "visible"
+                  : "hidden"
+                : "hidden"
+            }
+          >
+            {"Topics: " + topics.length}
+          </Typography>
+          <SuccessButton
+            icon={<PeopleIcon size={18} />}
+            message={"Start Priority Vote Session"}
+            width={"220px"}
+            height={"30px"}
+            uppercase={false}
+            marginLeft="0"
+            marginRight="4em"
+            backgroundColor={"#9fff64"}
+            action={() => {
+              openPriorityListRcrModal();
+            }}
+            visibility={priorityRCRs.length !== 0 ? "visible" : "hidden"}
+          />
           <SuccessButton
             icon={<RepoIcon size={18} />}
             message={"List RCR"}
@@ -188,6 +250,10 @@ const EnvironmentDetail = () => {
             marginLeft="0"
             marginRight="4em"
             backgroundColor={"#75d5ff"}
+            action={() => {
+              openPriorityListRcrModal();
+            }}
+            visibility={priorityRCRs.length !== 0 ? "visible" : "hidden"}
           />
         </Box>
         <FormControl
@@ -263,6 +329,11 @@ const EnvironmentDetail = () => {
         close={closeErrorDialog}
         title={errorCode}
         message={errorMessage}
+      />
+      <ListAssociatedRCRsEnvPopUp
+        open={priorityRCRListModalOpen}
+        close={closePriorityListRcrModal}
+        rcrs={priorityRCRs}
       />
     </ThemeProvider>
   );
