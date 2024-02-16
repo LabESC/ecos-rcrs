@@ -42,4 +42,39 @@ const sendEmail = async (to, subject, text) => {
   }
 };
 
-module.exports = sendEmail;
+// Function to validate email format and SMTP connection
+async function validateEmail(email) {
+  // Basic format check
+  if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+    console.error("Invalid email format:", email);
+    return false;
+  }
+  try {
+    // Send a test email to the provided address (replace with a dummy address)
+    const info = await sender.sendMail({
+      from: EMAIL_LOGIN,
+      to: email,
+      subject: "SECO - RCR: Check your email address",
+      text: "This is a test email to validate your address.",
+    });
+
+    console.log("Email sent successfully:", info.messageId);
+    return true;
+  } catch (error) {
+    console.error("Error sending email:", error);
+    // Check if the error indicates invalid email or server issue
+    if (
+      error.code === "ENOTFOUND" ||
+      (error.response && error.response.code === 554)
+    ) {
+      console.error("Invalid email or server issue:", email);
+      return false;
+    } else {
+      // Handle other errors differently
+      console.error("Unexpected error:", error);
+      return false;
+    }
+  }
+}
+
+module.exports = { sendEmail, validateEmail };

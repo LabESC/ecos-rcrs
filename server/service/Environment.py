@@ -449,7 +449,7 @@ class Environment:
             rcr_founded = []
 
             for rcr in existing_priority_data["rcrs"]:
-                if issue_id in rcr["relatedToIssues"]:
+                if issue_id in rcr["relatedToIssues"] or issue_id == rcr["mainIssue"]:
                     del rcr["relatedToIssues"]
                     rcr_founded.append(rcr)
 

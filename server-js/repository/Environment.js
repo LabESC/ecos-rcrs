@@ -1,0 +1,307 @@
+const { v4: uuidv4 } = require("uuid");
+
+// ! Importando modelos
+const EnvironmentModel = require("../sqlModels").Environment;
+const UserModel = require("../sqlModels").User;
+const VotingUserModel = require("../sqlModels").VotingUser;
+const VotingUserEnvironment = require("../sqlModels").VotingUserEnvironment;
+
+const basicFields = [
+  "id",
+  "user_id",
+  "name",
+  "details",
+  "mining_type",
+  "organization_name",
+  "status",
+  "repos",
+];
+
+class Environment {
+  /**
+   * Retrieves all environments.
+   * @returns {Array<EnvironmentModel>} An array of environments.
+   */
+  static async getAll() {
+    return await EnvironmentModel.findAll({ attributes: basicFields });
+  }
+
+  /**
+   * Creates a new environment.
+   * @param {Object} environmentAdd - The environment data to be added.
+   * @returns {EnvironmentModel} - The newly created environment.
+   */
+  static async create(environmentAdd) {
+    const newEnvironment = await EnvironmentModel.create(environmentAdd);
+
+    return newEnvironment;
+  }
+
+  /**
+   * Retrieves an environment by its ID.
+   * @param {uuidv4} id - The ID of the environment.
+   * @returns {EnvironmentModel} - An environment object.
+   */
+  static async getById(id) {
+    return await EnvironmentModel.findOne({
+      attributes: basicFields,
+      where: { id: id },
+    });
+  }
+
+  /**
+   * Retrieves environments by user ID.
+   * @param {uuidv4} userId - The ID of the user.
+   * @returns {Array<EnvironmentModel>} - An array of environments.
+   */
+  static async getByUserId(userId) {
+    return await EnvironmentModel.findAll({
+      attributes: basicFields,
+      where: { user_id: userId },
+    });
+  }
+
+  /**
+   * Update an environment status.
+   * @param {uuidv4} id - The environment id.
+   * @param {string} status - The new environment status.
+   * @returns {number} - The number of updated environments.
+   */
+  static async updateStatus(id, status) {
+    return await EnvironmentModel.update(
+      { status: status },
+      { where: { id: id } }
+    );
+  }
+
+  /**
+   * Updates the mining data and status of an environment.
+   * @param {uuidv4} id - The ID of the environment to update.
+   * @param {object} miningData - The new mining data.
+   * @param {string} status - The new status.
+   * @returns {number} - The number of updated rows.
+   */
+  static async updateMining(id, miningData, status) {
+    return await EnvironmentModel.update(
+      { mining_data: miningData, status: status },
+      { where: { id: id } }
+    );
+  }
+
+  /**
+   * Updates the topics of an environment.
+   * @param {uuidv4} id - The ID of the environment.
+   * @param {object} topicData - The updated topic data.
+   * @param {string} status - The updated status.
+   * @returns {number} - The number of affected rows.
+   */
+  static async updateTopics(id, topicData, status) {
+    return await EnvironmentModel.update(
+      { topic_data: topicData, status: status },
+      { where: { id: id } }
+    );
+  }
+
+  /**
+   * Updates the definition of an environment.
+   * @param {uuidv4} id - The ID of the environment.
+   * @param {object} definitionData - The updated definition data.
+   * @param {string|null} status - The updated status (optional).
+   * @returns {number} - The number of affected rows.
+   */
+  static async updateDefinition(id, definitionData, status = null) {
+    if (status === null) {
+      return await EnvironmentModel.update(
+        { definition_data: definitionData },
+        { where: { id: id } }
+      );
+    } else {
+      return await EnvironmentModel.update(
+        { definition_data: definitionData, status: status },
+        { where: { id: id } }
+      );
+    }
+  }
+
+  /**
+   * Updates the priority and status of an environment.
+   * @param {uuidv4} id - The ID of the environment.
+   * @param {object} priorityData - The updated priority data.
+   * @param {string|null} status - The updated status (optional).
+   * @returns {number} - The number of affected rows.
+   */
+  static async updatePriority(id, priorityData, status = null) {
+    if (status === null) {
+      return await EnvironmentModel.update(
+        { priority_data: priorityData },
+        { where: { id: id } }
+      );
+    } else {
+      return await EnvironmentModel.update(
+        { priority_data: priorityData, status: status },
+        { where: { id: id } }
+      );
+    }
+  }
+
+  /**
+   * Updates the final RCR and status of an environment.
+   * @param {uuidv4} id - The ID of the environment.
+   * @param {string} finalRcr - The final RCR value to update.
+   * @param {string|null} [status=null] - The status value to update (optional).
+   * @returns {number} - The number of affected rows.
+   */
+  static async updateFinalRcr(id, finalRcr, status = null) {
+    if (status === null) {
+      return await EnvironmentModel.update(
+        { final_rcr: finalRcr },
+        { where: { id: id } }
+      );
+    } else {
+      return await EnvironmentModel.update(
+        { final_rcr: finalRcr, status: status },
+        { where: { id: id } }
+      );
+    }
+  }
+
+  /**
+   * Retrieves the mining data for a specific environment.
+   * @param {uuidv4} id - The ID of the environment.
+   * @returns {Object} - The mining data object.
+   */
+  static async getMiningData(id) {
+    const data = await EnvironmentModel.findOne({
+      attributes: ["mining_data"],
+      where: { id: id },
+    });
+
+    if (data) {
+      return data.mining_data;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Retrieves the topic data for a given ID.
+   * @param {uuidv4} id - The ID of the environment.
+   * @returns {Object} - The topic data object.
+   */
+  static async getTopicData(id) {
+    const data = await EnvironmentModel.findOne({
+      attributes: ["topic_data"],
+      where: { id: id },
+    });
+
+    if (data) {
+      return data.topic_data;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Retrieves the definition data of an environment by its ID.
+   * @param {uuidv4} id - The ID of the environment.
+   * @returns {Object} The definition data of the environment.
+   */
+  static async getDefinitionData(id) {
+    const data = await EnvironmentModel.findOne({
+      attributes: ["definition_data"],
+      where: { id: id },
+    });
+
+    if (data) {
+      return data.definition_data;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Retrieves the priority data of an environment.
+   * @param {uuidv4} id - The ID of the environment.
+   * @returns {Object} The priority data of the environment.
+   */
+  static async getPriorityData(id) {
+    const data = await EnvironmentModel.findOne({
+      attributes: ["priority_data"],
+      where: { id: id },
+    });
+
+    if (data) {
+      return data.priority_data;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Retrieves the priority data of an environment.
+   * @param {uuidv4} id - The ID of the environment.
+   * @returns {Object} The final rcr data of the environment.
+   */
+  static async getFinalRcr(id) {
+    const data = await EnvironmentModel.findOne({
+      attributes: ["final_rcr"],
+      where: { id: id },
+    });
+
+    if (data) {
+      return data.final_rcr;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Retrieves the voting users associated with a specific environment.
+   * @param {uuidv4} environmentId - The ID of the environment.
+   * @returns {Array<Object>} - A promise that resolves to an array of voting users.
+   */
+  static async getVotingUsers(environmentId) {
+    return await VotingUserEnvironment.findAll({
+      attributes: [],
+      where: { environment_id: environmentId },
+      include: [
+        {
+          model: VotingUserModel,
+          attributes: ["email"],
+        },
+      ],
+    });
+  }
+
+  /**
+   * Retrieves the email of the user who created the environment by its ID.
+   * @param {uuidv4} id - The ID of the environment.
+   * @returns {Object} An object containing the email of the user who created the environment and the name of the environment.
+   */
+  static async getCreatedUserEmailByEnvironmentId(id) {
+    return await EnvironmentModel.findOne({
+      attributes: ["name"],
+      where: { id: id },
+      include: [
+        {
+          model: UserModel,
+          attributes: ["email"],
+        },
+      ],
+    });
+  }
+
+  /**
+   * Retrieves the repositories for a given ID.
+   * @param {uuidv4} id - The ID of the environment.
+   * @returns {Object} - An object containing the repositories.
+   */
+  static async getRepos(id) {
+    return await EnvironmentModel.findOne({
+      attributes: ["repos"],
+      where: { id: id },
+    });
+  }
+}
+
+module.exports = Environment;

@@ -336,14 +336,16 @@ const IssueDetail = () => {
       <RequestRCRPopUp
         open={rcrModalOpen}
         close={closeRcrModal}
-        relatedTo={relatedToIssues.concat(issueDetailed)}
+        relatedTo={relatedToIssues}
         environmentId={environmentId}
         topicNum={issueDetailed.topicNum}
+        mainIssue={issueDetailed}
       />
       <ListAssociatedRCRsPopUp
         open={rcrListModalOpen}
         close={closeListRcrModal}
         rcrs={rcrAssociated}
+        mainIssueId={issueDetailed.id}
       />
     </ThemeProvider>
   );

@@ -9,8 +9,10 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  Popover,
 } from "@mui/material";
 import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
+import { StarFillIcon } from "@primer/octicons-react";
 import { useState } from "react";
 
 export function ListAssociatedRCRsPopUp(props) {
@@ -19,43 +21,19 @@ export function ListAssociatedRCRsPopUp(props) {
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   // ! Imports do props (recebidos do componente pai)
-  const { open, close, rcrs } = props;
+  const { open, close, rcrs, mainIssueId } = props;
 
-  // ! Variaveis do alert Snackbar
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasAlert, setHasAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState({
-    title: "",
-    message: "",
-    severity: "",
-  });
+  const [anchorEl, setAnchorEl] = useState(null);
 
-  const closeAlert = () => {
-    setHasAlert(false);
+  const handlePopoverOpen = (event) => {
+    setAnchorEl(event.currentTarget);
   };
 
-  // ! Variavies do popup de detalhar issue
-  const [issueModal, setIssueModal] = useState({
-    id: null,
-    issueId: "",
-    repo: "",
-    body: "",
-    tags: "",
-    score: "",
-    relatedToScore: "",
-  });
-
-  // ! Variáveis e funções para manipulação do Dialog de Issue
-  const [issueModalOpen, setIssueModalOpen] = useState(false);
-
-  const openIssueOnModal = (issue) => {
-    setIssueModal(issue);
-    setIssueModalOpen(true);
+  const handlePopoverClose = () => {
+    setAnchorEl(null);
   };
 
-  const closeIssueModal = () => {
-    setIssueModalOpen(false);
-  };
+  const openPopOver = Boolean(anchorEl);
 
   return (
     <Dialog
@@ -102,8 +80,51 @@ export function ListAssociatedRCRsPopUp(props) {
                   //expandIcon={<ExpandMoreIcon />}
                   aria-controls="panel1-content"
                   id={`ACC-SUMM-${rcr.id}`}
+                  style={{ alignItems: "center !important" }}
                 >
-                  <strong>{rcr.name}</strong>
+                  {rcr.mainIssue === mainIssueId ? (
+                    <Box
+                      className="StarDivIcon"
+                      style={{
+                        marginRight: "0.5em",
+                        color: "#edd500",
+                      }}
+                      aria-owns={openPopOver ? "mouse-over-popover" : undefined}
+                      aria-haspopup="true"
+                      onMouseEnter={handlePopoverOpen}
+                      onMouseLeave={handlePopoverClose}
+                    >
+                      <StarFillIcon />
+                      <Popover
+                        id="mouse-over-popover"
+                        sx={{
+                          pointerEvents: "none",
+                        }}
+                        open={openPopOver}
+                        anchorEl={anchorEl}
+                        anchorOrigin={{
+                          vertical: "bottom",
+                          horizontal: "left",
+                        }}
+                        transformOrigin={{
+                          vertical: "top",
+                          horizontal: "left",
+                        }}
+                        onClose={handlePopoverClose}
+                        disableRestoreFocus
+                      >
+                        <Typography
+                          variant="body2"
+                          style={{ padding: "0.2em 0.5em" }}
+                        >
+                          Associated as main issue
+                        </Typography>
+                      </Popover>
+                    </Box>
+                  ) : (
+                    ""
+                  )}
+                  <strong>{`#${rcr.id} - ${rcr.name}`}</strong>
                 </AccordionSummary>
                 <AccordionDetails id={`ACC-DET-${rcr.id}`}>
                   {rcr.details}

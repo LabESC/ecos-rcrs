@@ -11,7 +11,6 @@ import {
   AccordionSummary,
 } from "@mui/material";
 import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
-import { useState } from "react";
 
 export function ListAssociatedRCRsEnvPopUp(props) {
   // ! Imports para o popUp

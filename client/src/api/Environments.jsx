@@ -107,6 +107,7 @@ export const createEnvironment = async (
       organization_name: organizationName,
       mining_data: null,
       topic_data: null,
+      definition_data: null,
       priority_data: null,
       final_rcr: null,
     },
@@ -272,8 +273,8 @@ export const requestTopicData = async (userId, userToken, environmentId) => {
 export const registerRCR = async (userId, userToken, environmentId, rcr) => {
   console.log("userId, userToken", userId, userToken);
   const result = await Axios.post(
-    `${baseUrl}/environment/${environmentId}/prioritydata`,
-    { priority_data: rcr },
+    `${baseUrl}/environment/${environmentId}/definitiondata`,
+    rcr,
     { headers: { "user-id": userId, "user-token": userToken } }
   )
     .then((res) => {

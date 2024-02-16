@@ -29,7 +29,7 @@ export function RequestRCRPopUp(props) {
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   // ! Imports do props (recebidos do componente pai)
-  const { open, close, relatedTo, environmentId, topicNum } = props;
+  const { open, close, mainIssue, relatedTo, environmentId, topicNum } = props;
 
   // ! Variaveis do alert Snackbar
   const [isLoading, setIsLoading] = useState(false);
@@ -138,7 +138,8 @@ export function RequestRCRPopUp(props) {
       name,
       details,
       relatedToIssues: issuesRcr.map((issue) => issue.id),
-      topicNum: topicNum,
+      topicNum,
+      mainIssue: mainIssue.id,
     };
 
     const response = await registerRCR(
@@ -167,6 +168,7 @@ export function RequestRCRPopUp(props) {
       setHasAlert(true);
 
       close();
+      location.reload();
     }
   };
 
@@ -217,6 +219,18 @@ export function RequestRCRPopUp(props) {
               placeholder="Insert a description for the rcr"
               multiline
               maxRows={4}
+            />
+          </Box>
+
+          <Box className="ButtonArea">
+            <Typography className="TextFieldLabel">Main Issue*</Typography>
+            <Chip
+              label={mainIssue.id}
+              key={`CHP_MAIN_${mainIssue.id}`}
+              style={{ margin: "0.25em" }}
+              onClick={() => {
+                openIssueOnModal(mainIssue);
+              }}
             />
           </Box>
           <Box className="ButtonArea">

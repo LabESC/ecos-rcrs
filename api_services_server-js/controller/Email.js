@@ -7,7 +7,7 @@ const validation = require("../validations/Email");
 const { validate_service_user } = require("../service/Auth");
 
 // * Importando classe Email
-const emailSender = require("../service/Email");
+const { sendEmail: emailSender, validateEmail } = require("../service/Email");
 
 // ! Rota de solicitação de mineração
 router.post("/api/email/send", async (req, res) => {
@@ -46,6 +46,32 @@ router.post("/api/email/send", async (req, res) => {
   }
 
   return res.status(200).json({ message: "Email sent" });
+});
+
+// ! Rota de validação de email
+router.post("/api/email/:email/validate", async (req, res) => {
+  // !! LOG
+  console.log(`${req.method} ${req.url} - ${new Date().toLocaleString()}`);
+
+  // * Obtendo dados da requisição
+  const { email } = req.params;
+
+  // * Validando variáveis
+  if (!email) {
+    return res.status(422).json({ error: "Invalid request." });
+  }
+
+  // * Validando email
+  const emailResponse = await validateEmail(email);
+
+  // * Se não for possível validar o email, retorne erro
+  if (!emailResponse) {
+    return res
+      .status(500)
+      .json({ error: "Internal server error. Email not validated." });
+  }
+
+  return res.status(200).json({ message: "Email validated" });
 });
 
 module.exports = router;

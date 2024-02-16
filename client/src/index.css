@@ -345,3 +345,11 @@ body {
 .ContainerRCRModal > * {
   margin-left: 1em;
 }
+
+[id^="ACC-SUMM-"] > div {
+  align-items: center !important;
+}
+
+.StarDivIcon > svg {
+  stroke: #000000;
+}
