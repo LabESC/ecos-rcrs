@@ -77,8 +77,8 @@ module.exports = {
         return res.status(400).json(ErrorSchema(400, msg_email_not_valid));
       case -3:
         return res.status(500).json(ErrorSchema(500, msg_email_not_sent));
-      default:
-        return res.status(200).json(user);
+      case true:
+        return res.status(200).send(true);
     }
   },
 
@@ -103,7 +103,7 @@ module.exports = {
       case -3:
         return res.status(400).json(ErrorSchema(400, msg_access_code_wrong));
       default:
-        return res.status(200).json(user);
+        return res.status(200).json(true);
     }
   },
 
@@ -137,7 +137,7 @@ module.exports = {
       case -3:
         return res.status(400).json(ErrorSchema(400, msg_access_code_wrong));
       default:
-        return res.status(200).json(user);
+        return res.status(200).json(true);
     }
   },
 
@@ -170,8 +170,12 @@ module.exports = {
         return res.status(404).json(ErrorSchema(404, msg_404));
       case -3:
         return res.status(400).json(ErrorSchema(400, msg_access_code_wrong));
-      default:
-        return res.status(200).json(user);
+    }
+
+    if (Array.isArray(user) && user.length > 0 && user[0] > 0) {
+      return res.status(200).send();
+    } else {
+      return res.status(500).send(ErrorSchema("server", msg_500));
     }
   },
 };

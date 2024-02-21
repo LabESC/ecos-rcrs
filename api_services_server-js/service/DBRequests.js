@@ -46,6 +46,7 @@ async function updateEnvironmentMiningData(environmentId, miningData, status) {
     console.log(req.status);
     return true;
   } catch (e) {
+    console.log(e);
     return false;
   }
 }

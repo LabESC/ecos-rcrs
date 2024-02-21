@@ -199,8 +199,16 @@ module.exports = {
       // !! Validar se é nulo ou 0
       case null:
         return res.status(404).send(ErrorSchema(entity_name, msg_404));
-      default:
-        return res.status(200);
+    }
+
+    if (
+      Array.isArray(updatedEnvironments) &&
+      updatedEnvironments.length > 0 &&
+      updatedEnvironments[0] > 0
+    ) {
+      return res.status(200).send();
+    } else {
+      return res.status(500).send(ErrorSchema("server", msg_500));
     }
   },
 
@@ -235,8 +243,16 @@ module.exports = {
         return res.status(500).send(ErrorSchema("server", msg_500));
       case null:
         return res.status(404).send(ErrorSchema(entity_name, msg_404));
-      default:
-        return res.status(200);
+    }
+
+    if (
+      Array.isArray(updatedEnvironments) &&
+      updatedEnvironments.length > 0 &&
+      updatedEnvironments[0] > 0
+    ) {
+      return res.status(200).send();
+    } else {
+      return res.status(500).send(ErrorSchema("server", msg_500));
     }
   },
 
@@ -271,8 +287,16 @@ module.exports = {
         return res.status(500).send(ErrorSchema("server", msg_500));
       case null:
         return res.status(404).send(ErrorSchema(entity_name, msg_404));
-      default:
-        return res.status(200);
+    }
+
+    if (
+      Array.isArray(updatedEnvironments) &&
+      updatedEnvironments.length > 0 &&
+      updatedEnvironments[0] > 0
+    ) {
+      return res.status(200).send();
+    } else {
+      return res.status(500).send(ErrorSchema("server", msg_500));
     }
   },
 
@@ -305,8 +329,16 @@ module.exports = {
         return res.status(500).send(ErrorSchema("server", msg_500));
       case null:
         return res.status(404).send(ErrorSchema(entity_name, msg_404));
-      default:
-        return res.status(200);
+    }
+
+    if (
+      Array.isArray(updatedEnvironments) &&
+      updatedEnvironments.length > 0 &&
+      updatedEnvironments[0] > 0
+    ) {
+      return res.status(200).send();
+    } else {
+      return res.status(500).send(ErrorSchema("server", msg_500));
     }
   },
 
@@ -332,8 +364,7 @@ module.exports = {
     const updatedEnvironments =
       await EnvironmentService.updateDefinitionDataWithStatus(
         req.params.id,
-        req.body.closing_date,
-        req.body.status
+        req.body.closing_date
       );
 
     switch (updatedEnvironments) {
@@ -341,8 +372,8 @@ module.exports = {
         return res.status(500).send(ErrorSchema("server", msg_500));
       case null:
         return res.status(404).send(ErrorSchema(entity_name, msg_404));
-      default:
-        return res.status(200);
+      case true:
+        return res.status(200).send(true);
     }
   },
 
@@ -407,8 +438,16 @@ module.exports = {
         return res.status(500).send(ErrorSchema("server", msg_500));
       case null:
         return res.status(404).send(ErrorSchema(entity_name, msg_404));
-      default:
-        return res.status(200);
+    }
+
+    if (
+      Array.isArray(updatedEnvironments) &&
+      updatedEnvironments.length > 0 &&
+      updatedEnvironments[0] > 0
+    ) {
+      return res.status(200).send();
+    } else {
+      return res.status(500).send(ErrorSchema("server", msg_500));
     }
   },
 
@@ -443,8 +482,16 @@ module.exports = {
         return res.status(500).send(ErrorSchema("server", msg_500));
       case null:
         return res.status(404).send(ErrorSchema(entity_name, msg_404));
-      default:
-        return res.status(200);
+    }
+
+    if (
+      Array.isArray(updatedEnvironments) &&
+      updatedEnvironments.length > 0 &&
+      updatedEnvironments[0] > 0
+    ) {
+      return res.status(200).send();
+    } else {
+      return res.status(500).send(ErrorSchema("server", msg_500));
     }
   },
 
@@ -463,8 +510,7 @@ module.exports = {
         .json(ErrorSchema(422, "Id and/or issueId not provided!"));
     }
 
-    /*
-    // * TODO 
+    /* // * TODO 
     // * Getting RCR 
     const rcr =
       await EnvironmentService.getDefinitionRCRByEnvironmentIdAndIssueId(
@@ -511,7 +557,7 @@ module.exports = {
       case null:
         return res.status(404).send(ErrorSchema(entity_name, msg_404));
       default:
-        return res.status(200);
+        return res.status(200).send();
     }*/
   },
 
@@ -724,6 +770,36 @@ module.exports = {
         return res.status(404).send(ErrorSchema(entity_name, msg_404));
       default:
         return res.status(200).send(votingUsers);
+    }
+  },
+
+  async getDefinitionDataForVoting(req, res) {
+    // * Validating id
+    if (!req.params.id) {
+      return res.status(422).json(ErrorSchema(422, "Id not provided!"));
+    }
+
+    // * Getting definition data for voting
+    const definitionData = await EnvironmentService.getDefinitionDataForVoting(
+      req.params.id
+    );
+
+    switch (definitionData) {
+      case -1:
+        return res.status(500).send(ErrorSchema("server", msg_500));
+      case -2:
+        return res
+          .status(400)
+          .send(
+            ErrorSchema(
+              "status",
+              "Environment is not opened to definition voting!"
+            )
+          );
+      case null:
+        return res.status(404).send(ErrorSchema(entity_name, msg_404));
+      default:
+        return res.status(200).send(definitionData);
     }
   },
 };

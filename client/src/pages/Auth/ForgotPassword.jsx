@@ -34,7 +34,7 @@ function getSteps() {
     <Typography variant="body1" key="t3" style={{ fontWeight: "bold" }}>
       Insert your new password
     </Typography>,
-    <Typography variant="body1" key="t3" style={{ fontWeight: "bold" }}>
+    <Typography variant="body1" key="t4" style={{ fontWeight: "bold" }}>
       Password updated
     </Typography>,
   ];

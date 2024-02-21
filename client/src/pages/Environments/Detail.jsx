@@ -24,6 +24,7 @@ import SideBar from "../../components/SideBar.jsx";
 import { IssueCard } from "./Issues/IssueCard.jsx";
 import { SuccessButton } from "../../components/Buttons.jsx";
 import { ListAssociatedRCRsEnvPopUp } from "./RCR/ListAssociatedRCRsEnvironment.jsx";
+import { OpenRCRDefinitionVotePopUp } from "./OpenRCRDefinitionVotePopUp.jsx";
 
 // ! Importações de códigos
 import { verifyLoggedUser } from "../../api/Auth.jsx";
@@ -32,7 +33,7 @@ import {
   getEnvironmentIdFromUrl,
   getTopicData,
   getEnvironmentNameFromLocalStorage,
-  getPriorityRCRs,
+  getDefinitionRCRs,
 } from "../../api/Environments.jsx";
 
 const EnvironmentDetail = () => {
@@ -77,7 +78,7 @@ const EnvironmentDetail = () => {
       }
 
       setEnvironmentName(environmentName);
-      document.title = `ECOS-IC: ${environmentName}`;
+      document.title = `SECO-RCR: ${environmentName}`;
 
       // . Obtendo os ambientes do usuário
       const response = await getTopicData(userId, userToken, environmentId);
@@ -101,7 +102,7 @@ const EnvironmentDetail = () => {
       setTopicDataToLocalStorage(topics[0]);
 
       // . Obtendo rcrs prioritarias associadas
-      const priorityRCRs = await getPriorityRCRs(
+      const priorityRCRs = await getDefinitionRCRs(
         userId,
         userToken,
         environmentId
@@ -194,6 +195,18 @@ const EnvironmentDetail = () => {
     setPriorityRCRListModalOpen(false);
   };
 
+  // ! Variáveis e funções para manipulação do Dialog de Lista de RCR
+  const [startRCRDefinitionVoteModalOpen, setStartRCRDefinitionVoteModalOpen] =
+    useState(false);
+
+  const openDefinitionRCRVoteModal = () => {
+    setStartRCRDefinitionVoteModalOpen(true);
+  };
+
+  const closeDefinitionRCRVoteModal = () => {
+    setStartRCRDefinitionVoteModalOpen(false);
+  };
+
   // . Declarando elementos da página
   const pageContent = () => {
     return (
@@ -237,7 +250,7 @@ const EnvironmentDetail = () => {
             marginRight="4em"
             backgroundColor={"#9fff64"}
             action={() => {
-              openPriorityListRcrModal();
+              openDefinitionRCRVoteModal();
             }}
             visibility={priorityRCRs.length !== 0 ? "visible" : "hidden"}
           />
@@ -334,6 +347,12 @@ const EnvironmentDetail = () => {
         open={priorityRCRListModalOpen}
         close={closePriorityListRcrModal}
         rcrs={priorityRCRs}
+      />
+      <OpenRCRDefinitionVotePopUp
+        open={startRCRDefinitionVoteModalOpen}
+        close={closeDefinitionRCRVoteModal}
+        rcrs={priorityRCRs}
+        environmentId={environmentId}
       />
     </ThemeProvider>
   );

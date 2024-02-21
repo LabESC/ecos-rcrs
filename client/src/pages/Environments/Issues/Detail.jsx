@@ -34,7 +34,7 @@ import {
   getEnvironmentIdAndIssueIdFromUrl,
   getEnvironmentNameFromLocalStorage,
   getIssueDataFromLocalStorage,
-  getPriorityRCRsByEnvironmentIdAndIssueId,
+  getDefinitionRCRsByEnvironmentIdAndIssueId,
 } from "../../../api/Environments.jsx";
 
 const IssueDetail = () => {
@@ -70,7 +70,7 @@ const IssueDetail = () => {
 
       setEnvironmentName(environmentName);
 
-      document.title = `ECOS-IC: ${environmentName}`;
+      document.title = `SECO-RCR: ${environmentName}`;
 
       // . Obtendo os dados de topico e da issue
       const response = getIssueDataFromLocalStorage(
@@ -90,7 +90,7 @@ const IssueDetail = () => {
       }
 
       //. Obtendo as RCRs de prioridade
-      const priorityRCRs = await getPriorityRCRsByEnvironmentIdAndIssueId(
+      const priorityRCRs = await getDefinitionRCRsByEnvironmentIdAndIssueId(
         loggedUser.userId,
         loggedUser.userToken,
         data.environmentId,

@@ -201,7 +201,7 @@ class Environment {
     return true;
   }
 
-  static async updateDefinitionDataWithStatus(id, closingDate, status) {
+  static async updateDefinitionDataWithStatus(id, closingDate) {
     // * Obtaining definition data if exists
     let definitionData = null;
     try {
@@ -214,8 +214,7 @@ class Environment {
     // * If does not exists, return it
     if (!definitionData) return definitionData;
 
-    // * Otherwise, update its closingDate and status
-    definitionData.status = status;
+    // * Otherwise, update its closingDate
     definitionData.closing_date = closingDate;
 
     // * Updating the environment
@@ -375,8 +374,12 @@ class Environment {
     if (!definitionData) return definitionData;
 
     let rcrsFounded = [];
+    const issueToBeFound = parseInt(issueId);
     for (const rcr of definitionData.rcrs) {
-      if (rcr.mainIssue === issueId || rcr.relatedToIssues.includes(issueId)) {
+      if (
+        rcr.mainIssue === issueToBeFound ||
+        rcr.relatedToIssues.includes(issueToBeFound)
+      ) {
         delete rcr.relatedToIssues;
         rcrsFounded.push(rcr);
       }
@@ -387,6 +390,53 @@ class Environment {
 
   static async getPriorityRCRByEnvironmentIdAndIssueId(id, issueId) {
     // * TODO
+  }
+
+  static async getDefinitionDataForVoting(id) {
+    // * Check if the environment is in the right status
+    let environment = null;
+    try {
+      environment = await EnvironmentRepository.getById(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    if (!environment) return environment;
+
+    if (environment.status !== "waiting_rcr_voting") return -2;
+
+    let definitionData = null;
+    let miningData = null;
+
+    // * Obtaining mining data if exists
+    try {
+      miningData = await EnvironmentRepository.getMiningData(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    // * Obtaining definition data if exists
+    try {
+      definitionData = await EnvironmentRepository.getDefinitionData(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    if (!miningData) return miningData;
+    if (!definitionData) return definitionData;
+
+    // * Joining data with EnvironmentUtils
+    definitionData = EnvironmentUtils.joinMiningAndDefinition(
+      miningData,
+      definitionData
+    );
+    // * Inputting data into environment object
+    environment.definition_data = definitionData;
+
+    return environment;
   }
 }
 

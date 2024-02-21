@@ -66,4 +66,25 @@ module.exports = class Environment {
 
     return newTopics;
   }
+
+  static joinMiningAndDefinition(miningData, definitionData) {
+    const miningMap = {};
+    for (const item of miningData.issues) {
+      miningMap[item.id] = item;
+    }
+
+    for (const rcr of definitionData.rcrs) {
+      if (miningMap[rcr.mainIssue]) {
+        rcr.mainIssue = miningMap[rcr.mainIssue];
+      }
+
+      for (let i = 0; i < rcr.relatedToIssues.length; i++) {
+        const relatedIssueId = rcr.relatedToIssues[i];
+        if (miningMap[relatedIssueId]) {
+          rcr.relatedToIssues[i] = miningMap[relatedIssueId];
+        }
+      }
+    }
+    return definitionData;
+  }
 };

@@ -89,9 +89,21 @@ class VotingUser {
    * @returns {VotingUserEnvironment} The created VotingUserEnvironment object.
    */
   static async registerDefinitionVotes(id, environmentId, votes) {
-    const votingUserEnvironment = await VotingUserEnvironment.create({
-      voting_user_id: id,
-      environment_id: environmentId,
+    let votingUserEnvironment = await VotingUserEnvironment.findOne({
+      where: { voting_user_id: id, environment_id: environmentId },
+    });
+
+    // * If the relation does not exist, create a new one.
+    if (votingUserEnvironment === null) {
+      votingUserEnvironment = await VotingUserEnvironment.create({
+        voting_user_id: id,
+        environment_id: environmentId,
+        votes_rcr_definition: votes,
+      });
+    }
+
+    // * Update the definition votes.
+    votingUserEnvironment = await votingUserEnvironment.update({
       votes_rcr_definition: votes,
     });
 
@@ -122,24 +134,21 @@ class VotingUser {
       votingUserEnvironment = await VotingUserEnvironment.create({
         voting_user_id: id,
         environment_id: environmentId,
-        votes_rcr_priority: votes,
       });
     }
 
-    // * If the relation exists, update the priority votes.
-    else {
-      return await votingUserEnvironment.update({
-        votes_rcr_priority: votes,
-      });
-    }
+    // * Update the priority votes.
+    votingUserEnvironment = await votingUserEnvironment.update({
+      votes_rcr_priority: votes,
+    });
 
     // * Removing token from the votingUser
     const votingUser = await VotingUserModel.findOne({
       where: { id: id },
     });
-
     votingUser.access_code = null;
     await votingUser.save();
+
     return votingUserEnvironment;
   }
 }

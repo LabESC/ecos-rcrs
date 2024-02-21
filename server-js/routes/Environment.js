@@ -8,7 +8,7 @@ router.get("/:id", EnvironmentController.getById);
 router.get("/user/:userId", EnvironmentController.getByUserId);
 router.post("/", EnvironmentController.create);
 router.put("/:id/status/:status", EnvironmentController.updateStatus);
-router.put("/:id/miningdata", EnvironmentController.updateMiningData);
+router.post("/:id/miningdata", EnvironmentController.updateMiningData);
 router.post("/:id/topicdata", EnvironmentController.updateTopicData);
 router.post("/:id/definitiondata", EnvironmentController.updateDefinitionData);
 router.patch(
@@ -37,6 +37,10 @@ router.get("/:id/finaldata", EnvironmentController.getFinalData);
 router.get(
   "/:id/votingusers",
   EnvironmentController.getVotingUsersByEnvironmentId
+);
+router.get(
+  "/:id/votingdefinitiondata",
+  EnvironmentController.getDefinitionDataForVoting
 );
 
 module.exports = router;

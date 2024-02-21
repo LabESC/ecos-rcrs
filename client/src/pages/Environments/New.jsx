@@ -37,7 +37,7 @@ const NewEnvironment = () => {
   // ! Executado ao iniciar o componente
   useEffect(() => {
     // . Mudando nome da página
-    document.title = "ECOS-IC: My Environments";
+    document.title = "SECO-RCR: My Environments";
     document.body.style.background = "white";
 
     // . Verificando se o usuário está logado e obtendo seus dados

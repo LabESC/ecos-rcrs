@@ -22,6 +22,7 @@ import SideBar from "../../components/SideBar.jsx";
 import { EnvironmentCard } from "./EnvironmentCard.jsx";
 import { SuccessButton } from "../../components/Buttons.jsx";
 import { RequestAgainPopUp } from "./RequestAgain.jsx";
+import { RequestAgainPopUp2 } from "./RequestAgain2.jsx";
 
 // ! Importações de códigos
 import { verifyLoggedUser, removeLoggedUser } from "../../api/Auth.jsx";
@@ -39,7 +40,7 @@ const MyEnvironment = () => {
   // ! Executado ao iniciar o componente
   useEffect(() => {
     // . Mudando nome da página
-    document.title = "ECOS-IC: My Environments";
+    document.title = "SECO-RCR: My Environments";
     document.body.style.background = "white";
 
     // . Função para obter os ambientes do usuário
@@ -104,37 +105,18 @@ const MyEnvironment = () => {
   };
 
   // ! Variáveis e funções para manipulação do Dialog de erro/interrupção
-  const [hasEnvironmentError, setHasEnvironmentError] = useState(false);
-  const [environmentErrorCode, setEnvironmentErrorCode] = useState("");
-  const [environmentErrorMessage, setEnvironmentErrorMessage] = useState("");
-  const [action, setAction] = useState({
-    environmentId: "",
-    code: "",
-    msg: "",
-    status: "",
-  });
-
-  const activeEnvironmentErrorDialog = () => {
-    let code = action.code;
-    try {
-      code = code.toUpperCase();
-    } catch (e) {}
-
-    setEnvironmentErrorCode(code);
-    setEnvironmentErrorMessage(action.msg);
-    setHasEnvironmentError(true);
-  };
+  const [action, setAction] = useState(null);
 
   const cardClick = async (environmentId, name, status) => {
     switch (status) {
       case "mining_error":
-        setAction({
+        await setAction({
           environmentId,
           status,
           code: "Mining error",
           msg: "An error occurred while mining repositories, you can request mining again or cancel the environment.",
         });
-        activeEnvironmentErrorDialog();
+        //await activeEnvironmentErrorDialog();
         break;
       case "topics_error":
         setAction({
@@ -143,16 +125,18 @@ const MyEnvironment = () => {
           code: "Topic generation error",
           msg: "An error occurred while generating the topics, you can request the generation again or cancel the environment.",
         });
-        activeEnvironmentErrorDialog();
+        //activeEnvironmentErrorDialog();
         break;
       case "mining_done":
-        setAction({
-          environmentId,
-          status,
-          code: "Topic generation",
-          msg: "You want to request the generation of topics?",
-        });
-        activeEnvironmentErrorDialog();
+        setAction(
+          {
+            environmentId,
+            status,
+            code: "Topic generation",
+            msg: "You want to request the generation of topics?",
+          }
+          //activeEnvironmentErrorDialog()
+        );
         break;
 
       case "waiting_rcr_voting":
@@ -160,9 +144,13 @@ const MyEnvironment = () => {
           environmentId,
           status,
           code: "RCR definition voting",
-          msg: "You want to stop now the RCR definition voting step?",
+          msg: [
+            `Here's the link for your environment voting:`,
+            `${window.location.origin}/environment/${environmentId}/priorityvote`,
+            "You want to stop now the RCR definition voting step?",
+          ],
         });
-        activeEnvironmentErrorDialog();
+        //activeEnvironmentErrorDialog();
         break;
 
       case "waiting_rcr_priority":
@@ -170,9 +158,9 @@ const MyEnvironment = () => {
           environmentId,
           status,
           code: "RCR priority voting",
-          msg: "You want to stop now the RCR priority voting step?",
+          msg: `Here's the link for your environment voting:\n${window.location.origin}/environment/${environmentId}/priorityvote\nYou want to stop now the RCR priority voting step?`,
         });
-        activeEnvironmentErrorDialog();
+        //activeEnvironmentErrorDialog();
         break;
 
       case "topics_done":
@@ -207,7 +195,6 @@ const MyEnvironment = () => {
   const requestPopUpAction = async () => {
     switch (action.status) {
       case "mining_error":
-        setHasEnvironmentError(false);
         await requestMiningData(
           loggedUser.userId,
           loggedUser.userToken,
@@ -218,11 +205,11 @@ const MyEnvironment = () => {
           message: "The mining of repositories has been requested.",
         });
         setRequestMade(true);
+        setAction(null);
         break;
 
       case "topics_error":
       case "mining_done":
-        setHasEnvironmentError(false);
         // !! IMPLEMENTAR... (AGUARDANDO FUNÇÃO/ENDPOINT) await...
         await requestTopicData(
           loggedUser.userId,
@@ -234,15 +221,14 @@ const MyEnvironment = () => {
           message: "The generation of topics has been requested.",
         });
         setRequestMade(true);
+        setAction(null);
         break;
 
       case "waiting_rcr_voting":
-        setHasEnvironmentError(false);
         // !! IMPLEMENTAR... (AGUARDANDO FUNÇÃO/ENDPOINT)
         break;
 
       case "waiting_rcr_priority":
-        setHasEnvironmentError(false);
         // !! IMPLEMENTAR... (AGUARDANDO FUNÇÃO/ENDPOINT)
         break;
 
@@ -255,8 +241,8 @@ const MyEnvironment = () => {
     // !! IMPLEMENTAR... (Mudança de status do ambiente para cancelado)
   };
 
-  const closeEnvironmentErrorDialog = () => {
-    setHasEnvironmentError(false);
+  const closeRequestPopUp = () => {
+    setAction(null);
   };
 
   // ! Variaveis e funçoes para manipulacao do Alert das requisicoes
@@ -337,14 +323,20 @@ const MyEnvironment = () => {
         title={errorCode}
         message={errorMessage}
       />
-      <RequestAgainPopUp
-        open={hasEnvironmentError}
-        close={closeEnvironmentErrorDialog}
-        title={environmentErrorCode}
-        message={environmentErrorMessage}
-        action={requestPopUpAction}
-        status={action.status}
-        actionCancel={requestPopUpActionCancel}
+      <RequestAgainPopUp2
+        open={action !== null}
+        close={closeRequestPopUp}
+        action={
+          action !== null
+            ? action
+            : {
+                environmentId: "",
+                code: "",
+                msg: "",
+                status: "",
+              }
+        }
+        btnSubmit={requestPopUpAction}
       />
       <Snackbar
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}

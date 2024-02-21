@@ -37,6 +37,23 @@ export const getEnvironmentIdFromUrl = () => {
   return environmentId;
 };
 
+export const getEnvironmentIdFromUrlVoting = () => {
+  // . Obtendo o id do ambiente
+  const url = window.location.href;
+  const urlSplit = url.split("/");
+  const environmentId = urlSplit[urlSplit.length - 2];
+
+  // . Verificando se o id é uuid
+  if (!regexUUID.test(environmentId)) {
+    return null;
+  }
+
+  // . Setando o id do ambiente no localStorage
+  localStorage.setItem("SECO_24_env-id", environmentId);
+
+  return environmentId;
+};
+
 export const getEnvironmentIdAndIssueIdFromUrl = () => {
   // . Obtendo o id do ambiente
   const url = window.location.href;
@@ -291,14 +308,14 @@ export const registerRCR = async (userId, userToken, environmentId, rcr) => {
   return result;
 };
 
-export const getPriorityRCRsByEnvironmentIdAndIssueId = async (
+export const getDefinitionRCRsByEnvironmentIdAndIssueId = async (
   userId,
   userToken,
   environmentId,
   issueId
 ) => {
   const result = await Axios.get(
-    `${baseUrl}/environment/${environmentId}/prioritydata/${issueId}`,
+    `${baseUrl}/environment/${environmentId}/definitiondata/${issueId}`,
     {
       headers: { "user-id": userId, "user-token": userToken },
     }
@@ -317,12 +334,80 @@ export const getPriorityRCRsByEnvironmentIdAndIssueId = async (
   return result;
 };
 
-export const getPriorityRCRs = async (userId, userToken, environmentId) => {
+export const getDefinitionRCRs = async (userId, userToken, environmentId) => {
   const result = await Axios.get(
-    `${baseUrl}/environment/${environmentId}/prioritydata`,
+    `${baseUrl}/environment/${environmentId}/definitiondata`,
     {
       headers: { "user-id": userId, "user-token": userToken },
     }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+
+  return result;
+};
+
+export const updateStatus = async (
+  userId,
+  userToken,
+  environmentId,
+  status
+) => {
+  const result = await Axios.put(
+    `${baseUrl}/environment/${environmentId}/status/${status}`,
+    {},
+    { headers: { "user-id": userId, "user-token": userToken } }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+
+  return result;
+};
+
+export const updateDefinitionRCRWithStatus = async (
+  userId,
+  userToken,
+  environmentId,
+  closingDate
+) => {
+  const result = await Axios.patch(
+    `${baseUrl}/environment/${environmentId}/definitiondata`,
+    { closing_date: closingDate },
+    { headers: { "user-id": userId, "user-token": userToken } }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+
+  return result;
+};
+
+export const getDefinitionDataForVoting = async (environmentId) => {
+  const result = await Axios.get(
+    `${baseUrl}/environment/${environmentId}/votingdefinitiondata`
   )
     .then((res) => {
       return res.data;

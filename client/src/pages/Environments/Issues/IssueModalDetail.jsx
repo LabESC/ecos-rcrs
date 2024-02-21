@@ -28,11 +28,21 @@ export function IssueModalDetail(props) {
         <Typography gutterBottom>
           <strong> Repo: </strong> {issue.repo}
         </Typography>
+        {issue.score ? (
+          <Typography gutterBottom>
+            <strong> Topic Score: </strong> {parseFloat(issue.score).toFixed(5)}
+          </Typography>
+        ) : (
+          ""
+        )}
         <Typography gutterBottom>
-          <strong> Topic Score: </strong> {parseFloat(issue.score).toFixed(5)}
-        </Typography>
-        <Typography gutterBottom>
-          <strong> Github Issue ID: </strong> {issue.issueId}
+          <strong> Github Issue ID: </strong>
+          <a
+            href={`https://github.com/${issue.repo}/issues/${issue.issueId}`}
+            target="_blank"
+          >
+            {issue.issueId}
+          </a>
         </Typography>
         <Typography gutterBottom>
           <strong> Related To Main Issue Score: </strong> {issue.relatedToScore}

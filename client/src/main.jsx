@@ -18,6 +18,9 @@ import NewEnvironment from "./pages/Environments/New.jsx";
 // . Environments -> Issues
 import IssueDetail from "./pages/Environments/Issues/Detail.jsx";
 
+// . Environment for VotingUsers
+import DefinitionDataPage from "./pages/VotingUserEnvironment/DefinitionData.jsx";
+
 // ! Criando rotas
 import {
   Routes,
@@ -41,6 +44,10 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           element={<IssueDetail />}
         ></Route>
         <Route path="/new-environment" element={<NewEnvironment />}></Route>
+        <Route
+          path="/environment/:id/definitiondata"
+          element={<DefinitionDataPage />}
+        />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

@@ -101,7 +101,6 @@ const EnvironmentUpdatePriorityDataRequest = Joi.object({
 
 const EnvironmentUpdateDefinitionOrPriorityDateWithStatusRequest = Joi.object({
   closing_date: Joi.date().required(),
-  status: Joi.string().required(),
 });
 
 const EnvironmentUpdateFinalDataRequest = Joi.object({

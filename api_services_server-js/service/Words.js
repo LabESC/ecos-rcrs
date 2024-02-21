@@ -27,7 +27,7 @@ async function filtraArrayRequestGit(array, sysId) {
   for (const issue of array) {
     if (issue.body != null) {
       // . Obtendo id da issue
-      issueId = issue.id;
+      issueId = issue.number;
 
       // . Obtendo tags da issue
       issueTags =

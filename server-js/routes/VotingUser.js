@@ -4,7 +4,7 @@ const router = express.Router();
 const VotingUserController = require("../controller/VotingUser");
 
 router.get("/:email", VotingUserController.getByEmail);
-router.post("/", VotingUserController.create);
+router.post("/:email", VotingUserController.create);
 router.post(
   "/:email/generateAccessCode",
   VotingUserController.generateAccessCode

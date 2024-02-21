@@ -8,6 +8,7 @@ import {
   TasklistIcon,
   AlertFillIcon,
   CheckCircleIcon,
+  XCircleFillIcon,
 } from "@primer/octicons-react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -26,6 +27,7 @@ export function EnvironmentCard(props) {
     switch (status) {
       case "mining_error":
       case "topics_error":
+      case "cancelled":
         return "#FACECE";
 
       case "mining_done":
@@ -152,6 +154,16 @@ export function EnvironmentCard(props) {
             <CheckCircleIcon size={18} />
             <Typography style={{ fontSize: 10, marginLeft: "0.6em" }}>
               Done
+            </Typography>
+          </Box>
+        );
+
+      case "cancelled":
+        return (
+          <Box style={{ display: "flex", alignItems: "center" }}>
+            <XCircleFillIcon size={18} />
+            <Typography style={{ fontSize: 10, marginLeft: "0.6em" }}>
+              Cancelled
             </Typography>
           </Box>
         );
