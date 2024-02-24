@@ -75,6 +75,10 @@ export function OpenRCRDefinitionVotePopUp(props) {
     setActiveStep((activeStep) => activeStep + 1);
   };
 
+  const goBackStep = () => {
+    setActiveStep((activeStep) => activeStep - 1);
+  };
+
   const registerVotingUser = async () => {
     setIsLoading(true);
 
@@ -229,6 +233,13 @@ export function OpenRCRDefinitionVotePopUp(props) {
               />
             </Box>
             <Box className="ContainerStep" style={{ marginTop: "1em" }}>
+              <Button
+                color="primary"
+                onClick={goBackStep}
+                style={{ marginRight: "0.5em" }}
+              >
+                GO BACK
+              </Button>
               <Button
                 variant="contained"
                 color="primary"

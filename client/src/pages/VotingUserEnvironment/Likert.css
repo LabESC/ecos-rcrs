@@ -1,0 +1,11 @@
+.likertLine {
+  border-top: 3px solid #3f3f3f !important;
+}
+
+.likertText {
+  font-size: 0.7em;
+}
+
+.likertScale {
+  margin-bottom: 0 !important;
+}

@@ -353,3 +353,12 @@ body {
 .StarDivIcon > svg {
   stroke: #000000;
 }
+
+.btn-vote-voting-user:hover > span {
+  color: #0067c7 !important;
+  transition: color 0.5s !important;
+}
+
+.MuiBadge-badge {
+  background-color: #747373 !important;
+}

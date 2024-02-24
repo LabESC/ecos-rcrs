@@ -21,6 +21,9 @@ import IssueDetail from "./pages/Environments/Issues/Detail.jsx";
 // . Environment for VotingUsers
 import DefinitionDataPage from "./pages/VotingUserEnvironment/DefinitionData.jsx";
 
+// . Likert - teste
+import LikertScale from "./pages/VotingUserEnvironment/LikertScale.jsx";
+
 // ! Criando rotas
 import {
   Routes,
@@ -45,9 +48,10 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         ></Route>
         <Route path="/new-environment" element={<NewEnvironment />}></Route>
         <Route
-          path="/environment/:id/definitiondata"
+          path="/environment/:id/definitionvote"
           element={<DefinitionDataPage />}
         />
+        <Route path="/likert" element={<LikertScale />}></Route>
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

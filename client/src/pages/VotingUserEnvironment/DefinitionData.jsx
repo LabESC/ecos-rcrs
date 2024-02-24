@@ -29,6 +29,7 @@ import Sidebar from "./SideBar.jsx";
 import { SuccessButton } from "../../components/Buttons.jsx";
 import { OpenRCRDefinitionVotePopUp } from "./OpenRCRDefinitionVotePopUp.jsx";
 import { IssueModalDetail } from "../Environments/Issues/IssueModalDetail.jsx";
+import LikertScale from "./LikertScale.jsx";
 
 // ! Importações de códigos
 import {
@@ -191,7 +192,7 @@ const DefinitionDataPage = () => {
       return;
     }
 
-    if (scoreData.score < 5 && comment.trim() === "") {
+    if (scoreData.score < 3 && comment.trim() === "") {
       activeErrorDialog(
         `SECO - RCR: Registering vote`,
         "Comment is required for scores below 5.",
@@ -306,11 +307,25 @@ const DefinitionDataPage = () => {
           />
         </Box>
         <Box>
+          <Box sx={{ margin: "1.1em 1.5em" }}>
+            <strong>Levels of agreement:</strong>
+            <ul>
+              <li>1 - Strongly disagree</li>
+              <li>2 - Disagree</li>
+              <li>3 - Neutral</li>
+              <li>4 - Agree</li>
+              <li>5 - Strongly agree</li>
+            </ul>
+          </Box>
           {environment.definition_data.rcrs.map((defData) => {
             return (
               <Box
                 key={`box-${defData.id}`}
-                style={{ display: "flex", minWidth: "100%" }}
+                style={{
+                  display: "flex",
+                  minWidth: "100%",
+                  marginBottom: "0.3em",
+                }}
               >
                 <Accordion
                   key={`Acc-${defData.id}`}
@@ -320,7 +335,10 @@ const DefinitionDataPage = () => {
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls="panel1a-content"
                     id={`ACC-Summ-${defData.id}`}
-                    style={{ fontWeight: "bold", flexDirection: "row-reverse" }}
+                    style={{
+                      fontWeight: "bold",
+                      flexDirection: "row-reverse",
+                    }}
                   >
                     <Box
                       style={{
@@ -330,7 +348,11 @@ const DefinitionDataPage = () => {
                       }}
                     >
                       <Box
-                        style={{ display: "flex", justifyContent: "center" }}
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
                       >
                         {checkIssueHasVote(defData.id) ? (
                           <span
@@ -359,15 +381,18 @@ const DefinitionDataPage = () => {
                           {`#${defData.id} - ${defData.name.toUpperCase()}`}
                         </Box>
                       </Box>
-
-                      <Rating
+                      <LikertScale
+                        onChangeLevel={handleScoreIssue}
+                        rcrId={defData.id}
+                      />
+                      {/* <Rating
                         key={`rating-${defData.id}`}
                         id={`rating-${defData.id}`}
                         style={{ marginRight: "0.5em" }}
                         onChange={(event, newValue) => {
                           handleScoreIssue(newValue, defData.id);
                         }}
-                      />
+                      />*/}
                     </Box>
                   </AccordionSummary>
                   <AccordionDetails>
@@ -430,11 +455,24 @@ const DefinitionDataPage = () => {
                 </Accordion>
 
                 <Button
+                  variant="filled"
+                  className="btn-vote-voting-user"
                   onClick={() => {
                     registerRCRVote(defData.id);
                   }}
                 >
-                  <DiffAddedIcon />
+                  <span
+                    style={{
+                      color: "#d2d2d2",
+                      display: "flex",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <CheckCircleFillIcon size={15} />
+                  </span>
+                  {
+                    //<DiffAddedIcon />
+                  }
                 </Button>
               </Box>
             );

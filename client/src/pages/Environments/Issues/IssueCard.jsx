@@ -17,20 +17,32 @@ export function IssueCard(props) {
       key={`badge-${issue.id}`}
     >
       <Box className="IssueCard" onClick={onClick}>
-        <Box className="IssueCardRepoAndQuantity">
-          <Typography
-            className="IssueCardTxt"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              color: "#313131",
-              fontSize: 10,
-            }}
-          >
-            <strong style={{ marginRight: "4px" }}> Repo: </strong>
-            {issue.repo}
-          </Typography>
-        </Box>
+        <Typography
+          className="IssueCardTxt"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            color: "#313131",
+            fontSize: 12,
+            fontWeight: "bold",
+            textDecoration: "underline",
+          }}
+        >
+          ID: {issue.id}
+        </Typography>
+        <Typography
+          className="IssueCardTxt"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            color: "#313131",
+            fontSize: 10,
+          }}
+        >
+          <strong style={{ marginRight: "4px" }}> Repo: </strong>
+          {issue.repo}
+        </Typography>
+
         <Typography
           style={{
             display: "flex",
