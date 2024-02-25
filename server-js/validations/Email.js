@@ -1,5 +1,4 @@
 const { verifyEmail } = require("@devmehq/email-validator-js");
-var verifier = require("@digitalroute/email-verify");
 
 class Email {
   static async validate(email) {

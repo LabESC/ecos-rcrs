@@ -34,6 +34,7 @@ import {
   getTopicData,
   getEnvironmentNameFromLocalStorage,
   getDefinitionRCRs,
+  setAllTopicsDataToLocalStorage,
 } from "../../api/Environments.jsx";
 
 const EnvironmentDetail = () => {
@@ -98,28 +99,33 @@ const EnvironmentDetail = () => {
       const topics = orderIssuesByRelatedTo(response);
       setTopics(topics);
 
-      // . Setando o topico atual no localStorage
+      // . Setando o topico atual no localStorage e todos os topicos
+      setAllTopicsDataToLocalStorage(topics);
       setTopicDataToLocalStorage(topics[0]);
 
       // . Obtendo rcrs prioritarias associadas
-      const priorityRCRs = await getDefinitionRCRs(
+      const definitionRCRs = await getDefinitionRCRs(
         userId,
         userToken,
         environmentId
       );
 
-      if (priorityRCRs.error) {
+      if (definitionRCRs.error) {
         setIsLoading(false);
+        if (definitionRCRs.status === 404) {
+          return;
+        }
+
         activeErrorDialog(
-          `${priorityRCRs.error.code}: Getting priority RCRs`,
-          priorityRCRs.error.message,
-          priorityRCRs.status
+          `${definitionRCRs.error.code}: Getting definition RCRs`,
+          definitionRCRs.error.message,
+          definitionRCRs.status
         );
         return;
       }
 
       // . Setando as rcrs prioritarias
-      setPriorityRCRs(priorityRCRs.rcrs);
+      setDefinitionRCRs(definitionRCRs.rcrs);
 
       // . Finalizando o carregamento
       setIsLoading(false);
@@ -170,7 +176,7 @@ const EnvironmentDetail = () => {
     { id: null, issues: "", name: "", topic: "" },
   ]); // . Armazena os ambientes do usuário
   const [actualTopic, setActualTopic] = useState(0); // . Armazena o ambiente atual
-  const [priorityRCRs, setPriorityRCRs] = useState([]); // . Armazena as RCRs prioritarias [Array
+  const [definitionRCRs, setDefinitionRCRs] = useState([]); // . Armazena as RCRs prioritarias [Array
 
   // . Função para mudar o topico atual (SELECT)
   const changeTopic = (event) => {
@@ -252,7 +258,7 @@ const EnvironmentDetail = () => {
             action={() => {
               openDefinitionRCRVoteModal();
             }}
-            visibility={priorityRCRs.length !== 0 ? "visible" : "hidden"}
+            visibility={definitionRCRs.length !== 0 ? "visible" : "hidden"}
           />
           <SuccessButton
             icon={<RepoIcon size={18} />}
@@ -266,7 +272,7 @@ const EnvironmentDetail = () => {
             action={() => {
               openPriorityListRcrModal();
             }}
-            visibility={priorityRCRs.length !== 0 ? "visible" : "hidden"}
+            visibility={definitionRCRs.length !== 0 ? "visible" : "hidden"}
           />
         </Box>
         <FormControl
@@ -346,12 +352,12 @@ const EnvironmentDetail = () => {
       <ListAssociatedRCRsEnvPopUp
         open={priorityRCRListModalOpen}
         close={closePriorityListRcrModal}
-        rcrs={priorityRCRs}
+        rcrs={definitionRCRs}
       />
       <OpenRCRDefinitionVotePopUp
         open={startRCRDefinitionVoteModalOpen}
         close={closeDefinitionRCRVoteModal}
-        rcrs={priorityRCRs}
+        rcrs={definitionRCRs}
         environmentId={environmentId}
       />
     </ThemeProvider>

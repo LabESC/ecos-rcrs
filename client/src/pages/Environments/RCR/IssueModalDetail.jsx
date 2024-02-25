@@ -32,7 +32,23 @@ export function IssueModalDetail(props) {
           <strong> Topic Score: </strong> {parseFloat(issue.score).toFixed(5)}
         </Typography>
         <Typography gutterBottom>
-          <strong> Github Issue ID: </strong> {issue.issueId}
+          <strong> Github Issue Number: </strong>
+          <a
+            className="linkGitHubIssue"
+            href={`https://github.com/${issue.repo}/issues/${issue.issueId}`}
+            target="_blank"
+          >
+            {issue.issueId}
+          </a>
+        </Typography>
+        <Typography
+          gutterBottom
+          style={{ display: issue.relatedToScore ? "flex" : "none" }}
+        >
+          <strong style={{ marginRight: "0.25em" }}>
+            Related To Main Issue Score:
+          </strong>
+          {issue.relatedToScore}
         </Typography>
         <Typography
           gutterBottom

@@ -1,10 +1,10 @@
 const { v4: uuidv4 } = require("uuid");
 
 // ! Importando modelos
-const EnvironmentModel = require("../sqlModels").Environment;
-const UserModel = require("../sqlModels").User;
-const VotingUserModel = require("../sqlModels").VotingUser;
-const VotingUserEnvironment = require("../sqlModels").VotingUserEnvironment;
+const EnvironmentModel = require("../database/db").Environment;
+const UserModel = require("../database/db").User;
+const VotingUserModel = require("../database/db").VotingUser;
+const VotingUserEnvironment = require("../database/db").VotingUserEnvironment;
 
 const basicFields = [
   "id",
@@ -207,6 +207,24 @@ class Environment {
    * @returns {Object} The definition data of the environment.
    */
   static async getDefinitionData(id) {
+    const data = await EnvironmentModel.findOne({
+      attributes: ["definition_data"],
+      where: { id: id },
+    });
+
+    if (data) {
+      return data.definition_data;
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Retrieves the definition data of an environment by its ID filtering only the ones for voting.
+   * @param {uuidv4} id - The ID of the environment.
+   * @returns {Object} The definition data of the environment.
+   */
+  static async getDefinitionDataForVoting(id) {
     const data = await EnvironmentModel.findOne({
       attributes: ["definition_data"],
       where: { id: id },

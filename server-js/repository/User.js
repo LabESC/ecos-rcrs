@@ -1,5 +1,5 @@
 const { v4: uuidv4 } = require("uuid");
-const UserModel = require("../sqlModels").User;
+const UserModel = require("../database/db").User;
 const UserValidation = require("../validations/User");
 
 const basicFields = ["id", "name", "email", "status"];
@@ -141,6 +141,14 @@ class UserRepository {
 
     if (user === null) {
       return false;
+    }
+
+    if (user.status === "inactive") {
+      return 1;
+    }
+
+    if (user.status === "pending") {
+      return 2;
     }
 
     const valid = await UserValidation.validatePassword(

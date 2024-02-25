@@ -1,20 +1,18 @@
 import {
-  TextField,
-  Button,
-  Link,
-  Typography,
   Box,
   CircularProgress,
   Backdrop,
   Snackbar,
   Alert,
   AlertTitle,
+  IconButton,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import { PopUpError } from "../../components/PopUp.jsx";
 import { useNavigate } from "react-router-dom";
 import { DiffAddedIcon } from "@primer/octicons-react";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
 // ! Importações de componentes criados
 import theme from "../../components/MuiTheme.jsx";
@@ -104,6 +102,22 @@ const MyEnvironment = () => {
     setHasLoginError(false);
   };
 
+  // ! Funcao para manipular copia da url de votacao
+  const [openURLCopied, setOpenURLCopied] = useState(false);
+
+  const closeURLSnack = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenURLCopied(false);
+  };
+
+  const copyURL = (url) => {
+    navigator.clipboard.writeText(url);
+    setOpenURLCopied(true);
+  };
+
   // ! Variáveis e funções para manipulação do Dialog de erro/interrupção
   const [action, setAction] = useState(null);
 
@@ -146,7 +160,27 @@ const MyEnvironment = () => {
           code: "RCR definition voting",
           msg: [
             `Here's the link for your environment voting:`,
-            `${window.location.origin}/environment/${environmentId}/priorityvote`,
+            <Box style={{ display: "flex", alignItems: "center" }}>
+              <a
+                href={`${window.location.origin}/environment/${environmentId}/definitionvote`}
+                target="_blank"
+                rel="noreferrer"
+                className="linkVoteCopy"
+              >
+                {`${window.location.origin}/environment/${environmentId}/definitionvote`}
+              </a>
+              <IconButton
+                onClick={() => {
+                  copyURL(
+                    `${window.location.origin}/environment/${environmentId}/definitionvote`
+                  );
+                }}
+                style={{ color: "rgba(0, 0, 0, 0.87)" }}
+                aria-label="copy-url"
+              >
+                <ContentCopyIcon />
+              </IconButton>
+            </Box>,
             "You want to stop now the RCR definition voting step?",
           ],
         });
@@ -166,14 +200,6 @@ const MyEnvironment = () => {
       case "topics_done":
         setEnvironmentNameToLocalStorage(name);
         goEnvironmentDetail(environmentId);
-        break;
-
-      case "waiting_rcr_voting":
-        // !! IMPLEMENTAR... (AGUARDANDO FUNÇÃO/ENDPOINT)
-        break;
-
-      case "waiting_rcr_priority":
-        // !! IMPLEMENTAR... (AGUARDANDO FUNÇÃO/ENDPOINT)
         break;
 
       case "rcr_voting_done":
@@ -339,6 +365,7 @@ const MyEnvironment = () => {
         btnSubmit={requestPopUpAction}
       />
       <Snackbar
+        key="SNACK_REQ_INFO"
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         open={requestMade}
         autoHideDuration={2500}
@@ -353,6 +380,14 @@ const MyEnvironment = () => {
           {request.message}
         </Alert>
       </Snackbar>
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        key={`SNACK_COPY_URL_VALIDATION`}
+        open={openURLCopied}
+        autoHideDuration={2500}
+        onClose={closeURLSnack}
+        message="URL Copied!"
+      />
     </ThemeProvider>
   );
 };

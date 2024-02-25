@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 module.exports = {
+  db_ssl: process.env.DB_SSL,
   database: process.env.DB_NAME,
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,

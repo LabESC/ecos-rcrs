@@ -2,6 +2,7 @@ const EnvironmentService = require("../service/Environment");
 const AuthValidator = require("../validations/Auth");
 const APIRequests = require("../service/APIRequests");
 const ErrorSchema = require("../utils/Error");
+const Logger = require("../utils/Logger");
 const EnvironmentSchemas = require("../schemas/Environment");
 
 const entity_name = "environment";
@@ -34,6 +35,9 @@ const msg_user_not_active = {
 
 module.exports = {
   async getAll(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
     // * Getting headers
     const header = req.headers;
 
@@ -56,6 +60,9 @@ module.exports = {
   },
 
   async getById(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
     // * Getting headers
     const header = req.headers;
 
@@ -85,6 +92,9 @@ module.exports = {
   },
 
   async getByUserId(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
     // * Checking if the user is authorized
     const auth = await AuthValidator.validateUser(req.headers);
 
@@ -115,6 +125,9 @@ module.exports = {
   },
 
   async create(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
     // * Checking if the user is authorized
     const auth = await AuthValidator.validateUser(req.headers);
 
@@ -162,6 +175,9 @@ module.exports = {
   },
 
   async updateStatus(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
     // * Control access variable
     let grantAccess = false;
 
@@ -213,6 +229,9 @@ module.exports = {
   },
 
   async updateMiningData(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
     // * Checking if the service is authorized
     const auth = AuthValidator.validateService(req.headers);
     if (!auth) {
@@ -243,20 +262,17 @@ module.exports = {
         return res.status(500).send(ErrorSchema("server", msg_500));
       case null:
         return res.status(404).send(ErrorSchema(entity_name, msg_404));
-    }
-
-    if (
-      Array.isArray(updatedEnvironments) &&
-      updatedEnvironments.length > 0 &&
-      updatedEnvironments[0] > 0
-    ) {
-      return res.status(200).send();
-    } else {
-      return res.status(500).send(ErrorSchema("server", msg_500));
+      case true:
+        return res.status(200).send(true);
+      default:
+        return res.status(500).send(ErrorSchema("server", msg_500));
     }
   },
 
   async updateTopicData(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
     // * Checking if the service is authorized
     const auth = AuthValidator.validateService(req.headers);
     if (!auth) {
@@ -287,20 +303,17 @@ module.exports = {
         return res.status(500).send(ErrorSchema("server", msg_500));
       case null:
         return res.status(404).send(ErrorSchema(entity_name, msg_404));
-    }
-
-    if (
-      Array.isArray(updatedEnvironments) &&
-      updatedEnvironments.length > 0 &&
-      updatedEnvironments[0] > 0
-    ) {
-      return res.status(200).send();
-    } else {
-      return res.status(500).send(ErrorSchema("server", msg_500));
+      case true:
+        return res.status(200).send(true);
+      default:
+        return res.status(500).send(ErrorSchema("server", msg_500));
     }
   },
 
   async updateDefinitionData(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
     // * Checking if the user is authorized
     const auth = await AuthValidator.validateUser(req.headers);
 
@@ -329,20 +342,17 @@ module.exports = {
         return res.status(500).send(ErrorSchema("server", msg_500));
       case null:
         return res.status(404).send(ErrorSchema(entity_name, msg_404));
-    }
-
-    if (
-      Array.isArray(updatedEnvironments) &&
-      updatedEnvironments.length > 0 &&
-      updatedEnvironments[0] > 0
-    ) {
-      return res.status(200).send();
-    } else {
-      return res.status(500).send(ErrorSchema("server", msg_500));
+      case true:
+        return res.status(200).send(true);
+      default:
+        return res.status(500).send(ErrorSchema("server", msg_500));
     }
   },
 
   async updateDefinitionDataWithStatus(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
     // * Checking if the user is authorized
     const auth = await AuthValidator.validateUser(req.headers);
 
@@ -364,7 +374,8 @@ module.exports = {
     const updatedEnvironments =
       await EnvironmentService.updateDefinitionDataWithStatus(
         req.params.id,
-        req.body.closing_date
+        req.body.closing_date,
+        req.body.rcrs_selected
       );
 
     switch (updatedEnvironments) {
@@ -378,6 +389,9 @@ module.exports = {
   },
 
   async getDefinitionRCRByEnvironmentIdAndIssueId(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
     // * Checking if the user is authorized
     const auth = await AuthValidator.validateUser(req.headers);
 
@@ -410,6 +424,9 @@ module.exports = {
   },
 
   async updatePriorityData(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
     // * Checking if the user is authorized
     const auth = await AuthValidator.validateUser(req.headers);
 
@@ -452,6 +469,9 @@ module.exports = {
   },
 
   async updatePriorityDataWithStatus(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
     // * Checking if the user is authorized
     const auth = await AuthValidator.validateUser(req.headers);
 
@@ -496,6 +516,9 @@ module.exports = {
   },
 
   async getPriorityRCRByEnvironmentIdAndIssueId(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
     // * Checking if the user is authorized
     const auth = await AuthValidator.validateUser(req.headers);
 
@@ -529,6 +552,9 @@ module.exports = {
   },
 
   async updateFinalData(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
     // * Checking if the user is authorized
     const auth = AuthValidator.validateService(req.headers);
 
@@ -562,6 +588,9 @@ module.exports = {
   },
 
   async getMiningData(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
     let grantAccess = false;
 
     // * Checking if the user is authorized
@@ -598,6 +627,9 @@ module.exports = {
   },
 
   async getTopicData(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
     let grantAccess = false;
 
     // * Checking if the user is authorized
@@ -634,6 +666,9 @@ module.exports = {
   },
 
   async getDefinitionData(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
     let grantAccess = false;
 
     // * Checking if the user is authorized
@@ -672,6 +707,9 @@ module.exports = {
   },
 
   async getPriorityData(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
     let grantAccess = false;
 
     // * Checking if the user is authorized
@@ -710,6 +748,9 @@ module.exports = {
   },
 
   async getFinalData(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
     let grantAccess = false;
 
     // * Checking if the user is authorized
@@ -746,6 +787,9 @@ module.exports = {
   },
 
   async getVotingUsersByEnvironmentId(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
     // * Checking if the user is authorized
     const auth = await AuthValidator.validateUser(req.headers);
 
@@ -774,6 +818,9 @@ module.exports = {
   },
 
   async getDefinitionDataForVoting(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
     // * Validating id
     if (!req.params.id) {
       return res.status(422).json(ErrorSchema(422, "Id not provided!"));

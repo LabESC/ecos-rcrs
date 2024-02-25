@@ -38,13 +38,17 @@ export function IssueModalDetail(props) {
         <Typography gutterBottom>
           <strong> Github Issue ID: </strong>
           <a
+            className="linkGitHubIssue"
             href={`https://github.com/${issue.repo}/issues/${issue.issueId}`}
             target="_blank"
           >
             {issue.issueId}
           </a>
         </Typography>
-        <Typography gutterBottom>
+        <Typography
+          gutterBottom
+          style={{ display: issue.relatedToScore ? "flex" : "none" }}
+        >
           <strong> Related To Main Issue Score: </strong> {issue.relatedToScore}
         </Typography>
         <Typography

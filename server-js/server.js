@@ -1,11 +1,19 @@
 // ! Importando módulos
 const app = require("./app");
-const db = require("./sqlModels");
+const db = require("./database/db");
 const config = require("./config");
+const cron = require("node-cron");
+
+// ! Tarefas agendadas
+cron.schedule("0 0,15,30,45 */1 * * *", function () {
+  console.log(
+    "CRON: running a task every 0,15,30 and 45 minute of hour (at second 0)"
+  );
+});
 
 // ! Autenticando com o banco e iniciando servidor
 db.sequelize
-  .authenticate()
+  .authenticate({ logging: false })
   .then(async () => {
     console.log("\nModelos:\n", db.sequelize.models, "\n");
     // *Inserir parâmetro "{ force: true }" no método sync() para forçar a redefinição das tabelas que foram modificadas (drop table e recrição)

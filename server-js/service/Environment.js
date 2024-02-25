@@ -82,6 +82,10 @@ class Environment {
       await APIRequests.sendEmail(user.email, subject, emailText);
     } catch (e) {
       console.log(e);
+      await EnvironmentRepository.updateStatus(
+        newEnvironment.id,
+        "mining_error"
+      );
     }
 
     return newEnvironment;
@@ -177,7 +181,7 @@ class Environment {
 
     // * If definition data does not exists, create it
     if (!definitionData) {
-      definitionData = { rcrs: [], status: "elaborating", closing_date: None };
+      definitionData = { rcrs: [], status: "elaborating", closing_date: null };
     }
 
     // * Updating definition data
@@ -201,7 +205,7 @@ class Environment {
     return true;
   }
 
-  static async updateDefinitionDataWithStatus(id, closingDate) {
+  static async updateDefinitionDataWithStatus(id, closingDate, rcrsSelected) {
     // * Obtaining definition data if exists
     let definitionData = null;
     try {
@@ -216,6 +220,15 @@ class Environment {
 
     // * Otherwise, update its closingDate
     definitionData.closing_date = closingDate;
+
+    // * Update each rcr who is included in rcrsSelected to have an attribute "going_to_vote" = "true"
+    for (const rcr of definitionData.rcrs) {
+      if (rcrsSelected.includes(rcr.id)) {
+        rcr.going_to_vote = true;
+      } else {
+        rcr.going_to_vote = false;
+      }
+    }
 
     // * Updating the environment
     try {
@@ -427,6 +440,11 @@ class Environment {
 
     if (!miningData) return miningData;
     if (!definitionData) return definitionData;
+
+    // * Filtering the rcrs who are going to vote
+    definitionData.rcrs = definitionData.rcrs.filter((rcr) => {
+      return rcr.going_to_vote === true;
+    });
 
     // * Joining data with EnvironmentUtils
     definitionData = EnvironmentUtils.joinMiningAndDefinition(

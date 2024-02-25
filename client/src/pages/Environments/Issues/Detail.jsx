@@ -90,7 +90,7 @@ const IssueDetail = () => {
       }
 
       //. Obtendo as RCRs de prioridade
-      const priorityRCRs = await getDefinitionRCRsByEnvironmentIdAndIssueId(
+      const definitionRCRs = await getDefinitionRCRsByEnvironmentIdAndIssueId(
         loggedUser.userId,
         loggedUser.userToken,
         data.environmentId,
@@ -98,19 +98,22 @@ const IssueDetail = () => {
       );
 
       // . Verificando se ocorreu algum erro
-      if (priorityRCRs.error) {
+      if (definitionRCRs.error) {
         setIsLoading(false);
-        activeErrorDialog(
-          `${priorityRCRs.error.code}: Getting rcrs associated with issue`,
-          priorityRCRs.error.message,
-          priorityRCRs.status
-        );
-        return;
-      }
-      console.log(priorityRCRs);
-      // . Armazenando as RCRs associadas
-      setRcrAssociated(priorityRCRs);
 
+        if (definitionRCRs.status !== 404) {
+          activeErrorDialog(
+            `${definitionRCRs.error.code}: Getting definition rcrs associated with issue`,
+            definitionRCRs.error.message,
+            definitionRCRs.status
+          );
+          return;
+        }
+      }
+      if (!definitionRCRs.status) {
+        // . Armazenando as RCRs associadas
+        setRcrAssociated(definitionRCRs);
+      }
       // . Armazenando os ambientes
       const { issueData, relatedToIssues, topic } = response;
       setRelatedToIssues(relatedToIssues);
@@ -265,20 +268,30 @@ const IssueDetail = () => {
             />
           </Box>
         </Box>
-        <Typography variant="h6">{topicData.name}</Typography>
+        <Typography variant="h6">{`Topic ${topicData.name}`}</Typography>
         <Box className="ContainerMainIssueDetail">
           <Box className="SubContainerMainIssueDetail1">
-            <Typography>
+            {/*<Typography>
               <strong> Topic: </strong>
               {issueDetailed.topicNum}
-            </Typography>
+            </Typography>*/}
             <Typography>
-              <strong> Issue: </strong>
+              <strong> Issue ID: </strong>
               {`#${issueDetailed.id}`}
             </Typography>
             <Typography>
               <strong> Repository: </strong>
               {issueDetailed.repo}
+            </Typography>
+            <Typography>
+              <strong> GitHub Issue Number: </strong>
+              <a
+                className="linkGitHubIssue"
+                href={`https://github.com/${issueDetailed.repo}/issues/${issueDetailed.issueId}`}
+                target="_blank"
+              >
+                {`#${issueDetailed.issueId}`}
+              </a>
             </Typography>
             <Typography>
               <strong> Topic Score: </strong>

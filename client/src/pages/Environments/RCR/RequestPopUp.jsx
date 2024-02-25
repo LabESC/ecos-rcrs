@@ -149,6 +149,7 @@ export function RequestRCRPopUp(props) {
       data
     );
 
+    console.log(response);
     // . Verificando se ocorreu algum erro
     if (response.error) {
       setIsLoading(false);
@@ -162,14 +163,14 @@ export function RequestRCRPopUp(props) {
       setIsLoading(false);
       setAlertMessage({
         title: "RCR created",
-        message: "The RCR was successfully created",
+        message: "The RCR was successfully created. Reloading page...",
         severity: "success",
       });
       setHasAlert(true);
-
-      close();
-      location.reload();
     }
+
+    close();
+    location.reload();
   };
 
   return (

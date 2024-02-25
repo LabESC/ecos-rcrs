@@ -18,15 +18,31 @@ import {
   Alert,
   AlertTitle,
   CircularProgress,
+  Slide,
+  Checkbox,
+  IconButton,
 } from "@mui/material";
 import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
-import { useState } from "react";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import CircleCheckedFilled from "@mui/icons-material/CheckCircle";
+import CircleUnchecked from "@mui/icons-material/RadioButtonUnchecked";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import { useState, forwardRef } from "react";
 import { useNavigate } from "react-router-dom";
+
+// ! Importações de componentes criados
+import { IssueModalDetail } from "./Issues/IssueModalDetail.jsx";
+import "./OpenRCRDefinitionVotePopUp.css";
 
 // ! Importações de códigos
 import { verifyLoggedUser, removeLoggedUser } from "../../api/Auth.jsx";
-import { updateDefinitionRCRWithStatus } from "../../api/Environments";
+import {
+  updateDefinitionRCRWithStatus,
+  getIssueDetailsFromTopicDataLocalStorage,
+  getIssueDetailsWithRelatedScoreFromTopicDataLocalStorage,
+} from "../../api/Environments";
 
+// ! Função para os título dos steps
 function getSteps() {
   return [
     <Typography variant="body1" key="t1" style={{ fontWeight: "bold" }}>
@@ -40,6 +56,10 @@ function getSteps() {
     </Typography>,
   ];
 }
+// ! Função para a transição do Dialog
+const Transition = forwardRef(function Transition(props, ref) {
+  return <Slide direction="up" ref={ref} {...props} />;
+});
 
 export function OpenRCRDefinitionVotePopUp(props) {
   // ! Instanciando o useNavigate para redirecionar o usuário pra alguma página
@@ -67,8 +87,93 @@ export function OpenRCRDefinitionVotePopUp(props) {
   });
   const steps = getSteps();
 
+  // ! Função para controlar a passagem entre os steps
   const goToNextStep = () => {
     setActiveStep((activeStep) => activeStep + 1);
+  };
+
+  const goToPreviousStep = () => {
+    setActiveStep((activeStep) => activeStep - 1);
+  };
+
+  const goToClosingDateStep = () => {
+    if (rcrsSelected.length === 0) {
+      setAlertContent({
+        title: "RCRs",
+        message: "Please select at least one RCR to proceed",
+        severity: "error",
+      });
+      setAlertOpen(true);
+      return;
+    }
+    goToNextStep();
+  };
+
+  // ! Componentes para controlar o modal de issue
+  const [issueModal, setIssueModal] = useState({
+    id: null,
+    issueId: "",
+    repo: "",
+    body: "",
+    tags: "",
+    score: "",
+    relatedToScore: "",
+  });
+
+  const [issueModalOpen, setIssueModalOpen] = useState(false);
+
+  const openMainIssueOnModal = (issue) => {
+    const issueData = getIssueDetailsFromTopicDataLocalStorage(issue);
+    setIssueModal(issueData);
+    setIssueModalOpen(true);
+  };
+
+  const openRelatedIssueOnModal = (issueId, mainIssueId, topicNum) => {
+    const issueData = getIssueDetailsWithRelatedScoreFromTopicDataLocalStorage(
+      parseInt(issueId),
+      parseInt(mainIssueId),
+      parseInt(topicNum)
+    );
+    setIssueModal(issueData);
+    setIssueModalOpen(true);
+  };
+
+  const closeIssueModal = () => {
+    setIssueModalOpen(false);
+  };
+
+  // ! Funcao para manipular copia da url de votacao
+  const [openURLCopied, setOpenURLCopied] = useState(false);
+
+  const closeURLSnack = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenURLCopied(false);
+  };
+
+  const copyURL = () => {
+    navigator.clipboard.writeText(finalStepContent.url);
+    setOpenURLCopied(true);
+  };
+
+  // ! Função para controlar as rcrs que serão levadas a votação
+  const [rcrsSelected, setRcrsSelected] = useState([]);
+
+  const handleRCRSelection = (rcrId, event) => {
+    if (rcrsSelected.includes(rcrId)) {
+      const newRcrsSelected = rcrsSelected.filter((r) => r !== rcrId);
+      console.log(newRcrsSelected);
+      setRcrsSelected(newRcrsSelected);
+    } else {
+      console.log(rcrsSelected.concat(rcrId));
+      setRcrsSelected(rcrsSelected.concat(rcrId));
+    }
+  };
+
+  const checkRCRSelected = (rcrId) => {
+    return rcrsSelected.includes(rcrId);
   };
 
   // ! Função para o conteudo de cada step
@@ -89,29 +194,97 @@ export function OpenRCRDefinitionVotePopUp(props) {
             >
               {rcrs.map((rcr) => {
                 return (
-                  <Accordion key={`ACC-${rcr.id}`} style={{ minWidth: "95%" }}>
-                    <AccordionSummary
-                      //expandIcon={<ExpandMoreIcon />}
-                      aria-controls="panel1-content"
-                      id={`ACC-SUMM-${rcr.id}`}
+                  <Box
+                    key={`BOX__ORCRDVPop_${rcr.id}`}
+                    style={{
+                      width: "100%",
+                      margin: "0.2em",
+                      display: "flex",
+                      flexDirection: "row",
+                    }}
+                  >
+                    <Checkbox
+                      key={`CHCK_${rcr.id}`}
+                      icon={<CircleUnchecked />}
+                      checkedIcon={<CircleCheckedFilled />}
+                      checked={checkRCRSelected(rcr.id)}
+                      onChange={(e) => {
+                        handleRCRSelection(rcr.id, e);
+                      }}
+                      inputProps={{ "aria-label": "controlled" }}
+                      color="success"
+                    />
+                    <Accordion
+                      key={`ACC-${rcr.id}`}
+                      style={{ minWidth: "95%" }}
                     >
-                      <strong>{`#${rcr.id} - ${rcr.name}`}</strong>
-                    </AccordionSummary>
-                    <AccordionDetails id={`ACC-DET-${rcr.id}`}>
-                      <Typography>
-                        <strong> Topic: </strong> {rcr.topicNum}
-                      </Typography>
-                      <Typography>
-                        <strong> Details: </strong>
-                        {rcr.details}
-                      </Typography>
-                    </AccordionDetails>
-                  </Accordion>
+                      <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="panel1-content"
+                        id={`ACC-SUMM-${rcr.id}`}
+                      >
+                        <strong>{`#${rcr.id} - ${rcr.name}`}</strong>
+                      </AccordionSummary>
+                      <AccordionDetails id={`ACC-DET-${rcr.id}`}>
+                        <Typography>
+                          <strong> Topic: </strong> {rcr.topicNum}
+                        </Typography>
+                        <Typography>
+                          <strong> Details: </strong>
+                          {rcr.details}
+                        </Typography>
+                        <Box style={{ alignItems: "center !important" }}>
+                          <strong>Main Issue: </strong>
+                          <Button
+                            variant="outlined"
+                            style={{ padding: "0em", marginLeft: "0.4em" }}
+                            onClick={() => {
+                              openMainIssueOnModal(rcr.mainIssue);
+                            }}
+                          >
+                            {rcr.mainIssue}
+                          </Button>
+                        </Box>
+
+                        <Box style={{ alignItems: "center !important" }}>
+                          <strong>Related To issues:</strong>
+                          {rcr.relatedToIssues.map((issue) => {
+                            return (
+                              <Button
+                                key={`RelIssue-${issue}`}
+                                variant="outlined"
+                                style={{
+                                  padding: "0em",
+                                  marginLeft: "0.4em",
+                                  marginTop: "0.8em",
+                                }}
+                                onClick={() => {
+                                  openRelatedIssueOnModal(
+                                    issue,
+                                    rcr.mainIssue,
+                                    rcr.topicNum
+                                  );
+                                }}
+                              >
+                                {issue}
+                              </Button>
+                            );
+                          })}
+                        </Box>
+                      </AccordionDetails>
+                    </Accordion>
+                  </Box>
                 );
               })}
             </Box>
             <Box>
-              <Button autoFocus onClick={goToNextStep} color="error">
+              <Button
+                variant="outlined"
+                autoFocus
+                onClick={goToClosingDateStep}
+                color="info"
+                style={{ marginTop: "0.8em", marginLeft: "0.8em" }}
+              >
                 CONFIRM
               </Button>
             </Box>
@@ -120,7 +293,17 @@ export function OpenRCRDefinitionVotePopUp(props) {
       case 1:
         return (
           <>
-            <Box className="ContainerTextField">
+            <Box
+              className="ContainerTextField"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                justifyContent: "flex-start",
+                flexWrap: "wrap",
+                width: "100% !important",
+              }}
+            >
               <Typography variant="body" component="h5" gutterBottom>
                 Closing date:
               </Typography>
@@ -139,16 +322,34 @@ export function OpenRCRDefinitionVotePopUp(props) {
                 }}
               />
             </Box>
-            <Box className="ContainerStep" style={{ marginTop: "1em" }}>
+            <Box
+              className="ContainerStep"
+              style={{
+                marginTop: "1em",
+                alignItems: "flex-start",
+                justifyContent: "flex-start",
+                alignItems: "flex-start",
+                justifyContent: "flex-start",
+              }}
+            >
               <Button
-                variant="contained"
+                variant="outlined"
+                autoFocus
+                onClick={goToPreviousStep}
+                color="warning"
+                style={{ marginRight: "0.8em" }}
+              >
+                GO BACK
+              </Button>
+              <Button
+                variant="outlined"
                 color={finalStepContent.url === "" ? "primary" : "success"}
                 onClick={
                   finalStepContent.url === "" ? handleStartVote : goToNextStep
                 }
               >
                 {isLoading ? (
-                  <CircularProgress key="c0" size="1.5em" color="white" />
+                  <CircularProgress key="c0" size="1.5em" color="primary" />
                 ) : finalStepContent.url === "" ? (
                   "START VOTING"
                 ) : (
@@ -177,12 +378,28 @@ export function OpenRCRDefinitionVotePopUp(props) {
               {finalStepContent.message}
             </Typography>
 
-            <a href={finalStepContent.url} target="_blank" rel="noreferrer">
-              {finalStepContent.url}
-            </a>
+            <Box style={{ display: "flex", alignItems: "center" }}>
+              <a
+                href={finalStepContent.url}
+                target="_blank"
+                rel="noreferrer"
+                className="linkVoteCopy"
+              >
+                {finalStepContent.url}
+              </a>
+              <IconButton
+                onClick={() => {
+                  copyURL();
+                }}
+                style={{ color: "rgba(0, 0, 0, 0.87)" }}
+                aria-label="copy-url"
+              >
+                <ContentCopyIcon />
+              </IconButton>
+            </Box>
 
             <Button
-              variant="contained"
+              variant="outlined"
               onClick={() => {
                 redirect("/my-environments");
               }}
@@ -237,7 +454,8 @@ export function OpenRCRDefinitionVotePopUp(props) {
       loggedUser.userId,
       loggedUser.userToken,
       environmentId,
-      closingDate
+      closingDate,
+      rcrsSelected
     );
 
     if (request === true) {
@@ -272,13 +490,16 @@ export function OpenRCRDefinitionVotePopUp(props) {
   return (
     <>
       <Dialog
-        fullScreen={fullScreen}
+        fullScreen={true}
+        maxWidth="xl"
         style={{
           backgroundColor: "transparent",
         }}
         open={open}
         onClose={close}
         aria-labelledby="responsive-dialog-list-rcr-env"
+        TransitionComponent={Transition}
+        keepMounted
         //style={{ background: "#D6D6D6" }}
       >
         <DialogTitle
@@ -329,6 +550,7 @@ export function OpenRCRDefinitionVotePopUp(props) {
         </DialogContent>
       </Dialog>
       <Snackbar
+        key={`SNACK_ERRORS_DATA`}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         open={alertOpen}
         autoHideDuration={alertContent.severity === "error" ? 3000 : null}
@@ -343,6 +565,20 @@ export function OpenRCRDefinitionVotePopUp(props) {
           {alertContent.message}
         </Alert>
       </Snackbar>
+      <Snackbar
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        key={`SNACK_COPY_URL_VALIDATION`}
+        open={openURLCopied}
+        autoHideDuration={2500}
+        onClose={closeURLSnack}
+        message="URL Copied!"
+      />
+      <IssueModalDetail
+        open={issueModalOpen}
+        close={closeIssueModal}
+        closeMessage={"Back"}
+        issue={issueModal}
+      />
     </>
   );
 }

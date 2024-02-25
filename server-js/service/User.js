@@ -188,6 +188,10 @@ class User {
         return null;
       }
 
+      if (user == 1 || user == 2) {
+        return user;
+      }
+
       return { id: user.id, token: user.token };
     } catch (e) {
       console.log(e);

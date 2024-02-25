@@ -163,6 +163,10 @@ module.exports = {
     switch (user) {
       case -1:
         return res.status(500).json(ErrorSchema(500, msg_500));
+      case 1:
+        return res.status(401).json(ErrorSchema("user", "User is inactive!"));
+      case 2:
+        return res.status(401).json(ErrorSchema("user", "User is pending!"));
       case null:
         return res.status(401).json(ErrorSchema("password", "Wrong password!"));
       case false:

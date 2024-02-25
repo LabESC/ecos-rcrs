@@ -1,9 +1,9 @@
 const { v4: uuidv4 } = require("uuid");
 
 // ! Importando modelos
-const EnvironmentModel = require("../sqlModels").Environment;
-const VotingUserModel = require("../sqlModels").VotingUser;
-const VotingUserEnvironment = require("../sqlModels").VotingUserEnvironment;
+const EnvironmentModel = require("../database/db").Environment;
+const VotingUserModel = require("../database/db").VotingUser;
+const VotingUserEnvironment = require("../database/db").VotingUserEnvironment;
 
 class VotingUser {
   /**
@@ -98,14 +98,15 @@ class VotingUser {
       votingUserEnvironment = await VotingUserEnvironment.create({
         voting_user_id: id,
         environment_id: environmentId,
-        votes_rcr_definition: votes,
       });
     }
 
     // * Update the definition votes.
-    votingUserEnvironment = await votingUserEnvironment.update({
+    votingUserEnvironment.votes_rcr_definition = votes;
+    await votingUserEnvironment.save();
+    /*votingUserEnvironment.update({
       votes_rcr_definition: votes,
-    });
+    });*/
 
     // * Removing token from the votingUser
     const votingUser = await VotingUserModel.findOne({

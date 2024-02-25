@@ -362,3 +362,27 @@ body {
 .MuiBadge-badge {
   background-color: #747373 !important;
 }
+
+.linkGitHubIssue {
+  color: #000 !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+}
+
+.linkGitHubIssue:hover {
+  color: rgba(0, 0, 0, 0.6) !important;
+  text-decoration: underline !important;
+  transition: color 0.3s !important;
+}
+
+.linkVoteCopy {
+  color: rgba(0, 0, 0, 0.87) !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+}
+
+.linkVoteCopy:hover {
+  color: rgba(0, 0, 0, 0.6) !important;
+  text-decoration: underline !important;
+  transition: color 0.3s !important;
+}

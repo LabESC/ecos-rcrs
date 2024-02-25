@@ -6,6 +6,7 @@ import {
   DialogTitle,
   Button,
   Typography,
+  Snackbar,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
@@ -62,18 +63,7 @@ export function RequestAgainPopUp2(props) {
           <DialogContentText>
             {Array.isArray(action.msg)
               ? action.msg.map((message, index) => {
-                  if (message.includes("http")) {
-                    return (
-                      <a
-                        key={`msg_${index}`}
-                        href={message}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        {message}
-                      </a>
-                    );
-                  } else
+                  if (typeof message === "string")
                     return (
                       <Typography
                         key={`msg_${index}`}
@@ -82,6 +72,7 @@ export function RequestAgainPopUp2(props) {
                         {message}
                       </Typography>
                     );
+                  else return message;
                 })
               : action.msg}
           </DialogContentText>

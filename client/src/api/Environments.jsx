@@ -61,7 +61,7 @@ export const getEnvironmentIdAndIssueIdFromUrl = () => {
   const issueId = urlSplit[urlSplit.length - 1];
   const environmentId = urlSplit[urlSplit.length - 3];
 
-  // . Verificando se os ids são uuid
+  // . Verificando se o environmentId é uuid
   if (!regexUUID.test(environmentId)) {
     return null;
   }
@@ -172,6 +172,14 @@ export const setIssueDataToLocalStorage = (issueData, topicData) => {
   localStorage.setItem("SECO_24_topic-data", JSON.stringify(topicData));
   localStorage.setItem("SECO_24_issue-data", JSON.stringify(issueData));
 };
+export const setAllTopicsDataToLocalStorage = (topicsData) => {
+  if (!topicsData) {
+    return;
+  }
+
+  // . Parseando JSON objeto para JSON string
+  localStorage.setItem("SECO_24_all-topic-data", JSON.stringify(topicsData));
+};
 
 export const setTopicDataToLocalStorage = (topicData) => {
   if (!topicData) {
@@ -224,7 +232,7 @@ export const getIssueDataFromLocalStorage = (issueId, environmentId) => {
   };
 
   // . Obtendo os dados das issues em relatedTo no topico e atualizando as no relatedTo da Issue
-  const relatedToIssues = issueData.relatedTo.map((relatedToIssue) => {
+  let relatedToIssues = issueData.relatedTo.map((relatedToIssue) => {
     const issue = topicData.issues.find(
       (issue) => issue.id === relatedToIssue.id
     );
@@ -234,7 +242,10 @@ export const getIssueDataFromLocalStorage = (issueId, environmentId) => {
     } catch (e) {
       console.log("Erro ao remover o atributo relatedTo da issue", e);
     }
-    return { ...issue, relatedToScore: relatedToIssue.score.toFixed(5) };
+    return {
+      ...issue,
+      relatedToScore: parseFloat(relatedToIssue.score.toFixed(5)),
+    };
   });
 
   // . Trocando atributo relatedToIssues da issue para a quantidade e removendo-o
@@ -244,6 +255,12 @@ export const getIssueDataFromLocalStorage = (issueId, environmentId) => {
     console.log("Erro ao remover o atributo relatedTo da issue", e);
   }
 
+  // . Ordenando relatedToIssues por score
+  relatedToIssues = relatedToIssues.sort(
+    (a, b) => b.relatedToScore - a.relatedToScore
+  );
+
+  console.log("relatedToIssues", relatedToIssues);
   return { issueData, relatedToIssues, topic };
 };
 
@@ -384,11 +401,12 @@ export const updateDefinitionRCRWithStatus = async (
   userId,
   userToken,
   environmentId,
-  closingDate
+  closingDate,
+  rcrsSelected
 ) => {
   const result = await Axios.patch(
     `${baseUrl}/environment/${environmentId}/definitiondata`,
-    { closing_date: closingDate },
+    { closing_date: closingDate, rcrs_selected: rcrsSelected },
     { headers: { "user-id": userId, "user-token": userToken } }
   )
     .then((res) => {
@@ -421,4 +439,67 @@ export const getDefinitionDataForVoting = async (environmentId) => {
     });
 
   return result;
+};
+
+export const getIssueDetailsFromTopicDataLocalStorage = (issueId) => {
+  let topicData = getTopicDataFromLocalStorage();
+  if (!topicData) {
+    return null;
+  }
+
+  let issueData = topicData.issues.find(
+    (issue) => issue.id === parseInt(issueId)
+  );
+  if (!issueData) {
+    return null;
+  }
+
+  delete issueData.relatedTo;
+  return issueData;
+};
+
+export const getIssueDetailsWithRelatedScoreFromTopicDataLocalStorage = (
+  issueId,
+  mainIssueId,
+  topicNum
+) => {
+  // Implementar a função que retorna os detalhes da issue com o score relacionado a mainIssue a partir dos dados do topico
+  let topicData = localStorage.getItem("SECO_24_all-topic-data");
+
+  if (!topicData) {
+    return null;
+  }
+
+  // . Parseando JSON string para JSON objeto
+  topicData = JSON.parse(topicData);
+
+  // . Buscando o topico pelo numero
+  const topic = topicData.find((topic) => parseInt(topic.id) === topicNum);
+
+  // . Buscando a mainIssue no atributo "issues" do topico
+  const mainIssue = topic.issues.find(
+    (issue) => parseInt(issue.id) === mainIssueId
+  );
+
+  // . Buscando a issue relacionada no atributo "relatedTo" da mainIssue para obter o score relacionado a issue mãe
+  const relatedIssueRelation = mainIssue.relatedTo.find(
+    (relatedToIssue) => parseInt(relatedToIssue.id) === issueId
+  );
+
+  // . Buscando a issue relacionada no atributo "issues" do topico
+  const relatedIssue = topic.issues.find(
+    (issue) => parseInt(issue.id) === issueId
+  );
+
+  // . Relacionando o score da issue relacionada a mainIssue
+  relatedIssue.relatedToScore = relatedIssueRelation.score;
+
+  // . Removendo o atributo relatedTo
+  try {
+    delete relatedIssue.relatedTo;
+  } catch (e) {
+    console.log("Erro ao remover o atributo relatedTo da issue");
+  }
+
+  return relatedIssue;
 };
