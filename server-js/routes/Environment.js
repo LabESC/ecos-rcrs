@@ -42,5 +42,6 @@ router.get(
   "/:id/votingdefinitiondata",
   EnvironmentController.getDefinitionDataForVoting
 );
+router.post("/:id/clone", EnvironmentController.clone);
 
 module.exports = router;

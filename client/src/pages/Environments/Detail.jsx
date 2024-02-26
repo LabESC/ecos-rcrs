@@ -244,7 +244,7 @@ const EnvironmentDetail = () => {
                 : "hidden"
             }
           >
-            {"Topics: " + topics.length}
+            {"Topics quantity: " + topics.length}
           </Typography>
           <SuccessButton
             icon={<PeopleIcon size={18} />}

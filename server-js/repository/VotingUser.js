@@ -152,6 +152,21 @@ class VotingUser {
 
     return votingUserEnvironment;
   }
+
+  /**
+   * Retrieves the definition votes of voting users in a specific environment.
+   * @param {uuidv4} environmentId - The ID of the environment.
+   * @returns {Object|null} - The definition votes or null if the relation does not exist.
+   */
+  static async getDefinitionVotesOfEnvironment(environmentId) {
+    const votingUserEnvironment = await VotingUserEnvironment.findOne({
+      where: { environment_id: environmentId },
+    });
+
+    if (votingUserEnvironment === null) return null;
+
+    return votingUserEnvironment.votes_rcr_definition;
+  }
 }
 
 module.exports = VotingUser;

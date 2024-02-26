@@ -5,6 +5,17 @@ import getServerError from "./ServerError.jsx";
 
 const regexUUID = /^[a-z,0-9,-]{36,36}$/;
 
+// * LOCAL STORAGE
+export const setEnvironmentStatusToLocalStorage = (status) => {
+  localStorage.setItem("SECO_24_env-status", status);
+  return;
+};
+
+export const getEnvironmentStatusFromLocalStorage = () => {
+  const status = localStorage.getItem("SECO_24_env-status");
+  return status;
+};
+
 export const getEnvironmentIdFromLocalStorage = () => {
   const environmentId = localStorage.getItem("SECO_24_env-id");
   return environmentId;
@@ -20,21 +31,50 @@ export const getEnvironmentNameFromLocalStorage = () => {
   return environmentName;
 };
 
-export const getEnvironmentIdFromUrl = () => {
-  // . Obtendo o id do ambiente
-  const url = window.location.href;
-  const urlSplit = url.split("/");
-  const environmentId = urlSplit[urlSplit.length - 1];
+export const getIssueDetailsWithRelatedScoreFromTopicDataLocalStorage = (
+  issueId,
+  mainIssueId,
+  topicNum
+) => {
+  // Implementar a função que retorna os detalhes da issue com o score relacionado a mainIssue a partir dos dados do topico
+  let topicData = localStorage.getItem("SECO_24_all-topic-data");
 
-  // . Verificando se o id é uuid
-  if (!regexUUID.test(environmentId)) {
+  if (!topicData) {
     return null;
   }
 
-  // . Setando o id do ambiente no localStorage
-  localStorage.setItem("SECO_24_env-id", environmentId);
+  // . Parseando JSON string para JSON objeto
+  topicData = JSON.parse(topicData);
 
-  return environmentId;
+  // . Buscando o topico pelo numero
+  const topic = topicData.find((topic) => parseInt(topic.id) === topicNum);
+
+  // . Buscando a mainIssue no atributo "issues" do topico
+  const mainIssue = topic.issues.find(
+    (issue) => parseInt(issue.id) === mainIssueId
+  );
+
+  // . Buscando a issue relacionada no atributo "relatedTo" da mainIssue para obter o score relacionado a issue mãe
+  const relatedIssueRelation = mainIssue.relatedTo.find(
+    (relatedToIssue) => parseInt(relatedToIssue.id) === issueId
+  );
+
+  // . Buscando a issue relacionada no atributo "issues" do topico
+  const relatedIssue = topic.issues.find(
+    (issue) => parseInt(issue.id) === issueId
+  );
+
+  // . Relacionando o score da issue relacionada a mainIssue
+  relatedIssue.relatedToScore = relatedIssueRelation.score;
+
+  // . Removendo o atributo relatedTo
+  try {
+    delete relatedIssue.relatedTo;
+  } catch (e) {
+    console.log("Erro ao remover o atributo relatedTo da issue");
+  }
+
+  return relatedIssue;
 };
 
 export const getEnvironmentIdFromUrlVoting = () => {
@@ -67,6 +107,152 @@ export const getEnvironmentIdAndIssueIdFromUrl = () => {
   }
 
   return { environmentId, issueId };
+};
+
+export const setIssueDataToLocalStorage = (issueData, topicData) => {
+  if (!issueData || !topicData) {
+    return;
+  }
+
+  // . Parseando JSON objeto para JSON string
+  localStorage.setItem("SECO_24_topic-data", JSON.stringify(topicData));
+  localStorage.setItem("SECO_24_issue-data", JSON.stringify(issueData));
+};
+
+export const setAllTopicsDataToLocalStorage = (topicsData) => {
+  if (!topicsData) {
+    return;
+  }
+
+  // . Parseando JSON objeto para JSON string
+  localStorage.setItem("SECO_24_all-topic-data", JSON.stringify(topicsData));
+};
+
+export const setTopicDataToLocalStorage = (topicData) => {
+  if (!topicData) {
+    return;
+  }
+
+  // . Parseando JSON objeto para JSON string
+  localStorage.setItem("SECO_24_topic-data", JSON.stringify(topicData));
+};
+
+export const getTopicDataFromLocalStorage = () => {
+  let topicData = localStorage.getItem("SECO_24_topic-data");
+
+  if (!topicData) {
+    return null;
+  }
+
+  // . Parseando JSON string para JSON objeto
+  topicData = JSON.parse(topicData);
+
+  return topicData;
+};
+
+export const getIssueDataFromLocalStorage = (issueId, environmentId) => {
+  const environmentLocalStorage = localStorage.getItem("SECO_24_env-id");
+
+  if (environmentLocalStorage !== environmentId) {
+    return null;
+  }
+
+  let topicData = localStorage.getItem("SECO_24_topic-data");
+  if (!topicData) {
+    return null;
+  }
+
+  topicData = JSON.parse(topicData);
+
+  const issueData = topicData.issues.find(
+    (issue) => issue.id === parseInt(issueId)
+  );
+
+  if (!issueData) {
+    return null;
+  }
+
+  // . Obtendo dados do topico (id, name)
+  const topic = {
+    id: topicData.id,
+    name: topicData.name,
+  };
+
+  // . Obtendo os dados das issues em relatedTo no topico e atualizando as no relatedTo da Issue
+  let relatedToIssues = issueData.relatedTo.map((relatedToIssue) => {
+    const issue = topicData.issues.find(
+      (issue) => issue.id === relatedToIssue.id
+    );
+    // . Remover o atributo relatedTo
+    try {
+      delete issue.relatedTo;
+    } catch (e) {
+      console.log("Erro ao remover o atributo relatedTo da issue", e);
+    }
+    return {
+      ...issue,
+      relatedToScore: parseFloat(relatedToIssue.score.toFixed(5)),
+    };
+  });
+
+  // . Trocando atributo relatedToIssues da issue para a quantidade e removendo-o
+  try {
+    delete issueData.relatedTo;
+  } catch (e) {
+    console.log("Erro ao remover o atributo relatedTo da issue", e);
+  }
+
+  // . Ordenando relatedToIssues por score
+  relatedToIssues = relatedToIssues.sort(
+    (a, b) => b.relatedToScore - a.relatedToScore
+  );
+
+  console.log("relatedToIssues", relatedToIssues);
+  return { issueData, relatedToIssues, topic };
+};
+
+export const getIssueDetailsFromTopicDataLocalStorage = (issueId) => {
+  let topicData = getTopicDataFromLocalStorage();
+  if (!topicData) {
+    return null;
+  }
+
+  let issueData = topicData.issues.find(
+    (issue) => issue.id === parseInt(issueId)
+  );
+  if (!issueData) {
+    return null;
+  }
+
+  delete issueData.relatedTo;
+  return issueData;
+};
+
+export const setPriorityRCRLToLocalStorage = (priorityRCRs) => {
+  if (!priorityRCRs) {
+    return;
+  }
+
+  // . Parseando JSON objeto para JSON string
+  localStorage.setItem("SECO_24_priority-rcr", JSON.stringify(priorityRCRs));
+};
+
+// * API
+export const getEnvironmentIdFromUrl = () => {
+  // . Obtendo o id do ambiente
+  const url = window.location.href;
+  const urlSplit = url.split("/");
+  const environmentId = urlSplit[urlSplit.length - 1];
+
+  // . Verificando se o id é uuid
+  if (!regexUUID.test(environmentId)) {
+    return null;
+  }
+
+  // . Setando o id do ambiente no localStorage
+  localStorage.setItem("SECO_24_env-id", environmentId);
+
+  return environmentId;
 };
 
 export const getMyEnvironments = async (userId, userToken) => {
@@ -161,107 +347,6 @@ export const getTopicData = async (userId, userToken, environmentId) => {
     });
 
   return result;
-};
-
-export const setIssueDataToLocalStorage = (issueData, topicData) => {
-  if (!issueData || !topicData) {
-    return;
-  }
-
-  // . Parseando JSON objeto para JSON string
-  localStorage.setItem("SECO_24_topic-data", JSON.stringify(topicData));
-  localStorage.setItem("SECO_24_issue-data", JSON.stringify(issueData));
-};
-export const setAllTopicsDataToLocalStorage = (topicsData) => {
-  if (!topicsData) {
-    return;
-  }
-
-  // . Parseando JSON objeto para JSON string
-  localStorage.setItem("SECO_24_all-topic-data", JSON.stringify(topicsData));
-};
-
-export const setTopicDataToLocalStorage = (topicData) => {
-  if (!topicData) {
-    return;
-  }
-
-  // . Parseando JSON objeto para JSON string
-  localStorage.setItem("SECO_24_topic-data", JSON.stringify(topicData));
-};
-
-export const getTopicDataFromLocalStorage = () => {
-  let topicData = localStorage.getItem("SECO_24_topic-data");
-
-  if (!topicData) {
-    return null;
-  }
-
-  // . Parseando JSON string para JSON objeto
-  topicData = JSON.parse(topicData);
-
-  return topicData;
-};
-
-export const getIssueDataFromLocalStorage = (issueId, environmentId) => {
-  const environmentLocalStorage = localStorage.getItem("SECO_24_env-id");
-
-  if (environmentLocalStorage !== environmentId) {
-    return null;
-  }
-
-  let topicData = localStorage.getItem("SECO_24_topic-data");
-  if (!topicData) {
-    return null;
-  }
-
-  topicData = JSON.parse(topicData);
-
-  const issueData = topicData.issues.find(
-    (issue) => issue.id === parseInt(issueId)
-  );
-
-  if (!issueData) {
-    return null;
-  }
-
-  // . Obtendo dados do topico (id, name)
-  const topic = {
-    id: topicData.id,
-    name: topicData.name,
-  };
-
-  // . Obtendo os dados das issues em relatedTo no topico e atualizando as no relatedTo da Issue
-  let relatedToIssues = issueData.relatedTo.map((relatedToIssue) => {
-    const issue = topicData.issues.find(
-      (issue) => issue.id === relatedToIssue.id
-    );
-    // . Remover o atributo relatedTo
-    try {
-      delete issue.relatedTo;
-    } catch (e) {
-      console.log("Erro ao remover o atributo relatedTo da issue", e);
-    }
-    return {
-      ...issue,
-      relatedToScore: parseFloat(relatedToIssue.score.toFixed(5)),
-    };
-  });
-
-  // . Trocando atributo relatedToIssues da issue para a quantidade e removendo-o
-  try {
-    delete issueData.relatedTo;
-  } catch (e) {
-    console.log("Erro ao remover o atributo relatedTo da issue", e);
-  }
-
-  // . Ordenando relatedToIssues por score
-  relatedToIssues = relatedToIssues.sort(
-    (a, b) => b.relatedToScore - a.relatedToScore
-  );
-
-  console.log("relatedToIssues", relatedToIssues);
-  return { issueData, relatedToIssues, topic };
 };
 
 export const requestMiningData = async (userId, userToken, environmentId) => {
@@ -372,6 +457,27 @@ export const getDefinitionRCRs = async (userId, userToken, environmentId) => {
   return result;
 };
 
+export const getPriorityRCRs = async (userId, userToken, environmentId) => {
+  const result = await Axios.get(
+    `${baseUrl}/environment/${environmentId}/prioritydata`,
+    {
+      headers: { "user-id": userId, "user-token": userToken },
+    }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+
+  return result;
+};
+
 export const updateStatus = async (
   userId,
   userToken,
@@ -439,67 +545,4 @@ export const getDefinitionDataForVoting = async (environmentId) => {
     });
 
   return result;
-};
-
-export const getIssueDetailsFromTopicDataLocalStorage = (issueId) => {
-  let topicData = getTopicDataFromLocalStorage();
-  if (!topicData) {
-    return null;
-  }
-
-  let issueData = topicData.issues.find(
-    (issue) => issue.id === parseInt(issueId)
-  );
-  if (!issueData) {
-    return null;
-  }
-
-  delete issueData.relatedTo;
-  return issueData;
-};
-
-export const getIssueDetailsWithRelatedScoreFromTopicDataLocalStorage = (
-  issueId,
-  mainIssueId,
-  topicNum
-) => {
-  // Implementar a função que retorna os detalhes da issue com o score relacionado a mainIssue a partir dos dados do topico
-  let topicData = localStorage.getItem("SECO_24_all-topic-data");
-
-  if (!topicData) {
-    return null;
-  }
-
-  // . Parseando JSON string para JSON objeto
-  topicData = JSON.parse(topicData);
-
-  // . Buscando o topico pelo numero
-  const topic = topicData.find((topic) => parseInt(topic.id) === topicNum);
-
-  // . Buscando a mainIssue no atributo "issues" do topico
-  const mainIssue = topic.issues.find(
-    (issue) => parseInt(issue.id) === mainIssueId
-  );
-
-  // . Buscando a issue relacionada no atributo "relatedTo" da mainIssue para obter o score relacionado a issue mãe
-  const relatedIssueRelation = mainIssue.relatedTo.find(
-    (relatedToIssue) => parseInt(relatedToIssue.id) === issueId
-  );
-
-  // . Buscando a issue relacionada no atributo "issues" do topico
-  const relatedIssue = topic.issues.find(
-    (issue) => parseInt(issue.id) === issueId
-  );
-
-  // . Relacionando o score da issue relacionada a mainIssue
-  relatedIssue.relatedToScore = relatedIssueRelation.score;
-
-  // . Removendo o atributo relatedTo
-  try {
-    delete relatedIssue.relatedTo;
-  } catch (e) {
-    console.log("Erro ao remover o atributo relatedTo da issue");
-  }
-
-  return relatedIssue;
 };

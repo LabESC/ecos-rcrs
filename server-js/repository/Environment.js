@@ -1,4 +1,6 @@
 const { v4: uuidv4 } = require("uuid");
+// ! Importando módulos do sequelize
+const { Op } = require("sequelize");
 
 // ! Importando modelos
 const EnvironmentModel = require("../database/db").Environment;
@@ -319,6 +321,30 @@ class Environment {
       attributes: ["repos"],
       where: { id: id },
     });
+  }
+
+  static async getDefinitionVoteExpiredEnvironments() {
+    console.log(new Date());
+    return await EnvironmentModel.findAll({
+      attributes: ["id", "name", "definition_data"],
+      where: {
+        status: "waiting_rcr_voting",
+        "definition_data.closing_date": { [Op.lt]: new Date() },
+      },
+      include: [
+        {
+          model: UserModel,
+          attributes: ["email"],
+        },
+      ],
+    });
+  }
+
+  static async endDefinitionVoteForEnvironment(id) {
+    return await EnvironmentModel.update(
+      { "definition_data.status": "closed" },
+      { where: { id: id } }
+    );
   }
 }
 

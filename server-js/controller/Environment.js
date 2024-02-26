@@ -849,4 +849,38 @@ module.exports = {
         return res.status(200).send(definitionData);
     }
   },
+
+  async clone(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
+    // * Checking if the user is authorized
+    const auth = await AuthValidator.validateUser(req.headers);
+
+    if (!auth) {
+      return res.status(401).json(ErrorSchema("Auth", "Unauthorized!"));
+    }
+
+    // * Validating id
+    if (!req.params.id || !req.body.name) {
+      return res
+        .status(422)
+        .json(ErrorSchema(422, "Id or new name not provided!"));
+    }
+
+    // * Cloning environment
+    const clonedEnvironment = await EnvironmentService.clone(
+      req.params.id,
+      req.body.name
+    );
+
+    switch (clonedEnvironment) {
+      case -1:
+        return res.status(500).send(ErrorSchema("server", msg_500));
+      case -2:
+        return res.status(404).send(ErrorSchema(entity_name, msg_404));
+      default:
+        return res.status(200).send(clonedEnvironment);
+    }
+  },
 };

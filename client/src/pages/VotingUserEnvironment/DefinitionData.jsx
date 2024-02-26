@@ -195,7 +195,7 @@ const DefinitionDataPage = () => {
     if (scoreData.score < 3 && comment.trim() === "") {
       activeErrorDialog(
         `SECO - RCR: Registering vote`,
-        "Comment is required for scores below 5.",
+        "Comment is required for scores below 3.",
         "400"
       );
       return;

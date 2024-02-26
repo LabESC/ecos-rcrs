@@ -5,7 +5,9 @@ const config = require("./config");
 const cron = require("node-cron");
 
 // ! Tarefas agendadas
+const CronJobs = require("./service/CronJobs");
 cron.schedule("0 0,15,30,45 */1 * * *", function () {
+  CronJobs.updateEnvironmentsVotingStatus();
   console.log(
     "CRON: running a task every 0,15,30 and 45 minute of hour (at second 0)"
   );

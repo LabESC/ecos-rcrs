@@ -27,6 +27,7 @@ import { verifyLoggedUser, removeLoggedUser } from "../../api/Auth.jsx";
 import {
   getMyEnvironments,
   setEnvironmentNameToLocalStorage,
+  setEnvironmentStatusToLocalStorage,
   requestMiningData,
   requestTopicData,
 } from "../../api/Environments.jsx";
@@ -203,7 +204,9 @@ const MyEnvironment = () => {
         break;
 
       case "rcr_voting_done":
-        // !! IMPLEMENTAR... (AGUARDANDO PAGINA)
+        setEnvironmentNameToLocalStorage(name);
+        setEnvironmentStatusToLocalStorage(status);
+        goEnvironmentDetailAfterDefinitionVoting(environmentId);
         break;
 
       case "rcr_priority_done":
@@ -291,6 +294,11 @@ const MyEnvironment = () => {
   // . Ir para a página de detalhes do ambiente
   const goEnvironmentDetail = (id) => {
     redirect(`/environment/${id}`);
+  };
+
+  // . Ir para a página de detalhes do ambiente
+  const goEnvironmentDetailAfterDefinitionVoting = (id) => {
+    redirect(`/environment/${id}/priority`);
   };
 
   // . Declarando elementos da página

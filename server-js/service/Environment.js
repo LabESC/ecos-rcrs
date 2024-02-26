@@ -218,8 +218,9 @@ class Environment {
     // * If does not exists, return it
     if (!definitionData) return definitionData;
 
-    // * Otherwise, update its closingDate
+    // * Otherwise, update its closingDate and its status
     definitionData.closing_date = closingDate;
+    definitionData.status = "voting";
 
     // * Update each rcr who is included in rcrsSelected to have an attribute "going_to_vote" = "true"
     for (const rcr of definitionData.rcrs) {
@@ -455,6 +456,106 @@ class Environment {
     environment.definition_data = definitionData;
 
     return environment;
+  }
+
+  static async clone(id, newName) {
+    // * Obtaining environment data
+    let environment = null;
+    try {
+      environment = await EnvironmentRepository.getById(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    if (!environment) return environment;
+
+    // * Creating new environment
+    let newEnvironment = {
+      name: newName,
+      user_id: environment.user_id,
+      mining_type: environment.mining_type,
+      organization_name: environment.organization_name,
+      details: environment.details,
+      repos: environment.repos,
+      status: "topics_done",
+      mining_data: null,
+      topic_data: null,
+      definition_data: null,
+      priority_data: null,
+      final_data: null,
+    };
+
+    // * Obtaining mining_data
+    let dataSearch = null;
+    try {
+      dataSearch = await EnvironmentRepository.getMiningData(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    if (dataSearch) {
+      newEnvironment.mining_data = dataSearch;
+    }
+
+    // * Obtaining topic_data
+    dataSearch = null;
+    try {
+      dataSearch = await EnvironmentRepository.getTopicData(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    if (dataSearch) {
+      newEnvironment.topic_data = dataSearch;
+    }
+
+    // * Checking if has definition data
+    dataSearch = null;
+    try {
+      dataSearch = await EnvironmentRepository.getDefinitionData(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    if (dataSearch) {
+      newEnvironment.definition_data = dataSearch;
+    }
+
+    // * Creating the new environment
+    try {
+      newEnvironment = await EnvironmentRepository.create(newEnvironment);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    if (!newEnvironment) return newEnvironment;
+
+    // * Sending e-mail to the user
+    const user = await UserRepository.getById(environment.user_id);
+    const subject = `SECO - RCR: ${newEnvironment.name} created`;
+    let emailText = `<br/>${user.name}, your environment ${environment.name} was cloned!\n`;
+    emailText += `<br/><strong>Environment name</strong>: ${newEnvironment.name}\n`;
+    emailText += `<br/><strong>Mining type</strong>: ${newEnvironment.mining_type}\n`;
+    emailText += `<br/><strong>Repositories</strong>: ${newEnvironment.repos.join(
+      ", "
+    )}\n`;
+    if (newEnvironment.mining_type === "organization") {
+      emailText += `<br/><strong>Organization name</strong>: ${newEnvironment.organization_name}\n`;
+    }
+    emailText += `<br/><strong>Details</strong>: ${newEnvironment.details}\n`;
+
+    try {
+      await APIRequests.sendEmail(user.email, subject, emailText);
+    } catch (e) {
+      console.log(e);
+    }
+
+    return newEnvironment;
   }
 }
 
