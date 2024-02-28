@@ -883,4 +883,29 @@ module.exports = {
         return res.status(200).send(clonedEnvironment);
     }
   },
+
+  async getIssueFromMiningData(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
+    // * Validating id
+    if ((!req.params.id, !req.params.issueId)) {
+      return res.status(422).json(ErrorSchema(422, "Id not provided!"));
+    }
+
+    // * Getting issue from mining data
+    const issue = await EnvironmentService.getIssueFromMiningData(
+      req.params.id,
+      req.params.issueId
+    );
+
+    switch (issue) {
+      case -1:
+        return res.status(500).send(ErrorSchema("server", msg_500));
+      case -2:
+        return res.status(404).send(ErrorSchema(entity_name, msg_404));
+      default:
+        return res.status(200).send(issue);
+    }
+  },
 };

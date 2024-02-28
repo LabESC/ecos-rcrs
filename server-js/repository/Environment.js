@@ -1,6 +1,6 @@
 const { v4: uuidv4 } = require("uuid");
 // ! Importando módulos do sequelize
-const { Op } = require("sequelize");
+const { Op, literal } = require("sequelize");
 
 // ! Importando modelos
 const EnvironmentModel = require("../database/db").Environment;
@@ -342,9 +342,19 @@ class Environment {
 
   static async endDefinitionVoteForEnvironment(id) {
     return await EnvironmentModel.update(
-      { "definition_data.status": "closed" },
+      {
+        mining_data: literal('mining_data || \'{"status": "done"}\''),
+      },
+      // Condition
       { where: { id: id } }
     );
+  }
+
+  static async getIssuesFromMiningData(environmentId) {
+    return await EnvironmentModel.findOne({
+      attributes: ["mining_data.issue"],
+      where: { id: environmentId },
+    });
   }
 }
 

@@ -14,6 +14,7 @@ import ForgotPassword from "./pages/Auth/ForgotPassword.jsx";
 import MyEnvironment from "./pages/Environments/My.jsx";
 import EnvironmentDetail from "./pages/Environments/Detail.jsx";
 import NewEnvironment from "./pages/Environments/New.jsx";
+import EnvironmentDetailPriority from "./pages/Environments/DetailPriority.jsx";
 
 // . Environments -> Issues
 import IssueDetail from "./pages/Environments/Issues/Detail.jsx";
@@ -25,13 +26,7 @@ import DefinitionDataPage from "./pages/VotingUserEnvironment/DefinitionData.jsx
 import LikertScale from "./pages/VotingUserEnvironment/LikertScale.jsx";
 
 // ! Criando rotas
-import {
-  Routes,
-  BrowserRouter,
-  Route,
-  RouterProvider,
-  createBrowserRouter,
-} from "react-router-dom";
+import { Routes, BrowserRouter, Route } from "react-router-dom";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
@@ -51,7 +46,10 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           path="/environment/:id/definitionvote"
           element={<DefinitionDataPage />}
         />
-        <Route path="/likert" element={<LikertScale />}></Route>
+        <Route
+          path="/environment/:id/priority"
+          element={<EnvironmentDetailPriority />}
+        />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>

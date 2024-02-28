@@ -557,6 +557,32 @@ class Environment {
 
     return newEnvironment;
   }
+
+  static async getIssueFromMiningData(environmentId, issueId) {
+    // * Obtaining mining data
+    let issueData = null;
+    try {
+      issueData = await EnvironmentRepository.getIssuesFromMiningData(
+        environmentId
+      );
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    if (!issueData) return issueData;
+
+    // * Obtaining issue
+    let issue = null;
+    for (const issueIterated of issueData) {
+      if (issueIterated.id === issueId) {
+        issue = issueIterated;
+        break;
+      }
+    }
+
+    return issue ? issue : -2;
+  }
 }
 
 module.exports = Environment;

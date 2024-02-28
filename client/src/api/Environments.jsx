@@ -128,6 +128,17 @@ export const setAllTopicsDataToLocalStorage = (topicsData) => {
   localStorage.setItem("SECO_24_all-topic-data", JSON.stringify(topicsData));
 };
 
+export const getAllTopicsDataFromLocalStorage = () => {
+  let topicsData = localStorage.getItem("SECO_24_all-topic-data");
+
+  if (!topicsData) {
+    return null;
+  }
+
+  // . Parseando JSON string para JSON objeto
+  return JSON.parse(topicsData);
+};
+
 export const setTopicDataToLocalStorage = (topicData) => {
   if (!topicData) {
     return;
@@ -242,8 +253,8 @@ export const getEnvironmentIdFromUrl = () => {
   // . Obtendo o id do ambiente
   const url = window.location.href;
   const urlSplit = url.split("/");
-  const environmentId = urlSplit[urlSplit.length - 1];
-
+  const environmentId = urlSplit[urlSplit.length - 2];
+  console.log("environmentId", environmentId);
   // . Verificando se o id é uuid
   if (!regexUUID.test(environmentId)) {
     return null;
@@ -545,4 +556,66 @@ export const getDefinitionDataForVoting = async (environmentId) => {
     });
 
   return result;
+};
+
+export const getIssueDataFromTopicDataAtLocalStorage = (topicNum, issueId) => {
+  const topicData = getAllTopicsDataFromLocalStorage();
+  if (!topicData) {
+    return null;
+  }
+
+  const topic = topicData.find((topic) => parseInt(topic.id) === topicNum);
+  if (!topic) {
+    return null;
+  }
+
+  const issue = topic.issues.find((issue) => parseInt(issue.id) === issueId);
+
+  if (!issue) {
+    return null;
+  }
+
+  // . Removendo o score para o topico da issue
+  delete issue.score;
+
+  return issue;
+};
+
+export const getIssueDataWithRelatedScoreFromTopicDataAtLocalStorage = (
+  topicNum,
+  issueId,
+  mainIssueId
+) => {
+  const topicData = getAllTopicsDataFromLocalStorage();
+  if (!topicData) {
+    return null;
+  }
+
+  const topic = topicData.find((topic) => parseInt(topic.id) === topicNum);
+  if (!topic) {
+    return null;
+  }
+
+  const mainIssue = topic.issues.find(
+    (issue) => parseInt(issue.id) === mainIssueId
+  );
+
+  if (!mainIssue) {
+    return null;
+  }
+
+  const relatedIssueRelation = mainIssue.relatedTo.find(
+    (relatedToIssue) => parseInt(relatedToIssue.id) === issueId
+  );
+
+  const relatedIssue = topic.issues.find(
+    (issue) => parseInt(issue.id) === issueId
+  );
+
+  relatedIssue.relatedToScore = relatedIssueRelation.score;
+
+  // . Removendo o score para o topico da issue
+  delete relatedIssue.score;
+
+  return relatedIssue;
 };

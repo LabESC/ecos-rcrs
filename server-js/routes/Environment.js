@@ -43,5 +43,9 @@ router.get(
   EnvironmentController.getDefinitionDataForVoting
 );
 router.post("/:id/clone", EnvironmentController.clone);
+router.get(
+  "/:id/miningdata/:issueId",
+  EnvironmentController.getIssueFromMiningData
+);
 
 module.exports = router;
