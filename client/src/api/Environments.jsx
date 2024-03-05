@@ -266,6 +266,23 @@ export const getEnvironmentIdFromUrl = () => {
   return environmentId;
 };
 
+export const getEnvironmentIdFromUrl2 = () => {
+  // . Obtendo o id do ambiente
+  const url = window.location.href;
+  const urlSplit = url.split("/");
+  const environmentId = urlSplit[urlSplit.length - 1];
+  console.log("environmentId", environmentId);
+  // . Verificando se o id é uuid
+  if (!regexUUID.test(environmentId)) {
+    return null;
+  }
+
+  // . Setando o id do ambiente no localStorage
+  localStorage.setItem("SECO_24_env-id", environmentId);
+
+  return environmentId;
+};
+
 export const getMyEnvironments = async (userId, userToken) => {
   console.log(" userId, userToken", userId, userToken);
   const result = await Axios.get(`${baseUrl}/environment/user/${userId}`, {
@@ -474,6 +491,59 @@ export const getPriorityRCRs = async (userId, userToken, environmentId) => {
     {
       headers: { "user-id": userId, "user-token": userToken },
     }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+
+  return result;
+};
+
+export const setPriorityData = async (
+  userId,
+  userToken,
+  environmentId,
+  priorityData
+) => {
+  const result = await Axios.post(
+    `${baseUrl}/environment/${environmentId}/prioritydata`,
+    { priority_data: priorityData },
+    {
+      headers: { "user-id": userId, "user-token": userToken },
+    }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+
+  return result;
+};
+
+export const updatePriorityRCRWithStatus = async (
+  userId,
+  userToken,
+  environmentId,
+  closingDate,
+  rcrs
+) => {
+  const result = await Axios.patch(
+    `${baseUrl}/environment/${environmentId}/prioritydata`,
+    { closing_date: closingDate, priority_data_rcrs: rcrs },
+    { headers: { "user-id": userId, "user-token": userToken } }
   )
     .then((res) => {
       return res.data;

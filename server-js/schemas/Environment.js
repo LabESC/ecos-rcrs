@@ -104,6 +104,11 @@ const EnvironmentUpdateDefinitionOrPriorityDateWithStatusRequest = Joi.object({
   rcrs_selected: Joi.array().items(Joi.number()).required(),
 });
 
+const EnvironmentUpdatePriorityDateWithStatusRequest = Joi.object({
+  closing_date: Joi.date().required(),
+  priority_data_rcrs: Joi.array().items(Joi.object()).required(),
+});
+
 const EnvironmentUpdateFinalDataRequest = Joi.object({
   final_rcr: Joi.object().required().allow(null),
   status: Joi.string().required(),
@@ -129,4 +134,5 @@ module.exports = {
   EnvironmentUpdateDefinitionOrPriorityDateWithStatusRequest,
   EnvironmentUpdateFinalDataRequest,
   EnvironmentVotingUsers,
+  EnvironmentUpdatePriorityDateWithStatusRequest,
 };

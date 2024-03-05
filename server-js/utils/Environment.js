@@ -96,9 +96,10 @@ module.exports = class Environment {
 
     // . Joining the votes with the rcrs
     for (const rcr of definitionData.rcrs) {
+      delete rcr.going_to_vote;
       rcr.definition_votes = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, comments: [] };
       rcr.final_vote = 0;
-      rcr.exclude_to_priority = false;
+      rcr.exclude_to_priority = true;
       rcr.position = 0;
 
       // . Filtering all the votes for the current RCR
@@ -115,7 +116,10 @@ module.exports = class Environment {
       }
 
       // * Verificar em qual dos atributos de nota há mais votos e definir o atributo final_vote na rcr
-      if (rcr.definition_votes[5] === rcr.definition_votes[4]) {
+      if (
+        rcr.definition_votes[5] === rcr.definition_votes[4] &&
+        rcr.definition_votes[5] !== 0
+      ) {
         rcr.final_vote = 5;
         continue;
       }
@@ -125,7 +129,10 @@ module.exports = class Environment {
         continue;
       }
 
-      if (rcr.definition_votes[4] === rcr.definition_votes[3]) {
+      if (
+        rcr.definition_votes[4] === rcr.definition_votes[3] &&
+        rcr.definition_votes[4] !== 0
+      ) {
         rcr.final_vote = 4;
         continue;
       }
@@ -135,7 +142,10 @@ module.exports = class Environment {
         continue;
       }
 
-      if (rcr.definition_votes[3] === rcr.definition_votes[2]) {
+      if (
+        rcr.definition_votes[3] === rcr.definition_votes[2] &&
+        rcr.definition_votes[3] !== 0
+      ) {
         rcr.final_vote = 3;
         continue;
       }
@@ -145,7 +155,10 @@ module.exports = class Environment {
         continue;
       }
 
-      if (rcr.definition_votes[2] === rcr.definition_votes[1]) {
+      if (
+        rcr.definition_votes[2] === rcr.definition_votes[1] &&
+        rcr.definition_votes[2] !== 0
+      ) {
         rcr.final_vote = 2;
         continue;
       }
@@ -164,7 +177,6 @@ module.exports = class Environment {
 
     // * Definir a posição de cada rcr
     for (let i = 0; i < definitionData.rcrs.length; i++) {
-      definitionData.rcrs[i].position = i + 1;
       definitionData.rcrs[i].votes_position = i + 1;
     }
 

@@ -343,7 +343,7 @@ class Environment {
   static async endDefinitionVoteForEnvironment(id) {
     return await EnvironmentModel.update(
       {
-        mining_data: literal('mining_data || \'{"status": "done"}\''),
+        definition_data: literal('definition_data || \'{"status": "done"}\''),
       },
       // Condition
       { where: { id: id } }
@@ -355,6 +355,13 @@ class Environment {
       attributes: ["mining_data.issue"],
       where: { id: environmentId },
     });
+  }
+
+  static async updateRCRsAtPriorityData(environmentId, priorityData) {
+    return await EnvironmentModel.update(
+      { priority_data: priorityData },
+      { where: { id: environmentId } }
+    );
   }
 }
 

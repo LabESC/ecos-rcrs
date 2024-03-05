@@ -298,7 +298,7 @@ const MyEnvironment = () => {
 
   // . Ir para a página de detalhes do ambiente
   const goEnvironmentDetailAfterDefinitionVoting = (id) => {
-    redirect(`/environment/${id}/priority`);
+    redirect(`/environment/${id}/definition`);
   };
 
   // . Declarando elementos da página

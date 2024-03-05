@@ -14,7 +14,7 @@ import ForgotPassword from "./pages/Auth/ForgotPassword.jsx";
 import MyEnvironment from "./pages/Environments/My.jsx";
 import EnvironmentDetail from "./pages/Environments/Detail.jsx";
 import NewEnvironment from "./pages/Environments/New.jsx";
-import EnvironmentDetailPriority from "./pages/Environments/DetailPriority.jsx";
+import EnvironmentDetailDefinition from "./pages/Environments/DetailDefinition.jsx";
 
 // . Environments -> Issues
 import IssueDetail from "./pages/Environments/Issues/Detail.jsx";
@@ -47,8 +47,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           element={<DefinitionDataPage />}
         />
         <Route
-          path="/environment/:id/priority"
-          element={<EnvironmentDetailPriority />}
+          path="/environment/:id/definition"
+          element={<EnvironmentDetailDefinition />}
         />
       </Routes>
     </BrowserRouter>

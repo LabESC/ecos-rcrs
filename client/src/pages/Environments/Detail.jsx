@@ -35,6 +35,7 @@ import {
   getEnvironmentNameFromLocalStorage,
   getDefinitionRCRs,
   setAllTopicsDataToLocalStorage,
+  getEnvironmentIdFromUrl2,
 } from "../../api/Environments.jsx";
 
 const EnvironmentDetail = () => {
@@ -60,24 +61,24 @@ const EnvironmentDetail = () => {
     // . Função para obter os topicos
     const getDetails = async (userId, userToken) => {
       // . Obtendo o id do ambiente
-      const environmentId = getEnvironmentIdFromUrl();
-      if (environmentId === null) {
+      const environmentId = getEnvironmentIdFromUrl2();
+      /*if (environmentId === null) {
         // . Voltar a página anterior
         redirect("/my-environments");
         return;
       }
-
+*/
       // . Armazenando o id do ambiente
       setEnvironmentId(environmentId);
 
       // . Obtendo o nome do ambiente
       const environmentName = getEnvironmentNameFromLocalStorage();
 
-      if (environmentName === null) {
+      /*if (environmentName === null) {
         redirect("/my-environments");
         return;
       }
-
+*/
       setEnvironmentName(environmentName);
       document.title = `SECO-RCR: ${environmentName}`;
 

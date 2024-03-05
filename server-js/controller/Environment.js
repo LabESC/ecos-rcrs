@@ -434,7 +434,7 @@ module.exports = {
       return res.status(401).json(ErrorSchema("Auth", "Unauthorized!"));
     }
 
-    // * Validating body
+    /*// * Validating body
     const { error } =
       EnvironmentSchemas.EnvironmentUpdatePriorityDataRequest.validate(
         req.body
@@ -442,12 +442,12 @@ module.exports = {
 
     if (error) {
       return res.status(422).json(ErrorSchema(422, error.details[0].message));
-    }
+    }*/
 
     // * Updating priority data
     const updatedEnvironments = await EnvironmentService.updatePriorityData(
       req.params.id,
-      req.body
+      req.body.priority_data
     );
 
     switch (updatedEnvironments) {
@@ -455,16 +455,8 @@ module.exports = {
         return res.status(500).send(ErrorSchema("server", msg_500));
       case null:
         return res.status(404).send(ErrorSchema(entity_name, msg_404));
-    }
-
-    if (
-      Array.isArray(updatedEnvironments) &&
-      updatedEnvironments.length > 0 &&
-      updatedEnvironments[0] > 0
-    ) {
-      return res.status(200).send();
-    } else {
-      return res.status(500).send(ErrorSchema("server", msg_500));
+      case true:
+        return res.status(200).send(true);
     }
   },
 
@@ -481,7 +473,7 @@ module.exports = {
 
     // * Validating body
     const { error } =
-      EnvironmentSchemas.EnvironmentUpdateDefinitionOrPriorityDateWithStatusRequest.validate(
+      EnvironmentSchemas.EnvironmentUpdatePriorityDateWithStatusRequest.validate(
         req.body
       );
 
@@ -494,7 +486,8 @@ module.exports = {
       await EnvironmentService.updatePriorityDataWithStatus(
         req.params.id,
         req.body.closing_date,
-        req.body.status
+        "voting",
+        req.body.priority_data_rcrs
       );
 
     switch (updatedEnvironments) {
@@ -502,16 +495,8 @@ module.exports = {
         return res.status(500).send(ErrorSchema("server", msg_500));
       case null:
         return res.status(404).send(ErrorSchema(entity_name, msg_404));
-    }
-
-    if (
-      Array.isArray(updatedEnvironments) &&
-      updatedEnvironments.length > 0 &&
-      updatedEnvironments[0] > 0
-    ) {
-      return res.status(200).send();
-    } else {
-      return res.status(500).send(ErrorSchema("server", msg_500));
+      case true:
+        return res.status(200).send(true);
     }
   },
 

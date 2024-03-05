@@ -246,8 +246,8 @@ class Environment {
     return true;
   }
 
-  static async updatePriorityData(id, newPriorityData) {
-    /*// * Obtaining priority data if exists
+  static async updatePriorityData(id, rcrsUpdated) {
+    // * Obtaining priority data if exists
     let priorityData = null;
     try {
       priorityData = await EnvironmentRepository.getPriorityData(id);
@@ -260,9 +260,9 @@ class Environment {
 
     // * If priority data does not exists, create it
     if (!priorityData) {
-      priorityData = { issues: [], status: "elaborating", closing_date: None };
+      priorityData = { rcrs: [], status: "elaborating", closing_date: None };
     }
-
+    /*
     // * Updating priority data
     // . Check if there is an id at the issues array
     let newId = 1;
@@ -273,9 +273,13 @@ class Environment {
     newPriorityData["id"] = newId;
     priorityData.issues.push(newPriorityData);
 */
+
+    // * Updating priority data
+    priorityData.rcrs = rcrsUpdated;
+
     // * Updating the environment
     try {
-      await EnvironmentRepository.updatePriority(id, newPriorityData);
+      await EnvironmentRepository.updatePriority(id, priorityData);
 
       //await EnvironmentRepository.updatePriority(id, priorityData);
     } catch (e) {
@@ -286,7 +290,7 @@ class Environment {
     return true;
   }
 
-  static async updatePriorityDataWithStatus(id, closingDate, status) {
+  static async updatePriorityDataWithStatus(id, closingDate, status, rcrs) {
     // * Obtaining priority data if exists
     let priorityData = null;
     try {
@@ -302,6 +306,7 @@ class Environment {
     // * Otherwise, update its closingDate and status
     priorityData.status = status;
     priorityData.closing_date = closingDate;
+    priorityData.rcrs = rcrs;
 
     // * Updating the environment
     try {
