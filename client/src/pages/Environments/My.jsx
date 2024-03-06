@@ -193,7 +193,31 @@ const MyEnvironment = () => {
           environmentId,
           status,
           code: "RCR priority voting",
-          msg: `Here's the link for your environment voting:\n${window.location.origin}/environment/${environmentId}/priorityvote\nYou want to stop now the RCR priority voting step?`,
+          msg: [
+            `Here's the link for your environment voting:`,
+            <Box style={{ display: "flex", alignItems: "center" }}>
+              <a
+                href={`${window.location.origin}/environment/${environmentId}/priorityvote`}
+                target="_blank"
+                rel="noreferrer"
+                className="linkVoteCopy"
+              >
+                {`${window.location.origin}/environment/${environmentId}/priorityvote`}
+              </a>
+              <IconButton
+                onClick={() => {
+                  copyURL(
+                    `${window.location.origin}/environment/${environmentId}/priorityvote`
+                  );
+                }}
+                style={{ color: "rgba(0, 0, 0, 0.87)" }}
+                aria-label="copy-url"
+              >
+                <ContentCopyIcon />
+              </IconButton>
+            </Box>,
+            "You want to stop now the RCR priority voting step?",
+          ],
         });
         //activeEnvironmentErrorDialog();
         break;

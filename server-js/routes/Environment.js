@@ -42,6 +42,10 @@ router.get(
   "/:id/votingdefinitiondata",
   EnvironmentController.getDefinitionDataForVoting
 );
+router.get(
+  "/:id/votingprioritydata",
+  EnvironmentController.getPriorityDataForVoting
+);
 router.post("/:id/clone", EnvironmentController.clone);
 router.get(
   "/:id/miningdata/:issueId",

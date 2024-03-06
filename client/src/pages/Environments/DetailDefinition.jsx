@@ -1,4 +1,5 @@
 import {
+  Chip,
   TextField,
   Button,
   Link,
@@ -37,6 +38,7 @@ import { IssueModalDetail } from "./Issues/IssueModalDetail.jsx";
 import { SuccessButton } from "../../components/Buttons.jsx";
 import { UpdateRCRPopUp } from "./RCR/UpdateRCR.jsx";
 import { OpenRCRPriorityVotePopUp } from "./OpenRCRPriorityVotePopUp.jsx";
+import { CommentPopUp } from "./CommentPopUp.jsx";
 
 // ! Importações de códigos
 import { verifyLoggedUser } from "../../api/Auth.jsx";
@@ -232,8 +234,7 @@ const EnvironmentDetailDefinition = () => {
     setRCRS([...newRCRs]);
   };
 
-  const getScoreDescription = (score, allVotes) => {
-    console.log("Score: ", score, "All votes: ", allVotes);
+  const getScoreDescriptionWithVoteCounts = (score, allVotes) => {
     score = parseInt(score);
     // * Contando quantos votos teve pro score, considerando que all votes é um objeto com as chaves de 1 a 5 e que voce so quer saber a quantidade de votos do score atual
     let votes = 0;
@@ -257,6 +258,64 @@ const EnvironmentDetailDefinition = () => {
       default:
         return "No score";
     }
+  };
+
+  const getScoreDescription = (score) => {
+    score = parseInt(score);
+
+    switch (score) {
+      case 1:
+        return `Strongly Disagree`;
+      case 2:
+        return `Disagree`;
+      case 3:
+        return `Neutral`;
+      case 4:
+        return `Agree`;
+      case 5:
+        return `Strongly Agree`;
+      default:
+        return "No score";
+    }
+  };
+
+  const getScoreColor = (score) => {
+    score = parseInt(score);
+
+    switch (score) {
+      case 1:
+        return `#cc0e0e`;
+      case 2:
+        return `#cc540e`;
+      case 3:
+        return `#998408`;
+      case 4:
+        return `#5b9e08`;
+      case 5:
+        return `#0c9e09`;
+      default:
+        return "No score";
+    }
+  };
+
+  // ! Funções para manipulação do popup de comentario
+  const [commentPopUpOpen, setCommentPopUpOpen] = useState(false);
+  const [commentPopUpData, setCommentPopUpData] = useState({
+    score: null,
+    comment: "",
+  });
+
+  const openCommentPopUp = (commentScore) => {
+    setCommentPopUpData({
+      score: getScoreDescription(commentScore.score),
+      color: getScoreColor(commentScore.score),
+      comment: commentScore.comment,
+    });
+    setCommentPopUpOpen(true);
+  };
+
+  const closeCommentPopUp = () => {
+    setCommentPopUpOpen(false);
   };
 
   // ! Funcoes para manipulacao da issue
@@ -339,6 +398,11 @@ const EnvironmentDetailDefinition = () => {
       }
     }
     setRCRS([...newRcrs]);
+    openAlert(
+      "success",
+      `RCR #${editRCR.id} updated at browser.`,
+      `If you want to register your actual state, please click on "Save Actual State"`
+    );
   };
 
   // ! Funções para manipulação do alerta
@@ -356,6 +420,7 @@ const EnvironmentDetailDefinition = () => {
       message: message,
     });
     setAlertOpen(true);
+    closeEditRCR();
   };
 
   const closeAlert = () => {
@@ -469,7 +534,7 @@ const EnvironmentDetailDefinition = () => {
             />
           </Box>
           <Box>
-            <Box
+            {/*<Box
               key={`box-details`}
               style={{
                 display: "flex",
@@ -478,7 +543,7 @@ const EnvironmentDetailDefinition = () => {
               }}
             >
               Position | RCR Name
-            </Box>
+            </Box>*/}
             {rcrs.map((rcr) => {
               return (
                 <Box
@@ -535,11 +600,18 @@ const EnvironmentDetailDefinition = () => {
                         </Box>
                         <Box style={{ marginRight: "1em" }}>
                           <Typography>
-                            <strong>Most votes at: </strong>
-                            {getScoreDescription(
-                              rcr.final_vote,
-                              rcr.definition_votes
-                            )}
+                            Most votes at:
+                            <strong
+                              style={{
+                                color: getScoreColor(rcr.final_vote),
+                                marginLeft: "0.3em",
+                              }}
+                            >
+                              {getScoreDescriptionWithVoteCounts(
+                                rcr.final_vote,
+                                rcr.definition_votes
+                              )}
+                            </strong>
                           </Typography>
                         </Box>
                         {
@@ -591,30 +663,93 @@ const EnvironmentDetailDefinition = () => {
                           );
                         })}
                       </Box>
+                      <Box
+                        style={{
+                          margin: "0.8em 0 0.2em 0",
+                          width: "100%",
+                          display: "flex",
+                          flexDirection: "row",
+                        }}
+                      >
+                        <strong>Voting details:</strong>
+                        <Box
+                          style={{
+                            marginRight: "0.5em",
+                            width: "90%",
+                            display: "flex",
+                            flexDirection: "row",
+                          }}
+                        >
+                          {Object.keys(rcr.definition_votes).map(
+                            (key, index) => {
+                              if (key !== "comments") {
+                                return (
+                                  <Chip
+                                    label={getScoreDescriptionWithVoteCounts(
+                                      key,
+                                      rcr.definition_votes
+                                    )}
+                                    style={{
+                                      marginRight: "0.5em",
+                                      color: getScoreColor(key),
+                                      fontWeight: "bold",
+                                    }}
+                                  />
+                                );
+                              }
+                            }
+                          )}
+                        </Box>
+                      </Box>
+                      <Box
+                        style={{
+                          margin: "0.8em 0 0.2em 0",
+                          width: "100%",
+                          display:
+                            rcr.definition_votes.comments.length > 0
+                              ? "flex"
+                              : "none",
+                          flexDirection: "row",
+                        }}
+                      >
+                        <strong>Comments on the score:</strong>
+                        <Box
+                          style={{
+                            marginRight: "0.5em",
+                            width: "90%",
+                            display: "flex",
+                            flexDirection: "row",
+                          }}
+                        >
+                          {rcr.definition_votes.comments.map(
+                            (comment, index) => {
+                              return (
+                                <Chip
+                                  label={getScoreDescription(comment.score)}
+                                  onClick={() => {
+                                    openCommentPopUp(comment);
+                                  }}
+                                  style={{
+                                    marginRight: "0.5em",
+                                    color: getScoreColor(comment.score),
+                                    fontWeight: "bold",
+                                  }}
+                                />
+                              );
+                            }
+                          )}
+                        </Box>
+                      </Box>
                     </AccordionDetails>
                     <AccordionActions
                       style={{
                         display: "flex",
                         justifyContent: "space-between",
                       }}
-                    >
-                      <strong style={{ marginLeft: "8px" }}>
-                        Comment on the score:
-                      </strong>
-                      <TextField
-                        id={`txt-comment-${rcr.id}`}
-                        placeholder="Comment on the RCR"
-                        required
-                        variant="outlined"
-                        style={{ marginRight: "0.5em", width: "90%" }}
-                        multiline
-                        rows={4}
-                      />
-                    </AccordionActions>
+                    ></AccordionActions>
                   </Accordion>
                   <IconButton
                     onClick={() => {
-                      console.log("Edit RCR: ", rcr);
                       openEditRCR(rcr);
                     }}
                     style={{
@@ -654,6 +789,12 @@ const EnvironmentDetailDefinition = () => {
           close={closeVotingStartPopUp}
           rcrs={rcrs}
           environmentId={environmentId}
+        />
+        <CommentPopUp
+          open={commentPopUpOpen}
+          close={closeCommentPopUp}
+          closeMessage={"GO BACK"}
+          commentScore={commentPopUpData}
         />
         <Snackbar
           key={`SNACK_ERRORS_DATA`}

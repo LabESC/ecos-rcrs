@@ -105,7 +105,7 @@ export function RequestAgainPopUp2(props) {
             {action.status.includes("error")
               ? "TRY AGAIN"
               : action.status.includes("waiting")
-              ? "END NOW"
+              ? "END VOTING NOW"
               : "REQUEST"}
           </Button>
         </DialogActions>

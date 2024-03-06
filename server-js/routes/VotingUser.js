@@ -19,7 +19,7 @@ router.post(
 );
 router.post(
   "/:id/votepriority/:environmentId",
-  VotingUserController.registerDefinitionVotes
+  VotingUserController.registerPriorityVotes
 );
 
 module.exports = router;

@@ -835,6 +835,39 @@ module.exports = {
     }
   },
 
+  async getPriorityDataForVoting(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
+    // * Validating id
+    if (!req.params.id) {
+      return res.status(422).json(ErrorSchema(422, "Id not provided!"));
+    }
+
+    // * Getting definition data for voting
+    const priorityData = await EnvironmentService.getPriorityDataForVoting(
+      req.params.id
+    );
+
+    switch (priorityData) {
+      case -1:
+        return res.status(500).send(ErrorSchema("server", msg_500));
+      case -2:
+        return res
+          .status(400)
+          .send(
+            ErrorSchema(
+              "status",
+              "Environment is not opened to definition voting!"
+            )
+          );
+      case null:
+        return res.status(404).send(ErrorSchema(entity_name, msg_404));
+      default:
+        return res.status(200).send(priorityData);
+    }
+  },
+
   async clone(req, res) {
     // . LOGGER
     Logger(req.method, req.url);

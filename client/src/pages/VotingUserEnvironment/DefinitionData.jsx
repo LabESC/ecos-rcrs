@@ -8,15 +8,12 @@ import {
   Accordion,
   AccordionActions,
   AccordionSummary,
-  Rating,
   AccordionDetails,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import { PopUpError } from "../../components/PopUp.jsx";
-import { useNavigate } from "react-router-dom";
 import {
-  DiffAddedIcon,
   CheckCircleFillIcon,
   PeopleIcon,
   AlertFillIcon,
@@ -38,9 +35,6 @@ import {
 } from "../../api/Environments.jsx";
 
 const DefinitionDataPage = () => {
-  // ! Instanciando o useNavigate para redirecionar o usuário pra alguma página
-  const redirect = useNavigate();
-
   // ! Executado ao iniciar o componente
   useEffect(() => {
     // . Mudando nome da página

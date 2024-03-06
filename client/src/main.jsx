@@ -21,6 +21,7 @@ import IssueDetail from "./pages/Environments/Issues/Detail.jsx";
 
 // . Environment for VotingUsers
 import DefinitionDataPage from "./pages/VotingUserEnvironment/DefinitionData.jsx";
+import PriorityDataPage from "./pages/VotingUserEnvironment/PriorityData.jsx";
 
 // . Likert - teste
 import LikertScale from "./pages/VotingUserEnvironment/LikertScale.jsx";
@@ -49,6 +50,10 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <Route
           path="/environment/:id/definition"
           element={<EnvironmentDetailDefinition />}
+        />
+        <Route
+          path="/environment/:id/priorityvote"
+          element={<PriorityDataPage />}
         />
       </Routes>
     </BrowserRouter>

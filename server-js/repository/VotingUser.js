@@ -159,13 +159,16 @@ class VotingUser {
    * @returns {Object|null} - The definition votes or null if the relation does not exist.
    */
   static async getDefinitionVotesOfEnvironment(environmentId) {
-    const votingUserEnvironment = await VotingUserEnvironment.findOne({
+    const votingUserEnvironment = await VotingUserEnvironment.findAll({
       where: { environment_id: environmentId },
     });
 
     if (votingUserEnvironment === null) return null;
 
-    return votingUserEnvironment.votes_rcr_definition;
+    // * Extracting the definition votes from the voting user environment objects.
+    return votingUserEnvironment.map((votingUserEnvironment) => {
+      return votingUserEnvironment.votes_rcr_definition;
+    });
   }
 }
 

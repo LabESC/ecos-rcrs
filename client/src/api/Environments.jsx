@@ -628,6 +628,24 @@ export const getDefinitionDataForVoting = async (environmentId) => {
   return result;
 };
 
+export const getPriorityDataForVoting = async (environmentId) => {
+  const result = await Axios.get(
+    `${baseUrl}/environment/${environmentId}/votingprioritydata`
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+
+  return result;
+};
+
 export const getIssueDataFromTopicDataAtLocalStorage = (topicNum, issueId) => {
   const topicData = getAllTopicsDataFromLocalStorage();
   if (!topicData) {

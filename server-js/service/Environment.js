@@ -463,6 +463,58 @@ class Environment {
     return environment;
   }
 
+  static async getPriorityDataForVoting(id) {
+    // * Check if the environment is in the right status
+    let environment = null;
+    try {
+      environment = await EnvironmentRepository.getById(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    if (!environment) return environment;
+
+    if (environment.status !== "waiting_rcr_priority") return -2;
+
+    let priorityData = null;
+    let miningData = null;
+
+    // * Obtaining mining data if exists
+    try {
+      miningData = await EnvironmentRepository.getMiningData(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    // * Obtaining definition data if exists
+    try {
+      priorityData = await EnvironmentRepository.getPriorityData(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    if (!miningData) return miningData;
+    if (!priorityData) return priorityData;
+
+    // * Filtering the rcrs who are going to vote
+    priorityData.rcrs = priorityData.rcrs.filter((rcr) => {
+      return rcr.exclude_to_priority === false;
+    });
+
+    // * Joining data with EnvironmentUtils
+    priorityData = EnvironmentUtils.joinMiningAndDefinition(
+      miningData,
+      priorityData
+    );
+    // * Inputting data into environment object
+    environment.priority_data = priorityData;
+
+    return environment;
+  }
+
   static async clone(id, newName) {
     // * Obtaining environment data
     let environment = null;
