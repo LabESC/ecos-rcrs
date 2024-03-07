@@ -207,7 +207,7 @@ const EnvironmentDetailDefinition = () => {
   const [loggedUser, setLoggedUser] = useState({
     userId: null,
     userToken: null,
-  }); // . Armazena as posições das rcrs
+  }); // . Armazena os dados do usuário logado
 
   // . Funcao para verificar se a rcr foi excluida
   const checkRCRExcluded = (rcrId) => {

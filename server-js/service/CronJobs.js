@@ -68,7 +68,7 @@ async function updateEnvironmentsVotingStatus() {
 
     if (updated === -1) {
       console.log(
-        `CRON: Error updating the status of the environment with ID ${environmentId}`
+        `CRON: Error updating the status of the environment with ID ${environment.id}`
       );
       continue;
     }
@@ -86,7 +86,7 @@ async function updateEnvironmentsVotingStatus() {
 
     if (definitionDataUpdated === -1) {
       console.log(
-        `CRON: Error ending the definitionData status for the environment with ID ${environmentId}`
+        `CRON: Error ending the definitionData status for the environment with ID ${environment.id}`
       );
     }
 

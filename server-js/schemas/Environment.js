@@ -1,5 +1,20 @@
 const Joi = require("joi");
 
+const EnvironmentStatus = Joi.string().valid(
+  "mining",
+  "mining_error",
+  "mining_done",
+  "making_topics",
+  "topics_error",
+  "topics_done",
+  "waiting_rcr_voting",
+  "rcr_voting_done",
+  "waiting_rcr_priority",
+  "rcr_priority_done",
+  "done",
+  "cancelled"
+);
+
 const EnvironmentBase = Joi.object({
   user_id: Joi.string()
     .guid({
@@ -110,7 +125,11 @@ const EnvironmentUpdatePriorityDateWithStatusRequest = Joi.object({
 });
 
 const EnvironmentUpdateFinalDataRequest = Joi.object({
-  final_rcr: Joi.object().required().allow(null),
+  final_rcr: Joi.array().items(Joi.object()).required(),
+});
+
+const EnvironmentUpdateFinalDataWithStatusRequest = Joi.object({
+  final_rcr: Joi.array().items(Joi.object()).required(),
   status: Joi.string().required(),
 });
 
@@ -135,4 +154,6 @@ module.exports = {
   EnvironmentUpdateFinalDataRequest,
   EnvironmentVotingUsers,
   EnvironmentUpdatePriorityDateWithStatusRequest,
+  EnvironmentStatus,
+  EnvironmentUpdateFinalDataWithStatusRequest,
 };

@@ -289,6 +289,7 @@ export const getMyEnvironments = async (userId, userToken) => {
     headers: { "user-id": userId, "user-token": userToken },
   })
     .then((res) => {
+      console.log("res.data", res.data);
       return res.data;
     })
     .catch((err) => {
@@ -706,4 +707,101 @@ export const getIssueDataWithRelatedScoreFromTopicDataAtLocalStorage = (
   delete relatedIssue.score;
 
   return relatedIssue;
+};
+
+export const forceEndVote = async (
+  userId,
+  userToken,
+  environmentId,
+  actualState
+) => {
+  let newVotingStatus = null;
+  if (actualState === "waiting_rcr_voting") {
+    newVotingStatus = "definition";
+  }
+  if (actualState === "waiting_rcr_priority") {
+    newVotingStatus = "priority";
+  }
+
+  if (newVotingStatus === null) {
+    return {
+      error: {
+        code: "STATUS",
+        message: "Actual state invalid!",
+      },
+      status: 422,
+    };
+  }
+
+  const result = await Axios.put(
+    `${baseUrl}/environment/${environmentId}/endvoting/${newVotingStatus}`,
+    {},
+    { headers: { "user-id": userId, "user-token": userToken } }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+
+  return result;
+};
+
+export const getFinalRCR = async (userId, userToken, environmentId) => {
+  const result = await Axios.get(
+    `${baseUrl}/environment/${environmentId}/finaldata`,
+    {
+      headers: { "user-id": userId, "user-token": userToken },
+    }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+
+  return result;
+};
+
+export const setFinalRCR = async (
+  userId,
+  userToken,
+  environmentId,
+  finalRCR
+) => {
+  const result = await Axios.post(
+    `${baseUrl}/environment/${environmentId}/finaldata`,
+    { final_rcr: finalRCR },
+    { headers: { "user-id": userId, "user-token": userToken } }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+  return result;
+};
+
+export const setFinalRCRLToLocalStorage = (finalRCRs) => {
+  if (!finalRCRs) {
+    return;
+  }
+
+  // . Parseando JSON objeto para JSON string
+  localStorage.setItem("SECO_24_final-rcr", JSON.stringify(finalRCRs));
 };

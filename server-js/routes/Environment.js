@@ -51,5 +51,11 @@ router.get(
   "/:id/miningdata/:issueId",
   EnvironmentController.getIssueFromMiningData
 );
+router.put("/:id/endvoting/priority", EnvironmentController.endPriorityPoll);
+//router.put("/:id/endvoting/definition", EnvironmentController.endDefinitionPoll);
+router.put(
+  "/:id/countvotes/:status",
+  EnvironmentController.countVotesForEnvironment
+);
 
 module.exports = router;

@@ -21,7 +21,7 @@ export function EnvironmentCard(props) {
   const redirect = useNavigate();
 
   // ! Extraindo variáveis do props
-  const { status, id, name, action } = props;
+  const { status, id, name, action, votingCount } = props;
 
   const getColor = (status) => {
     switch (status) {
@@ -102,8 +102,8 @@ export function EnvironmentCard(props) {
         return (
           <Box style={{ display: "flex", alignItems: "center" }}>
             <PeopleIcon size={18} />
-            <Typography style={{ fontSize: 10, marginLeft: "0.6em" }}>
-              Waiting for RCR definition voting
+            <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
+              {`Waiting for RCR definition voting (${votingCount} votes)`}
             </Typography>
           </Box>
         );
@@ -112,8 +112,8 @@ export function EnvironmentCard(props) {
         return (
           <Box style={{ display: "flex", alignItems: "center" }}>
             <PeopleIcon size={18} />
-            <Typography style={{ fontSize: 10, marginLeft: "0.6em" }}>
-              Waiting for RCR priority voting
+            <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
+              {`Waiting for RCR priority voting (${votingCount} votes)`}
             </Typography>
           </Box>
         );

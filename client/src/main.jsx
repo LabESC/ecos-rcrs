@@ -15,6 +15,7 @@ import MyEnvironment from "./pages/Environments/My.jsx";
 import EnvironmentDetail from "./pages/Environments/Detail.jsx";
 import NewEnvironment from "./pages/Environments/New.jsx";
 import EnvironmentDetailDefinition from "./pages/Environments/DetailDefinition.jsx";
+import EnvironmentDetailPriority from "./pages/Environments/DetailPriority.jsx";
 
 // . Environments -> Issues
 import IssueDetail from "./pages/Environments/Issues/Detail.jsx";
@@ -54,6 +55,10 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <Route
           path="/environment/:id/priorityvote"
           element={<PriorityDataPage />}
+        />
+        <Route
+          path="/environment/:id/priority"
+          element={<EnvironmentDetailPriority />}
         />
       </Routes>
     </BrowserRouter>

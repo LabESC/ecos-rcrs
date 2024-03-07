@@ -1,4 +1,5 @@
 const { v4: uuidv4 } = require("uuid");
+const { Op } = require("sequelize");
 
 // ! Importando modelos
 const EnvironmentModel = require("../database/db").Environment;
@@ -169,6 +170,50 @@ class VotingUser {
     return votingUserEnvironment.map((votingUserEnvironment) => {
       return votingUserEnvironment.votes_rcr_definition;
     });
+  }
+
+  /**
+   * Retrieves the definition votes of voting users in a specific environment.
+   * @param {uuidv4} environmentId - The ID of the environment.
+   * @returns {Object|null} - The definition votes or null if the relation does not exist.
+   */
+  static async getPriorityVotesOfEnvironment(environmentId) {
+    const votingUserEnvironment = await VotingUserEnvironment.findAll({
+      where: { environment_id: environmentId },
+    });
+
+    if (votingUserEnvironment === null) return null;
+
+    // * Extracting the definition votes from the voting user environment objects.
+    return votingUserEnvironment.map((votingUserEnvironment) => {
+      return votingUserEnvironment.votes_rcr_priority;
+    });
+  }
+
+  static async countDefinitionVotesOfEnvironment(environmentId) {
+    const votingUserEnvironment = await VotingUserEnvironment.findAll({
+      where: {
+        environment_id: environmentId,
+        votes_rcr_definition: { [Op.ne]: null },
+      },
+    });
+
+    if (votingUserEnvironment === null) return 0;
+
+    return votingUserEnvironment[0].length;
+  }
+
+  static async countPriorityVotesOfEnvironment(environmentId) {
+    const votingUserEnvironment = await VotingUserEnvironment.findAll({
+      where: {
+        environment_id: environmentId,
+        votes_rcr_priority: { [Op.ne]: null },
+      },
+    });
+
+    if (votingUserEnvironment === null) return 0;
+
+    return votingUserEnvironment.length;
   }
 }
 

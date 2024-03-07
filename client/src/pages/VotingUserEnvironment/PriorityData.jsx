@@ -13,12 +13,7 @@ import {
 import { useState, useEffect } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import { PopUpError } from "../../components/PopUp.jsx";
-import {
-  ArrowUpIcon,
-  XCircleFillIcon,
-  FeedPlusIcon,
-  PeopleIcon,
-} from "@primer/octicons-react";
+import { ArrowUpIcon, PeopleIcon } from "@primer/octicons-react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 // ! Importações de componentes criados

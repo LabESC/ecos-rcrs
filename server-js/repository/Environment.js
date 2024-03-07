@@ -60,6 +60,7 @@ class Environment {
     return await EnvironmentModel.findAll({
       attributes: basicFields,
       where: { user_id: userId },
+      raw: true,
     });
   }
 
@@ -340,10 +341,67 @@ class Environment {
     });
   }
 
+  static async getDefinitionVoteForEnding(id) {
+    return await EnvironmentModel.findOne({
+      attributes: ["id", "name", "definition_data"],
+      where: {
+        id: id,
+      },
+      include: [
+        {
+          model: UserModel,
+          attributes: ["email"],
+        },
+      ],
+    });
+  }
+
   static async endDefinitionVoteForEnvironment(id) {
     return await EnvironmentModel.update(
       {
         definition_data: literal('definition_data || \'{"status": "done"}\''),
+      },
+      // Condition
+      { where: { id: id } }
+    );
+  }
+
+  static async getPriorityVoteExpiredEnvironments() {
+    console.log(new Date());
+    return await EnvironmentModel.findAll({
+      attributes: ["id", "name", "priority_data"],
+      where: {
+        status: "waiting_rcr_voting",
+        "priority_data.closing_date": { [Op.lt]: new Date() },
+      },
+      include: [
+        {
+          model: UserModel,
+          attributes: ["email"],
+        },
+      ],
+    });
+  }
+
+  static async getPriorityVoteForEnding(id) {
+    return await EnvironmentModel.findOne({
+      attributes: ["id", "name", "priority_data"],
+      where: {
+        id: id,
+      },
+      include: [
+        {
+          model: UserModel,
+          attributes: ["email"],
+        },
+      ],
+    });
+  }
+
+  static async endPriorityVoteForEnvironment(id) {
+    return await EnvironmentModel.update(
+      {
+        priority_data: literal('priority_data || \'{"status": "done"}\''),
       },
       // Condition
       { where: { id: id } }

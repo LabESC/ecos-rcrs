@@ -6,6 +6,7 @@ import {
   Alert,
   AlertTitle,
   IconButton,
+  Typography,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { ThemeProvider } from "@mui/material/styles";
@@ -30,6 +31,7 @@ import {
   setEnvironmentStatusToLocalStorage,
   requestMiningData,
   requestTopicData,
+  forceEndVote,
 } from "../../api/Environments.jsx";
 
 const MyEnvironment = () => {
@@ -122,7 +124,7 @@ const MyEnvironment = () => {
   // ! Variáveis e funções para manipulação do Dialog de erro/interrupção
   const [action, setAction] = useState(null);
 
-  const cardClick = async (environmentId, name, status) => {
+  const cardClick = async (environmentId, name, status, votingCount) => {
     switch (status) {
       case "mining_error":
         await setAction({
@@ -182,6 +184,7 @@ const MyEnvironment = () => {
                 <ContentCopyIcon />
               </IconButton>
             </Box>,
+            `Votes received: ${votingCount}`,
             "You want to stop now the RCR definition voting step?",
           ],
         });
@@ -216,6 +219,9 @@ const MyEnvironment = () => {
                 <ContentCopyIcon />
               </IconButton>
             </Box>,
+            <Typography style={{ marginTop: "0.6em", fontWeight: "500" }}>
+              <strong>Votes received: {votingCount}</strong>
+            </Typography>,
             "You want to stop now the RCR priority voting step?",
           ],
         });
@@ -234,11 +240,13 @@ const MyEnvironment = () => {
         break;
 
       case "rcr_priority_done":
-        // !! IMPLEMENTAR... (AGUARDANDO PAGINA)
+        setEnvironmentNameToLocalStorage(name);
+        setEnvironmentStatusToLocalStorage(status);
+        goEnvironmentDetailAfterPriorityVoting(environmentId);
         break;
 
       case "done":
-        // !! IMPLEMENTAR... (AGUARDANDO FUNÇÃO/ENDPOINT)
+        // !! IMPLEMENTAR... (AGUARDANDO FUNÇÃO/ENDPOINT/PAGINA)
         break;
       default: // * mining, making_topics, não faz nada
         break;
@@ -263,7 +271,6 @@ const MyEnvironment = () => {
 
       case "topics_error":
       case "mining_done":
-        // !! IMPLEMENTAR... (AGUARDANDO FUNÇÃO/ENDPOINT) await...
         await requestTopicData(
           loggedUser.userId,
           loggedUser.userToken,
@@ -278,11 +285,27 @@ const MyEnvironment = () => {
         break;
 
       case "waiting_rcr_voting":
-        // !! IMPLEMENTAR... (AGUARDANDO FUNÇÃO/ENDPOINT)
-        break;
-
       case "waiting_rcr_priority":
-        // !! IMPLEMENTAR... (AGUARDANDO FUNÇÃO/ENDPOINT)
+        const result = await forceEndVote(
+          loggedUser.userId,
+          loggedUser.userToken,
+          action.environmentId,
+          action.status
+        );
+        if (result.error) {
+          setRequest({
+            title: "Error",
+            message: result.error.message,
+          });
+        } else {
+          setRequest({
+            title: "Voting ended",
+            message:
+              "The voting has been ended, reload the page to access the results!",
+          });
+        }
+        setAction(null);
+        setRequestMade(true);
         break;
 
       default:
@@ -325,6 +348,11 @@ const MyEnvironment = () => {
     redirect(`/environment/${id}/definition`);
   };
 
+  // . Ir para a página de detalhes do ambiente
+  const goEnvironmentDetailAfterPriorityVoting = (id) => {
+    redirect(`/environment/${id}/priority`);
+  };
+
   // . Declarando elementos da página
   const pageContent = () => {
     return (
@@ -352,8 +380,9 @@ const MyEnvironment = () => {
               id={env.id}
               name={env.name}
               status={env.status}
+              votingCount={env.voting_users_count}
               action={() => {
-                cardClick(env.id, env.name, env.status);
+                cardClick(env.id, env.name, env.status, env.voting_users_count);
               }}
               key={`ENV_${env.id}`}
             />

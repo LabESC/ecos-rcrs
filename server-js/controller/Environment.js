@@ -196,11 +196,20 @@ module.exports = {
       return res.status(401).json(ErrorSchema("Auth", "Unauthorized!"));
     }
 
-    // * Checking if id and status were provided
-    if (!req.params.id || !req.params.status) {
+    // * Checking if id was provided
+    if (!req.params.id) {
       return res
         .status(422)
         .json(ErrorSchema(422, "Id and/or status not provided!"));
+    }
+
+    // * Validating status
+    const { error } = EnvironmentSchemas.EnvironmentStatus.validate(
+      req.params.status
+    );
+
+    if (error) {
+      return res.status(422).json(ErrorSchema(422, error.details[0].message));
     }
 
     // * Updating the environment status
@@ -541,13 +550,13 @@ module.exports = {
     Logger(req.method, req.url);
 
     // * Checking if the user is authorized
-    const auth = AuthValidator.validateService(req.headers);
+    const auth = AuthValidator.validateUser(req.headers);
 
     if (!auth) {
       return res.status(401).json(ErrorSchema("Auth", "Unauthorized!"));
     }
 
-    /* // * TODO 
+    // * TODO
     // * Validating body
     const { error } =
       EnvironmentSchemas.EnvironmentUpdateFinalDataRequest.validate(req.body);
@@ -559,7 +568,7 @@ module.exports = {
     // * Updating final data
     const updatedEnvironments = await EnvironmentService.updateFinalData(
       req.params.id,
-      req.body
+      req.body.final_rcr
     );
 
     switch (updatedEnvironments) {
@@ -568,8 +577,8 @@ module.exports = {
       case null:
         return res.status(404).send(ErrorSchema(entity_name, msg_404));
       default:
-        return res.status(200).send();
-    }*/
+        return res.status(200).send(true);
+    }
   },
 
   async getMiningData(req, res) {
@@ -925,5 +934,70 @@ module.exports = {
       default:
         return res.status(200).send(issue);
     }
+  },
+
+  async endPriorityPoll(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
+    // * Checking if the user is authorized
+    const auth = await AuthValidator.validateUser(req.headers);
+
+    if (!auth) {
+      return res.status(401).json(ErrorSchema("Auth", "Unauthorized!"));
+    }
+
+    // * Validating id
+    if (!req.params.id) {
+      return res.status(422).json(ErrorSchema(422, "Id not provided!"));
+    }
+
+    // * Ending priority poll
+    const ended = await EnvironmentService.endPriorityPoll(req.params.id);
+
+    switch (ended) {
+      case -1:
+        return res.status(500).send(ErrorSchema("server", msg_500));
+      case -2:
+        return res.status(404).send(ErrorSchema(entity_name, msg_404));
+      case true:
+        return res.status(200).send(ended);
+    }
+  },
+
+  async countVotesForEnvironment(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
+    // * Checking if the user is authorized
+    const auth = await AuthValidator.validateUser(req.headers);
+
+    if (!auth) {
+      return res.status(401).json(ErrorSchema("Auth", "Unauthorized!"));
+    }
+
+    // * Validating id
+    if (!req.params.id || !req.params.status) {
+      return res
+        .status(422)
+        .json(ErrorSchema(422, "Id or/and status not provided!"));
+    }
+
+    if (
+      req.params.status !== "definition" &&
+      req.params.status !== "priority"
+    ) {
+      return res.status(422).json(ErrorSchema(422, "Invalid status!"));
+    }
+
+    // * Counting votes for environment
+    const count = await EnvironmentService.countVotesForEnvironment(
+      req.params.id
+    );
+
+    if (count === -1)
+      return res.status(500).send(ErrorSchema("server", msg_500));
+
+    return res.status(200).send(count);
   },
 };

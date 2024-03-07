@@ -91,7 +91,7 @@ module.exports = class Environment {
   static joinDefinitionDataWithVotes(definitionData, votes) {
     // . Filtering all the rcrs with going_to_vote = true
     definitionData.rcrs = definitionData.rcrs.filter(
-      (rcr) => rcr.going_to_vote
+      (rcr) => rcr.going_to_vote === true
     );
 
     // . Joining the votes with the rcrs
@@ -185,5 +185,58 @@ module.exports = class Environment {
     definitionData.status = "elaborating";
 
     return definitionData;
+  }
+
+  static joinPriorityDataWithVotes(priorityData, votes) {
+    // . Filtering all the rcrs with exclude_to_priority = false
+    priorityData.rcrs = priorityData.rcrs.filter(
+      (rcr) => rcr.exclude_to_priority === false
+    );
+
+    // ! Obtendo um valor para definir a posicao de cada rcr
+    // . Agrupando votos por id
+    const groupedObjects = votes.reduce((acc, obj) => {
+      acc[obj.id] = (acc[obj.id] || []).concat(obj);
+      return acc;
+    }, {});
+
+    // . Calculando a soma das posicoes
+    const positionsSum = Object.entries(groupedObjects).map(([id, objects]) => {
+      const positions = objects.map((obj) => obj.position);
+      return {
+        id: parseInt(id),
+        positionsSum: positions.reduce((a, b) => a + b, 0),
+      };
+    });
+
+    // . Calculando a media das posicoes
+    const positionsAverage = positionsSum.map((obj) => {
+      return { ...obj, positionsAverage: obj.positionsSum / votes.length };
+    });
+
+    // . Ordenando os objetos pela media das posicoes ascentemente
+    const sortedVotes = positionsAverage.sort(
+      (a, b) => a.positionsAverage - b.positionsAverage
+    );
+
+    // . Joining the sorted votes with the rcrs and
+    for (let i = 0; i < sortedVotes.length; i++) {
+      const vote = sortedVotes[i];
+      //. search the rcr with the same id
+      const rcr = priorityData.rcrs.find((rcr) => rcr.id === vote.id);
+      rcr.votes_position = i + 1;
+      rcr.position = i + 1;
+    }
+
+    // * Ordenar as rcrs pelo votes_position ascendentemente
+    priorityData.rcrs.sort((a, b) => {
+      return a.votes_position - b.votes_position;
+    });
+
+    // . Erasing closing_date and status
+    priorityData.closing_date = null;
+    priorityData.status = "elaborating";
+
+    return priorityData;
   }
 };

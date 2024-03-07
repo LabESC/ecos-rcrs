@@ -2,6 +2,7 @@ const EnvironmentRepository = require("../repository/Environment");
 const UserRepository = require("../repository/User");
 const APIRequests = require("./APIRequests");
 const EnvironmentUtils = require("../utils/Environment");
+const VotingUserRepository = require("../repository/VotingUser");
 
 class Environment {
   static async getAll() {
@@ -25,12 +26,31 @@ class Environment {
   }
 
   static async getByUserId(userId) {
+    let environments = null;
     try {
-      return await EnvironmentRepository.getByUserId(userId);
+      environments = await EnvironmentRepository.getByUserId(userId);
     } catch (e) {
       console.log(e);
       return -1;
     }
+
+    if (environments === null) return null;
+
+    for (const env of environments) {
+      if (env.status === "waiting_rcr_voting") {
+        const votingUsers =
+          await VotingUserRepository.countDefinitionVotesOfEnvironment(env.id);
+        env.voting_users_count = votingUsers;
+      }
+
+      if (env.status === "waiting_rcr_priority") {
+        const votingUsers =
+          await VotingUserRepository.countPriorityVotesOfEnvironment(env.id);
+        env.voting_users_count = votingUsers;
+      }
+    }
+
+    return environments;
   }
 
   static async create(environment) {
@@ -323,8 +343,48 @@ class Environment {
     return true;
   }
 
-  static async updateFinalData(id) {
-    // !! IMPLEMENTAR... (sera gatilho ou nao?)
+  static async updateFinalData(id, rcrsUpdated) {
+    // * Obtaining priority data if exists
+    let finalData = null;
+    try {
+      finalData = await EnvironmentRepository.getFinalRcr(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    if (finalData === false) return false;
+
+    // * If priority data does not exists, create it
+    if (!finalData) {
+      finalData = { rcrs: [], status: "elaborating", closing_date: None };
+    }
+    /*
+    // * Updating priority data
+    // . Check if there is an id at the issues array
+    let newId = 1;
+    for (const issue of priorityData.issues) {
+      newId = issue.id + 1;
+    }
+
+    newPriorityData["id"] = newId;
+    priorityData.issues.push(newPriorityData);
+*/
+
+    // * Updating priority data
+    finalData.rcrs = rcrsUpdated;
+
+    // * Updating the environment
+    try {
+      await EnvironmentRepository.updateFinalRcr(id, finalData);
+
+      //await EnvironmentRepository.updatePriority(id, priorityData);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    return true;
   }
 
   static async getMiningData(id) {
@@ -639,6 +699,208 @@ class Environment {
     }
 
     return issue ? issue : -2;
+  }
+
+  static async endDefinitionPoll(id) {
+    // * Obtaining environment data
+    let environment = null;
+    try {
+      environment = await EnvironmentRepository.getById(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    // * Obtaining environment data
+    let definitionData = null;
+
+    try {
+      definitionData = await EnvironmentRepository.getDefinitionData(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    // . Getting the votes for the environment
+    let votes = null;
+
+    try {
+      votes = await VotingUserRepository.getDefinitionVotesOfEnvironment(id);
+    } catch (e) {
+      console.log(
+        `CRON: Error getting the votes for the environment with ID ${id}`
+      );
+    }
+
+    if (votes === null) {
+      console.log(
+        `CRON: Error getting the votes for the environment with ID ${id}`
+      );
+    }
+
+    // . Joining all object from the arrays inside votes array into a single array
+    votes = votes.flat();
+
+    // . Joining the definition data with the votes
+    const priorityData = EnvironmentUtils.joinDefinitionDataWithVotes(
+      definitionData,
+      votes
+    );
+
+    // . Updating the status of the environment and defining priority RCRs
+    let updated = null;
+    try {
+      updated = await EnvironmentRepository.updatePriority(
+        id,
+        priorityData,
+        "rcr_voting_done"
+      );
+    } catch (e) {
+      console.log(e);
+    }
+
+    if (updated === -1) {
+      console.log(
+        `CRON: Error updating the status of the environment with ID ${id}`
+      );
+    }
+
+    // . Ending the status of the definitionData for the environment
+    let definitionDataUpdated = null;
+    try {
+      definitionDataUpdated =
+        await EnvironmentRepository.endDefinitionVoteForEnvironment(id);
+    } catch (e) {
+      console.log(e);
+    }
+
+    if (definitionDataUpdated === -1) {
+      console.log(
+        `CRON: Error ending the definitionData status for the environment with ID ${id}`
+      );
+    }
+
+    // . Sending the email to the user who created the environment
+    const subject = `SECO - RCR: ${environment.name} definition rcr voting completed`;
+    let emailText = `The RCR voting for your environment ${environment.name} was completed and processed!`;
+    emailText += `<br/>You can log on the system to see the results.\n`;
+
+    try {
+      await APIRequests.sendEmail(environment.User.email, subject, emailText);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  static async endPriorityPoll(id) {
+    // * Obtaining environment data
+    let environment = null;
+
+    try {
+      environment = await EnvironmentRepository.getPriorityVoteForEnding(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    // . Getting the votes for the environment
+    let votes = null;
+
+    try {
+      votes = await VotingUserRepository.getPriorityVotesOfEnvironment(id);
+    } catch (e) {
+      console.log(
+        `CRON: Error getting the votes for the environment with ID ${id}`
+      );
+    }
+
+    if (votes === null) {
+      console.log(
+        `CRON: Error getting the votes for the environment with ID ${id}`
+      );
+    }
+
+    // . Joining all object from the arrays inside votes array into a single array
+    votes = votes.flat();
+
+    // . Joining the definition data with the votes
+    const finalData = EnvironmentUtils.joinPriorityDataWithVotes(
+      environment.priority_data,
+      votes
+    );
+
+    // . Updating the status of the environment and defining priority RCRs
+    let updated = null;
+    try {
+      updated = await EnvironmentRepository.updateFinalRcr(
+        id,
+        finalData,
+        "rcr_priority_done"
+      );
+    } catch (e) {
+      console.log(e);
+    }
+
+    if (updated === -1) {
+      console.log(
+        `CRON: Error updating the status of the environment with ID ${id}`
+      );
+    }
+
+    // . Ending the status of the definitionData for the environment
+    let priorityDataUpdated = null;
+    try {
+      priorityDataUpdated =
+        await EnvironmentRepository.endPriorityVoteForEnvironment(id);
+    } catch (e) {
+      console.log(e);
+    }
+
+    if (priorityDataUpdated === -1) {
+      console.log(
+        `CRON: Error ending the definitionData status for the environment with ID ${id}`
+      );
+    }
+
+    // . Sending the email to the user who created the environment
+    const subject = `SECO - RCR: ${environment.name} definition rcr voting completed`;
+    let emailText = `The RCR voting for your environment ${environment.name} was completed and processed!`;
+    emailText += `<br/>You can log on the system to see the results.\n`;
+
+    try {
+      await APIRequests.sendEmail(environment.User.email, subject, emailText);
+    } catch (e) {
+      console.log(e);
+    }
+    return true;
+  }
+
+  static async countVotesForEnvironment(id, status) {
+    let votes = null;
+
+    try {
+      if (status === "definition") {
+        votes = await VotingUserRepository.countDefinitionVotesOfEnvironment(
+          id
+        );
+      }
+      if (status === "priority") {
+        votes = await VotingUserRepository.countPriorityVotesOfEnvironment(id);
+      }
+    } catch (e) {
+      console.log(
+        `CRON: Error getting the votes count for the environment with ID ${id}`
+      );
+      return -1;
+    }
+
+    if (votes === null) {
+      console.log(
+        `CRON: Error getting the votes for the environment with ID ${id}`
+      );
+    }
+
+    return votes;
   }
 }
 

@@ -1,21 +1,18 @@
 import {
   TextField,
   Button,
-  Link,
   Typography,
   Box,
   CircularProgress,
   Backdrop,
-  InputLabel,
-  Select,
-  MenuItem,
-  FormControl,
-  Badge,
   Accordion,
   AccordionSummary,
   AccordionDetails,
   AccordionActions,
   IconButton,
+  Snackbar,
+  Alert,
+  AlertTitle,
 } from "@mui/material";
 import { useState, useEffect, useMemo } from "react";
 import { ThemeProvider } from "@mui/material/styles";
@@ -25,6 +22,7 @@ import {
   ArrowUpIcon,
   XCircleFillIcon,
   FeedPlusIcon,
+  FeedIssueDraftIcon,
 } from "@primer/octicons-react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
@@ -46,6 +44,9 @@ import {
   setAllTopicsDataToLocalStorage,
   getIssueDataFromTopicDataAtLocalStorage,
   getIssueDataWithRelatedScoreFromTopicDataAtLocalStorage,
+  getFinalRCR,
+  setFinalRCRLToLocalStorage,
+  setFinalRCR,
 } from "../../api/Environments.jsx";
 
 const EnvironmentDetailPriority = () => {
@@ -96,7 +97,7 @@ const EnvironmentDetailPriority = () => {
 
       if (
         environmentStatus === null ||
-        environmentStatus !== "rcr_voting_done"
+        environmentStatus !== "rcr_priority_done"
       ) {
         redirect("/my-environments");
         return;
@@ -120,7 +121,7 @@ const EnvironmentDetailPriority = () => {
       setAllTopicsDataToLocalStorage(topicRequest);
 
       // . Obtendo as rcrs prioritarias do usuário
-      const response = await getPriorityRCRs(userId, userToken, environmentId);
+      const response = await getFinalRCR(userId, userToken, environmentId);
 
       // . Verificando se ocorreu algum erro
       if (response.error) {
@@ -138,7 +139,7 @@ const EnvironmentDetailPriority = () => {
       setRCRS(response.rcrs);
 
       // . Setando o topico atual no localStorage e todos os topicos
-      setPriorityRCRLToLocalStorage(response);
+      setFinalRCRLToLocalStorage(response);
 
       // . Obtendo somente a prioridade de cada rcr
       const positions = getPositions(response.rcrs);
@@ -161,6 +162,7 @@ const EnvironmentDetailPriority = () => {
       }
 
       // . Obtendo os ambientes do usuário
+      setLoggedUser(verifyUser);
       await getDetails(verifyUser.userId, verifyUser.userToken);
     };
 
@@ -214,28 +216,22 @@ const EnvironmentDetailPriority = () => {
     },
   ]); // . Armazena os ambientes do usuário
   const [positions, setPositions] = useState({}); // . Armazena as posições das rcrs
-
-  // . Funcao para verificar se a rcr foi excluida
-  const checkRCRExcluded = (rcrId) => {
-    const rcr = rcrs.find((rcr) => rcr.id === rcrId);
-    if (rcr === undefined) {
-      return false;
-    }
-    return rcr.definition_votes[1] > 0;
-  };
+  const [loggedUser, setLoggedUser] = useState({
+    userId: null,
+    userToken: null,
+  }); // . Armazena os dados do usuário logado
 
   const checkRCRPosition = (rcrId) => {
     // . Buscando no array de rcrs
     for (const rcr of rcrs) {
       if (rcr.id === rcrId) {
-        return rcr.position;
+        return rcr.votes_position;
       }
     }
   };
 
   const changeRCRPosition = (rcrId, directionOfNewPosition) => {
     console.log(rcrId, directionOfNewPosition);
-
     const newRCRs = rcrs;
     for (let i = 0; i < newRCRs.length; i++) {
       if (newRCRs[i].id === rcrId) {
@@ -245,9 +241,9 @@ const EnvironmentDetailPriority = () => {
             return;
           }
 
-          const temp = newRCRs[i].position;
-          newRCRs[i].position = newRCRs[i - 1].position;
-          newRCRs[i - 1].position = temp;
+          const temp = newRCRs[i].votes_position;
+          newRCRs[i].votes_position = newRCRs[i - 1].votes_position;
+          newRCRs[i - 1].votes_position = temp;
           break;
         } else {
           if (i === newRCRs.length - 1) {
@@ -255,70 +251,23 @@ const EnvironmentDetailPriority = () => {
             return;
           }
 
-          const temp = newRCRs[i].position;
-          newRCRs[i].position = newRCRs[i + 1].position;
-          newRCRs[i + 1].position = temp;
+          const temp = newRCRs[i].votes_position;
+          newRCRs[i].votes_position = newRCRs[i + 1].votes_position;
+          newRCRs[i + 1].votes_position = temp;
           break;
         }
       }
     }
 
     // . Reordenando o array de rcrs de acordo com a nova posição
-    newRCRs.sort((a, b) => a.position - b.position);
-    console.log(newRCRs);
-    setRCRS([...newRCRs]);
-  };
+    newRCRs.sort((a, b) => a.votes_position - b.votes_position);
 
-  const excludeRCR = (rcrId) => {
-    const newRCRs = rcrs;
-    let arrPosition = -1;
-    for (let i = 0; i < newRCRs.length; i++) {
-      if (newRCRs[i].id === rcrId) {
-        arrPosition = i; // . Armazenando a posição da rcr no array
-        newRCRs[i].exclude_to_priority = !newRCRs[i].exclude_to_priority; // . Invertendo o valor de exclusão
-        break;
-      }
+    // . Obtendo cada id e a posicao e salvando
+    const votesUpdated = [];
+    for (const rcr of rcrs) {
+      votesUpdated.push({ id: rcr.id, position: rcr.votes_position });
     }
-
-    if (arrPosition === -1) return;
-
-    // . Dependendo da condicao de exclusao da proridade, reordene o array
-    if (newRCRs[arrPosition].exclude_to_priority === true) {
-      // !! TODO: Erro quando a rcr e a ultima e e excluida, ao ser readicionada, ela retorna com uma posicao +1 o tamanho do array (ex: 5 rcrs, exclui a 5, ao readicionar ela fica na posicao 6)
-      // . Removendo a rcr
-      const removedRCR = newRCRs.splice(arrPosition, 1);
-
-      // . Alterando a posicao das rcrs abaixo desta
-      for (let i = arrPosition; i < newRCRs.length; i++) {
-        newRCRs[i].position -= 1;
-      }
-
-      // . Adicionando a rcr removida no final do array e atualizando a sua posicao
-      removedRCR[0].position = newRCRs.length + 1;
-      newRCRs.push(removedRCR[0]);
-    } else {
-      // . Verificando se as issues acima deste sao removidas, se sim, ir subindo ate encontrar uma que nao seja e deixa-la na posicao abaixo
-      for (let i = arrPosition; i >= 0; i--) {
-        if (newRCRs[i].exclude_to_priority === false) {
-          const tempPos = newRCRs[i].position + 1;
-
-          // . Alterando a posicao das rcrs abaixo desta
-          for (let j = tempPos; j < arrPosition; j++) {
-            newRCRs[j].position += 1;
-          }
-
-          newRCRs[arrPosition].position = tempPos;
-
-          break;
-        }
-      }
-
-      // . Reordenar array conforme a posicao
-      newRCRs.sort((a, b) => a.position - b.position);
-    }
-
-    console.log(newRCRs);
-    setRCRS([...newRCRs]);
+    setPositions({ ...votesUpdated });
   };
 
   // ! Funcoes para manipulacao da issue
@@ -365,6 +314,58 @@ const EnvironmentDetailPriority = () => {
     setIssueModalOpen(false);
   };
 
+  // . Funcao para salvar estado atual
+  const saveActualState = async () => {
+    setIsLoading(true);
+    const request = await setFinalRCR(
+      loggedUser.userId,
+      loggedUser.userToken,
+      environmentId,
+      rcrs
+    );
+
+    if (request === true) {
+      setAlertContent({
+        title: "Success",
+        message: "Actual rcr states saved successfully!",
+        severity: "success",
+      });
+      setIsLoading(false);
+      setAlertOpen(true);
+    } else {
+      setAlertContent({
+        title: "Error",
+        message:
+          "An error occurred while starting the voting! Try again later!",
+        severity: "error",
+      });
+      setIsLoading(false);
+      setAlertOpen(true);
+    }
+  };
+
+  // ! Variáveis e funções para manipulação dos Alerts
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertContent, setAlertContent] = useState({
+    severity: "error",
+    title: "Error",
+    message: "An error occurred",
+  });
+
+  const openAlert = (severity, title, message) => {
+    setAlertContent({
+      severity: severity,
+      title: title,
+      message: message,
+    });
+    setAlertOpen(true);
+    closeEditRCR();
+  };
+
+  const closeAlert = () => {
+    setAlertOpen(false);
+  };
+
   // . Declarando elementos da página
   const pageContent = () => {
     return (
@@ -399,6 +400,21 @@ const EnvironmentDetailPriority = () => {
             >
               {"RCRs Voted: " + rcrs.length}
             </Typography>
+
+            <SuccessButton
+              icon={<FeedIssueDraftIcon size={18} />}
+              message={"Save Actual State"}
+              width={"150px"}
+              height={"35px"}
+              uppercase={false}
+              marginLeft="0"
+              marginRight="4em"
+              backgroundColor={"#9fff64"}
+              action={() => {
+                saveActualState();
+              }}
+              visibility={rcrs.length !== 0 ? "visible" : "hidden"}
+            />
           </Box>
           <Box>
             <Box
@@ -421,25 +437,20 @@ const EnvironmentDetailPriority = () => {
                     marginBottom: "0.3em",
                   }}
                 >
-                  <IconButton
-                    className={
-                      rcr.exclude_to_priority === true
-                        ? "iconButtonAdd"
-                        : "iconButtonRemove"
-                    }
-                    onClick={() => {
-                      excludeRCR(rcr.id);
-                    }}
+                  <Box
                     style={{
+                      fontWeight: "bold",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      alignItems: "center",
                       marginRight: "0.5em",
+                      minWidth: "3%",
+                      maxWidth: "3%",
                     }}
                   >
-                    {rcr.exclude_to_priority === true ? (
-                      <FeedPlusIcon size={15}></FeedPlusIcon>
-                    ) : (
-                      <XCircleFillIcon size={15} />
-                    )}
-                  </IconButton>
+                    {rcr.votes_position}
+                  </Box>
                   <Accordion key={`Acc-${rcr.id}`} style={{ minWidth: "90%" }}>
                     <AccordionSummary
                       expandIcon={<ExpandMoreIcon />}
@@ -465,40 +476,10 @@ const EnvironmentDetailPriority = () => {
                             alignItems: "center",
                           }}
                         >
-                          {rcr.exclude_to_priority === true ? (
-                            <span
-                              style={{
-                                color: "red",
-                                display: "flex",
-                                justifyContent: "center",
-                                marginLeft: "0.2em",
-                              }}
-                            >
-                              <XCircleFillIcon size={15} />
-                            </span>
-                          ) : (
-                            <span
-                              style={{
-                                color: "#ff8700",
-                                display: "flex",
-                                justifyContent: "center",
-                                marginLeft: "0.2em",
-                              }}
-                            >
-                              {checkRCRPosition(rcr.id)} |
-                            </span>
-                          )}
                           <Box style={{ marginLeft: "0.4em" }}>
-                            {
-                              /*`#${rcr.id} - */ `${
-                                rcr.name ? rcr.name.toUpperCase() : ""
-                              }`
-                            }
+                            {` | ${rcr.name ? rcr.name.toUpperCase() : ""}`}
                           </Box>
                         </Box>
-                        {
-                          // !! INSERIR ESCALA LIKERT com o "final_vote"
-                        }
                       </Box>
                     </AccordionSummary>
                     <AccordionDetails>
@@ -546,25 +527,6 @@ const EnvironmentDetailPriority = () => {
                         })}
                       </Box>
                     </AccordionDetails>
-                    <AccordionActions
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <strong style={{ marginLeft: "8px" }}>
-                        Comment on the score:
-                      </strong>
-                      <TextField
-                        id={`txt-comment-${rcr.id}`}
-                        placeholder="Comment on the RCR"
-                        required
-                        variant="outlined"
-                        style={{ marginRight: "0.5em", width: "80%" }}
-                        multiline
-                        rows={4}
-                      />
-                    </AccordionActions>
                   </Accordion>
                   <IconButton
                     className={
@@ -638,6 +600,22 @@ const EnvironmentDetailPriority = () => {
         title={errorCode}
         message={errorMessage}
       />
+      <Snackbar
+        key={`SNACK_ERRORS_DATA`}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        open={alertOpen}
+        autoHideDuration={alertContent.severity === "error" ? 3000 : null}
+        onClose={closeAlert}
+      >
+        <Alert
+          onClose={closeAlert}
+          severity={alertContent.severity}
+          sx={{ width: "100%" }}
+        >
+          <AlertTitle>{alertContent.title}</AlertTitle>
+          {alertContent.message}
+        </Alert>
+      </Snackbar>
     </ThemeProvider>
   );
 };
