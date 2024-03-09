@@ -70,7 +70,7 @@ export function CancelEnvironmentDialog(props) {
             onClick={close}
             style={{ marginRight: "0.25em" }}
           />
-          CANCEL ENVIRONMENT
+          DELETE ENVIRONMENT
         </DialogTitle>
 
         <DialogContent
@@ -79,7 +79,7 @@ export function CancelEnvironmentDialog(props) {
           }}
         >
           <DialogContentText>
-            Are you sure you want to cancel the environment?
+            Are you sure you want to delete the environment?
           </DialogContentText>
         </DialogContent>
 

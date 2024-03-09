@@ -249,7 +249,7 @@ const EnvironmentDetail = () => {
           </Typography>
           <SuccessButton
             icon={<PeopleIcon size={18} />}
-            message={"Start RCR Definition Poll"}
+            message={"Start RCR Definition Voting"}
             width={"220px"}
             height={"30px"}
             uppercase={false}

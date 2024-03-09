@@ -271,7 +271,7 @@ const NewEnvironment = () => {
                 />
               </Box>
               <Box className="ButtonArea">
-                <Typography className="TextFieldLabel">Details</Typography>
+                <Typography className="TextFieldLabel">Description</Typography>
                 <TextField
                   id="txt-details"
                   variant="outlined"

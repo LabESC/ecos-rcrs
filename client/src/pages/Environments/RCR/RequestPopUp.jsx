@@ -116,7 +116,7 @@ export function RequestRCRPopUp(props) {
       setIsLoading(false);
       setAlertMessage({
         title: "Empty fields",
-        message: "Name and details are required",
+        message: "Name and description are required",
         severity: "error",
       });
       setHasAlert(true);
@@ -212,7 +212,7 @@ export function RequestRCRPopUp(props) {
             />
           </Box>
           <Box className="ButtonArea">
-            <Typography className="TextFieldLabel">Details*</Typography>
+            <Typography className="TextFieldLabel">Description*</Typography>
             <TextField
               id="txt-details"
               variant="outlined"

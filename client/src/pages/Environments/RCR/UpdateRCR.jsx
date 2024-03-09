@@ -91,7 +91,7 @@ export function UpdateRCRPopUp(props) {
             />
           </Box>
           <Box className="ButtonArea">
-            <Typography className="TextFieldLabel">Details*</Typography>
+            <Typography className="TextFieldLabel">Description*</Typography>
             <TextField
               id="txt-details-edit"
               variant="outlined"

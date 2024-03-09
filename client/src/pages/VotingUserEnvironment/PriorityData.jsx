@@ -18,7 +18,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 // ! Importações de componentes criados
 import theme from "../../components/MuiTheme.jsx";
-import SideBar from "../../components/SideBar.jsx";
+import SideBar from "./SideBar.jsx";
 import { IssueModalDetail } from "../Environments/Issues/IssueModalDetail.jsx";
 import { OpenRCRPriorityVotePopUp } from "./PopUps/OpenRCRPriorityVotePopUp.jsx";
 import { SuccessButton } from "../../components/Buttons.jsx";
@@ -270,16 +270,32 @@ const PriorityDataPage = () => {
             }}
             className="ContainerTitle"
           >
-            <Typography
-              variant="h5"
+            <Box
               style={{
-                textDecoration: "underline",
-                marginLeft: "1em",
-                fontWeight: "bold",
+                justifyContent: "flex-start",
+                display: "flex",
               }}
             >
-              {environmentName}
-            </Typography>
+              <Typography
+                variant="h5"
+                style={{
+                  marginLeft: "1em",
+                  fontWeight: "bold",
+                }}
+              >
+                RCR Priority vote for
+              </Typography>
+              <Typography
+                variant="h5"
+                style={{
+                  textDecoration: "underline",
+                  marginLeft: "0.3em",
+                  fontWeight: "bold",
+                }}
+              >
+                {environmentName}
+              </Typography>
+            </Box>
 
             <SuccessButton
               icon={<PeopleIcon size={18} />}

@@ -62,7 +62,7 @@ export function RequestAgainPopUp(props) {
                 : "hidden",
           }}
         >
-          CANCEL ENVIRONMENT
+          DELETE ENVIRONMENT
         </Button>
         <Button autoFocus onClick={action} color="warning">
           {status.includes("error")

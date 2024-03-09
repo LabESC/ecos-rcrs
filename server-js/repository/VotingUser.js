@@ -199,6 +199,7 @@ class VotingUser {
     });
 
     if (votingUserEnvironment === null) return 0;
+    if (votingUserEnvironment[0] === undefined) return 0;
 
     return votingUserEnvironment[0].length;
   }

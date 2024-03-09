@@ -936,6 +936,35 @@ module.exports = {
     }
   },
 
+  async endDefinitionPoll(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
+    // * Checking if the user is authorized
+    const auth = await AuthValidator.validateUser(req.headers);
+
+    if (!auth) {
+      return res.status(401).json(ErrorSchema("Auth", "Unauthorized!"));
+    }
+
+    // * Validating id
+    if (!req.params.id) {
+      return res.status(422).json(ErrorSchema(422, "Id not provided!"));
+    }
+
+    // * Ending priority poll
+    const ended = await EnvironmentService.endDefinitionPoll(req.params.id);
+
+    switch (ended) {
+      case -1:
+        return res.status(500).send(ErrorSchema("server", msg_500));
+      case -2:
+        return res.status(404).send(ErrorSchema(entity_name, msg_404));
+      case true:
+        return res.status(200).send(ended);
+    }
+  },
+
   async endPriorityPoll(req, res) {
     // . LOGGER
     Logger(req.method, req.url);

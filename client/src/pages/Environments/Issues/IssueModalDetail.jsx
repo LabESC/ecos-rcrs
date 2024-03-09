@@ -49,7 +49,11 @@ export function IssueModalDetail(props) {
           gutterBottom
           style={{ display: issue.relatedToScore ? "flex" : "none" }}
         >
-          <strong> Related To Main Issue Score: </strong> {issue.relatedToScore}
+          <strong style={{ marginRight: "0.3em" }}>
+            {" "}
+            Related To Main Issue Score:{" "}
+          </strong>{" "}
+          {issue.relatedToScore}
         </Typography>
         <Typography
           gutterBottom

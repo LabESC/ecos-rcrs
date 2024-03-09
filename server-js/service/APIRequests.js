@@ -58,6 +58,33 @@ class APIRequests {
       return false;
     }
   }
+
+  /**
+   * Makes a request to the topics API endpoint.
+   * @param {string} environmentId - The environment ID.
+   * @returns {boolean} - True if the request is successful, or false otherwise.
+   */
+  static async requestTopics(environmentId) {
+    // * Defining url
+    const url = `${config.apiMicroserviceBase}/request/topics`;
+
+    // * Making request
+    try {
+      await axios.post(
+        url,
+        { environment_id: environmentId },
+        {
+          headers: {
+            "service-login": config.servicesLogin,
+            "service-pwd": config.servicesPassword,
+          },
+        }
+      );
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 }
 
 module.exports = APIRequests;

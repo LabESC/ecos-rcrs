@@ -31,6 +31,8 @@ router.post("/api/request/topics", async (req, res) => {
   // * Validando variáveis
   const valid = await validation(headers, body);
 
+  // !! VALIDAR TAMBEM O SERVICO
+
   // * Se for inválido, retorne erro
   if (!valid) {
     return res.status(400).json({ error: "Invalid request." });

@@ -1,4 +1,4 @@
-import { Alert, Box, Typography } from "@mui/material";
+import { Alert, Box, Typography, Badge } from "@mui/material";
 import {
   OrganizationIcon,
   BeakerIcon,
@@ -9,6 +9,7 @@ import {
   AlertFillIcon,
   CheckCircleIcon,
   XCircleFillIcon,
+  CopyIcon,
 } from "@primer/octicons-react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -180,29 +181,83 @@ export function EnvironmentCard(props) {
     }
   };
 
+  const canClone = (status) => {
+    // ! Retorna se o ambiente pode ser clonado (ele so pode apos a geracao de topicos)
+    return (
+      status === "topics_done" ||
+      status === "waiting_rcr_voting" ||
+      status === "waiting_rcr_priority" ||
+      status === "rcr_voting_done" ||
+      status === "rcr_priority_done" ||
+      status === "done"
+    );
+  };
+
   return (
-    <Box
-      className="EnvironmentCard"
-      style={{
-        display: "flex",
-        marginBottom: 20,
-        borderRadius: 8,
-        padding: "0.8em",
-        width: 230,
-        height: 125,
-        background: getColor(status),
-        flexDirection: "column",
-        justifyContent: "space-between",
+    <Badge
+      badgeContent={
+        canClone(status) ? (
+          <CopyIcon
+            size={12}
+            style={{
+              margin: "2em !important",
+              visibility: canClone(status) ? "visible" : "hidden",
+            }}
+          />
+        ) : (
+          ""
+        )
+      }
+      key={`badge-${id}`}
+      onClick={() => {
+        // !! IMPLEMENTAR FUNCAO DE CLONAR AMBIENTE
+        console.log("cliquei");
       }}
-      onClick={action}
+      sx={{
+        "& .MuiBadge-badge": {
+          color: "black",
+          backgroundColor: canClone(status)
+            ? "#d6d6d6 !important"
+            : "transparent !important",
+          cursor: canClone(status) ? "pointer" : "default",
+          padding: "1em 0.8em",
+          "&:hover": {
+            color: "blue",
+          },
+        },
+      }}
     >
-      <Box>
-        <OrganizationIcon size={28} />
-        <Typography style={{ fontWeight: "500" }}>{name}</Typography>
+      <Box
+        className="EnvironmentCard"
+        style={{
+          display: "flex",
+          marginBottom: 20,
+          borderRadius: 8,
+          padding: "0.8em",
+          width: 230,
+          height: 125,
+          background: getColor(status),
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
+        onClick={action}
+      >
+        <Box>
+          <Box
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+            }}
+          >
+            <OrganizationIcon size={28} />
+          </Box>
+          <Typography style={{ fontWeight: "500" }}>{name}</Typography>
+        </Box>
+        <Box>
+          <Typography> {getStatusMessage(status)} </Typography>
+        </Box>
       </Box>
-      <Box>
-        <Typography> {getStatusMessage(status)} </Typography>
-      </Box>
-    </Box>
+    </Badge>
   );
 }

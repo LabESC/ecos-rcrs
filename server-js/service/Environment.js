@@ -132,13 +132,28 @@ class Environment {
       return -1;
     }
 
+    // . Requesting topic generation
+    let requestTopic = null;
+    try {
+      requestTopic = await APIRequests.requestTopics(id);
+    } catch (e) {
+      console.log(e);
+      requestTopic = false;
+    }
+
     // * Sending e-mail to the user
     const environmentUser =
       await EnvironmentRepository.getCreatedUserEmailByEnvironmentId(id);
 
     const subject = `SECO - RCR: ${environmentUser.name} mining done`;
-    let emailText = `<br/>The mining data for your environment ${environmentUser.name} is done!\n`;
-    emailText += `<br/>You need to log on the system to request the topics generation.\n`;
+    let emailText = "";
+    if (requestTopic === false) {
+      emailText = `<br/>The mining data for your environment ${environmentUser.name} is done!\n`;
+      emailText += `<br/>You need to log on the system to request the topics generation.\n`;
+    } else {
+      emailText = `<br/>The mining data for your environment ${environmentUser.name} is done!\n`;
+      emailText += `<br/>The topics generation is being processed, when finished, you'll be notified.\n`;
+    }
 
     try {
       await APIRequests.sendEmail(
@@ -780,7 +795,7 @@ class Environment {
       );
     }
 
-    // . Sending the email to the user who created the environment
+    /*// . Sending the email to the user who created the environment
     const subject = `SECO - RCR: ${environment.name} definition rcr voting completed`;
     let emailText = `The RCR voting for your environment ${environment.name} was completed and processed!`;
     emailText += `<br/>You can log on the system to see the results.\n`;
@@ -789,7 +804,8 @@ class Environment {
       await APIRequests.sendEmail(environment.User.email, subject, emailText);
     } catch (e) {
       console.log(e);
-    }
+    }*/
+    return true;
   }
 
   static async endPriorityPoll(id) {

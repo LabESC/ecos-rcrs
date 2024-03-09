@@ -116,7 +116,7 @@ export function ListAssociatedRCRsEnvPopUp(props) {
                       <strong> Topic: </strong> {rcr.topicNum}
                     </Typography>
                     <Typography>
-                      <strong> Details: </strong>
+                      <strong> Description: </strong>
                       {rcr.details}
                     </Typography>
                     <Box style={{ alignItems: "center !important" }}>

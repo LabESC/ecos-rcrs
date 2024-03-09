@@ -621,7 +621,7 @@ const EnvironmentDetailDefinition = () => {
                     </AccordionSummary>
                     <AccordionDetails>
                       <Typography>
-                        <strong>Details: </strong>
+                        <strong>Description: </strong>
                         {rcr.details}
                       </Typography>
 

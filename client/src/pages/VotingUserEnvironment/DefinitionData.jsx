@@ -186,6 +186,8 @@ const DefinitionDataPage = () => {
       return;
     }
 
+    /*
+    // !! Restricao de comentario removida (abaixo de 3, obrigar comentario)
     if (scoreData.score < 3 && comment.trim() === "") {
       activeErrorDialog(
         `SECO - RCR: Registering vote`,
@@ -193,7 +195,7 @@ const DefinitionDataPage = () => {
         "400"
       );
       return;
-    }
+    }*/
 
     // . Verificar se ja existe o voto em "definitionDataVoted", se sim, alterar, senão, adicionar
     const newDefinitionDataVoted = [...definitionDataVoted];

@@ -51,7 +51,7 @@ export function IssueCard(props) {
             fontSize: 10,
           }}
         >
-          <strong style={{ marginRight: "4px" }}> Score: </strong>
+          <strong style={{ marginRight: "4px" }}> Topic Score: </strong>
           {issue.score.toFixed(5)}
         </Typography>
         <Box className="IssueCardBody">

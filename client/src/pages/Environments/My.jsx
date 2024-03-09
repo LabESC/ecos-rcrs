@@ -131,7 +131,7 @@ const MyEnvironment = () => {
           environmentId,
           status,
           code: "Mining error",
-          msg: "An error occurred while mining repositories, you can request mining again or cancel the environment.",
+          msg: "An error occurred while mining repositories, you can request mining again or delete the environment.",
         });
         //await activeEnvironmentErrorDialog();
         break;
@@ -140,7 +140,7 @@ const MyEnvironment = () => {
           environmentId,
           status,
           code: "Topic generation error",
-          msg: "An error occurred while generating the topics, you can request the generation again or cancel the environment.",
+          msg: "An error occurred while generating the topics, you can request the generation again or delete the environment.",
         });
         //activeEnvironmentErrorDialog();
         break;
