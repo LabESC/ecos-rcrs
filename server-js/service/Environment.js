@@ -374,17 +374,6 @@ class Environment {
     if (!finalData) {
       finalData = { rcrs: [], status: "elaborating", closing_date: None };
     }
-    /*
-    // * Updating priority data
-    // . Check if there is an id at the issues array
-    let newId = 1;
-    for (const issue of priorityData.issues) {
-      newId = issue.id + 1;
-    }
-
-    newPriorityData["id"] = newId;
-    priorityData.issues.push(newPriorityData);
-*/
 
     // * Updating priority data
     finalData.rcrs = rcrsUpdated;
@@ -392,8 +381,33 @@ class Environment {
     // * Updating the environment
     try {
       await EnvironmentRepository.updateFinalRcr(id, finalData);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
 
-      //await EnvironmentRepository.updatePriority(id, priorityData);
+    return true;
+  }
+
+  static async updateFinalDataAndCloseEnvironment(id, rcrs) {
+    // * Obtaining priority data if exists
+    let finalData = null;
+    try {
+      finalData = await EnvironmentRepository.getFinalRcr(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    // * If does not exists, return it
+    if (!finalData) return finalData;
+
+    // * Otherwise, update its closingDate and status
+    finalData.rcrs = rcrs;
+
+    // * Updating the environment
+    try {
+      await EnvironmentRepository.updateFinalRcr(id, finalData, "done");
     } catch (e) {
       console.log(e);
       return -1;
@@ -557,12 +571,12 @@ class Environment {
     let miningData = null;
 
     // * Obtaining mining data if exists
-    try {
+    /*try {
       miningData = await EnvironmentRepository.getMiningData(id);
     } catch (e) {
       console.log(e);
       return -1;
-    }
+    }*/
 
     // * Obtaining definition data if exists
     try {
@@ -572,7 +586,7 @@ class Environment {
       return -1;
     }
 
-    if (!miningData) return miningData;
+    //if (!miningData) return miningData;
     if (!priorityData) return priorityData;
 
     // * Filtering the rcrs who are going to vote
@@ -588,6 +602,55 @@ class Environment {
 
     // * Inputting data into environment object
     environment.priority_data = priorityData;
+
+    return environment;
+  }
+
+  static async getFinalDataForReport(id) {
+    // * Check if the environment is in the right status
+    let environment = null;
+    try {
+      environment = await EnvironmentRepository.getById(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    if (!environment) return environment;
+
+    if (environment.status !== "done") return -2;
+
+    let finalData = null;
+    let miningData = null;
+
+    // * Obtaining mining data if exists
+    try {
+      miningData = await EnvironmentRepository.getMiningData(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    // * Obtaining definition data if exists
+    try {
+      finalData = await EnvironmentRepository.getFinalRcr(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    if (!miningData) return miningData;
+    if (!finalData) return finalData;
+
+    // * Filtering the rcrs who are going to vote
+    finalData.rcrs = finalData.rcrs.filter((rcr) => {
+      return rcr.exclude_to_priority === false;
+    });
+
+    // * Joining data with EnvironmentUtils
+    finalData = EnvironmentUtils.joinMiningAndFinal(miningData, finalData);
+    // * Inputting data into environment object
+    environment.final_data = finalData;
 
     return environment;
   }

@@ -797,6 +797,85 @@ export const setFinalRCR = async (
   return result;
 };
 
+export const setFinalRCRAndEndEnvironment = async (
+  userId,
+  userToken,
+  environmentId,
+  finalRCR
+) => {
+  const result = await Axios.post(
+    `${baseUrl}/environment/${environmentId}/end`,
+    { final_rcr: finalRCR },
+    { headers: { "user-id": userId, "user-token": userToken } }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      try {
+        return {
+          error: err.response.data.message["en-US"],
+          status: err.response.status,
+        };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+  return result;
+};
+
+export const setFinalRCRForReport = async (
+  userId,
+  userToken,
+  environmentId
+) => {
+  const result = await Axios.put(
+    `${baseUrl}/environment/${environmentId}/finaldata/report`,
+    {},
+    { headers: { "user-id": userId, "user-token": userToken } }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      console.log("err", err);
+      try {
+        return {
+          error: err.response.data.message["en-US"],
+          status: err.response.status,
+        };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+  return result;
+};
+
+export const getFinalRCRForReport = async (
+  userId,
+  userToken,
+  environmentId
+) => {
+  const result = await Axios.get(
+    `${baseUrl}/environment/${environmentId}/finaldata/report`,
+    {
+      headers: { "user-id": userId, "user-token": userToken },
+    }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+
+  return result;
+};
+
 export const setFinalRCRLToLocalStorage = (finalRCRs) => {
   if (!finalRCRs) {
     return;

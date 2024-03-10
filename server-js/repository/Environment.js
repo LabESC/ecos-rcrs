@@ -48,6 +48,7 @@ class Environment {
     return await EnvironmentModel.findOne({
       attributes: basicFields,
       where: { id: id },
+      raw: true,
     });
   }
 
@@ -259,7 +260,7 @@ class Environment {
   }
 
   /**
-   * Retrieves the priority data of an environment.
+   * Retrieves the final data of an environment.
    * @param {uuidv4} id - The ID of the environment.
    * @returns {Object} The final rcr data of the environment.
    */

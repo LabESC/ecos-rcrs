@@ -56,9 +56,18 @@ router.put(
   "/:id/endvoting/definition",
   EnvironmentController.endDefinitionPoll
 );
+router.post(
+  "/:id/end",
+  EnvironmentController.updateFinalDataAndCloseEnvironment
+);
 router.put(
   "/:id/countvotes/:status",
   EnvironmentController.countVotesForEnvironment
+);
+
+router.get(
+  "/:id/finaldata/report",
+  EnvironmentController.getFinalDataForReport
 );
 
 module.exports = router;

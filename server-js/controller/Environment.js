@@ -581,6 +581,43 @@ module.exports = {
     }
   },
 
+  async updateFinalDataAndCloseEnvironment(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
+    // * Checking if the user is authorized
+    const auth = AuthValidator.validateUser(req.headers);
+
+    if (!auth) {
+      return res.status(401).json(ErrorSchema("Auth", "Unauthorized!"));
+    }
+
+    // * TODO
+    // * Validating body
+    const { error } =
+      EnvironmentSchemas.EnvironmentUpdateFinalDataRequest.validate(req.body);
+
+    if (error) {
+      return res.status(422).json(ErrorSchema(422, error.details[0].message));
+    }
+
+    // * Updating final data
+    const updatedEnvironments =
+      await EnvironmentService.updateFinalDataAndCloseEnvironment(
+        req.params.id,
+        req.body.final_rcr
+      );
+
+    switch (updatedEnvironments) {
+      case -1:
+        return res.status(500).send(ErrorSchema("server", msg_500));
+      case null:
+        return res.status(404).send(ErrorSchema(entity_name, msg_404));
+      default:
+        return res.status(200).send(true);
+    }
+  },
+
   async getMiningData(req, res) {
     // . LOGGER
     Logger(req.method, req.url);
@@ -874,6 +911,46 @@ module.exports = {
         return res.status(404).send(ErrorSchema(entity_name, msg_404));
       default:
         return res.status(200).send(priorityData);
+    }
+  },
+
+  async getFinalDataForReport(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
+    // * Checking if the user is authorized
+    const auth = await AuthValidator.validateUser(req.headers);
+
+    if (!auth) {
+      return res.status(401).json(ErrorSchema("Auth", "Unauthorized!"));
+    }
+
+    // * Validating id
+    if (!req.params.id) {
+      return res.status(422).json(ErrorSchema(422, "Id not provided!"));
+    }
+
+    // * Getting definition data for voting
+    const finalData = await EnvironmentService.getFinalDataForReport(
+      req.params.id
+    );
+
+    switch (finalData) {
+      case -1:
+        return res.status(500).send(ErrorSchema("server", msg_500));
+      case -2:
+        return res
+          .status(400)
+          .send(
+            ErrorSchema(
+              "status",
+              "Environment is not opened to definition voting!"
+            )
+          );
+      case null:
+        return res.status(404).send(ErrorSchema(entity_name, msg_404));
+      default:
+        return res.status(200).send(finalData);
     }
   },
 

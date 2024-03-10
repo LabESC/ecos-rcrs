@@ -1,6 +1,4 @@
 import {
-  TextField,
-  Button,
   Typography,
   Box,
   CircularProgress,
@@ -23,6 +21,8 @@ import {
   XCircleFillIcon,
   FeedPlusIcon,
   FeedIssueDraftIcon,
+  PeopleIcon,
+  CheckCircleFillIcon,
 } from "@primer/octicons-react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
@@ -31,22 +31,18 @@ import theme from "../../components/MuiTheme.jsx";
 import SideBar from "../../components/SideBar.jsx";
 import { IssueModalDetail } from "./Issues/IssueModalDetail.jsx";
 import { SuccessButton } from "../../components/Buttons.jsx";
+import { OpenEndEnvironmentPopUp } from "./OpenEndEnvironmentPopUp.jsx";
 
 // ! Importações de códigos
 import { verifyLoggedUser } from "../../api/Auth.jsx";
 import {
   getEnvironmentIdFromUrl,
-  getPriorityRCRs,
-  setPriorityRCRLToLocalStorage,
   getEnvironmentNameFromLocalStorage,
   getEnvironmentStatusFromLocalStorage,
-  getTopicData,
-  setAllTopicsDataToLocalStorage,
-  getIssueDataFromTopicDataAtLocalStorage,
-  getIssueDataWithRelatedScoreFromTopicDataAtLocalStorage,
   getFinalRCR,
   setFinalRCRLToLocalStorage,
   setFinalRCR,
+  setFinalRCRAndEndEnvironment,
 } from "../../api/Environments.jsx";
 
 const EnvironmentDetailPriority = () => {
@@ -214,7 +210,6 @@ const EnvironmentDetailPriority = () => {
   };
 
   const changeRCRPosition = (rcrId, directionOfNewPosition) => {
-    console.log(rcrId, directionOfNewPosition);
     const newRCRs = rcrs;
     for (let i = 0; i < newRCRs.length; i++) {
       if (newRCRs[i].id === rcrId) {
@@ -305,6 +300,21 @@ const EnvironmentDetailPriority = () => {
     setAlertOpen(false);
   };
 
+  const endEnvironmentAction = () => {
+    console.log();
+  };
+
+  // ! Funcoes para manipulacao do popup de clone
+  const [openFinish, setOpenFinish] = useState(false);
+
+  const openFinishPopUp = () => {
+    setOpenFinish(true);
+  };
+
+  const closeFinishPopUp = () => {
+    setOpenFinish(false);
+  };
+
   // . Declarando elementos da página
   const pageContent = () => {
     return (
@@ -341,6 +351,21 @@ const EnvironmentDetailPriority = () => {
             </Typography>
 
             <SuccessButton
+              icon={<CheckCircleFillIcon size={18} />}
+              message={"Finish Environment"}
+              width={"150px"}
+              height={"35px"}
+              uppercase={false}
+              marginLeft="0"
+              marginRight="4em"
+              backgroundColor={"#9fff64"}
+              action={async () => {
+                openFinishPopUp();
+              }}
+              visibility={rcrs.length !== 0 ? "visible" : "hidden"}
+            />
+
+            <SuccessButton
               icon={<FeedIssueDraftIcon size={18} />}
               message={"Save Actual State"}
               width={"150px"}
@@ -348,10 +373,10 @@ const EnvironmentDetailPriority = () => {
               uppercase={false}
               marginLeft="0"
               marginRight="4em"
-              backgroundColor={"#9fff64"}
               action={() => {
                 saveActualState();
               }}
+              backgroundColor={"#f0dfc7"}
               visibility={rcrs.length !== 0 ? "visible" : "hidden"}
             />
           </Box>
@@ -493,6 +518,13 @@ const EnvironmentDetailPriority = () => {
         close={closeErrorDialog}
         title={errorCode}
         message={errorMessage}
+      />
+      <OpenEndEnvironmentPopUp
+        open={openFinish}
+        close={closeFinishPopUp}
+        environmentId={environmentId}
+        loggedUser={loggedUser}
+        finalRCRs={rcrs}
       />
       <Snackbar
         key={`SNACK_ERRORS_DATA`}

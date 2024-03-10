@@ -16,6 +16,7 @@ import EnvironmentDetail from "./pages/Environments/Detail.jsx";
 import NewEnvironment from "./pages/Environments/New.jsx";
 import EnvironmentDetailDefinition from "./pages/Environments/DetailDefinition.jsx";
 import EnvironmentDetailPriority from "./pages/Environments/DetailPriority.jsx";
+import EnvironmentFinalReport from "./pages/Environments/DetailFinal.jsx";
 
 // . Environments -> Issues
 import IssueDetail from "./pages/Environments/Issues/Detail.jsx";
@@ -59,6 +60,10 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <Route
           path="/environment/:id/priority"
           element={<EnvironmentDetailPriority />}
+        />
+        <Route
+          path="/environment/:id/final-report"
+          element={<EnvironmentFinalReport />}
         />
       </Routes>
     </BrowserRouter>

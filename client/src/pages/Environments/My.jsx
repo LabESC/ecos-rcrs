@@ -246,7 +246,9 @@ const MyEnvironment = () => {
         break;
 
       case "done":
-        // !! IMPLEMENTAR... (AGUARDANDO FUNÇÃO/ENDPOINT/PAGINA)
+        setEnvironmentNameToLocalStorage(name);
+        setEnvironmentStatusToLocalStorage(status);
+        goEnvironmentFinalReport(environmentId);
         break;
       default: // * mining, making_topics, não faz nada
         break;
@@ -343,14 +345,19 @@ const MyEnvironment = () => {
     redirect(`/environment/${id}`);
   };
 
-  // . Ir para a página de detalhes do ambiente
+  // . Ir para a página de detalhes de definicao do ambiente
   const goEnvironmentDetailAfterDefinitionVoting = (id) => {
     redirect(`/environment/${id}/definition`);
   };
 
-  // . Ir para a página de detalhes do ambiente
+  // . Ir para a página de detalhes de prioridade do ambiente
   const goEnvironmentDetailAfterPriorityVoting = (id) => {
     redirect(`/environment/${id}/priority`);
+  };
+
+  // . Ir para a página de relatorio final do ambiente
+  const goEnvironmentFinalReport = (id) => {
+    redirect(`/environment/${id}/final-report`);
   };
 
   // . Declarando elementos da página

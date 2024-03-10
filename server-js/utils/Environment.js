@@ -88,6 +88,30 @@ module.exports = class Environment {
     return definitionData;
   }
 
+  static joinMiningAndFinal(miningData, finalData) {
+    const miningMap = {};
+    for (const item of miningData.issues) {
+      miningMap[item.id] = {
+        ...item,
+        url: `https://github.com/${item.repo}/issues/${item.issueId}`,
+      };
+    }
+
+    for (const rcr of finalData.rcrs) {
+      if (miningMap[rcr.mainIssue]) {
+        rcr.mainIssue = miningMap[rcr.mainIssue];
+      }
+
+      for (let i = 0; i < rcr.relatedToIssues.length; i++) {
+        const relatedIssueId = rcr.relatedToIssues[i];
+        if (miningMap[relatedIssueId]) {
+          rcr.relatedToIssues[i] = miningMap[relatedIssueId];
+        }
+      }
+    }
+    return finalData;
+  }
+
   static joinDefinitionDataWithVotes(definitionData, votes) {
     // . Filtering all the rcrs with going_to_vote = true
     definitionData.rcrs = definitionData.rcrs.filter(

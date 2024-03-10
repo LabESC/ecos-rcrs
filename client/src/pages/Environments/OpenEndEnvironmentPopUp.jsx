@@ -5,19 +5,25 @@ import {
   DialogContentText,
   DialogTitle,
   Button,
+  Typography,
   useMediaQuery,
   useTheme,
+  Box,
+  TextField,
   Snackbar,
   Alert,
   AlertTitle,
 } from "@mui/material";
-import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
-import { updateStatus } from "../../api/Environments";
-import { verifyLoggedUser } from "../../api/Auth";
 import { useState } from "react";
+import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
+import { setFinalRCRAndEndEnvironment } from "../../api/Environments";
+import { useNavigate } from "react-router-dom";
 
-export function CancelEnvironmentDialog(props) {
-  const { open, close, closeParent, environmentId } = props;
+export function OpenEndEnvironmentPopUp(props) {
+  // ! Instanciando o useNavigate para redirecionar o usuário pra alguma página
+  const redirect = useNavigate();
+
+  const { open, close, environmentId, finalRCRs, loggedUser } = props;
   // ! Imports para o popUp
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
@@ -34,28 +40,18 @@ export function CancelEnvironmentDialog(props) {
     setRequestMade(false);
   };
 
-  // . Cancelar ambiente
-  const deleteEnvironmentAction = async () => {
-    // * Obtendo dados do usuario logado
-    const user = await verifyLoggedUser();
-    if (user === null) {
-      close();
-      return;
-    }
-
-    console.log(user);
-    // * Atualizando status do ambiente
-    const updatedEnvironment = await updateStatus(
-      user.userId,
-      user.userToken,
+  // . Clonar ambiente
+  const finishEnvironmentAction = async () => {
+    const response = await setFinalRCRAndEndEnvironment(
+      loggedUser.userId,
+      loggedUser.userToken,
       environmentId,
-      "cancelled"
+      finalRCRs
     );
 
-    // * Verificando se houve erro
-    if (updatedEnvironment.error) {
+    if (response !== true) {
       setRequest({
-        title: `${response.error.code}: Deleting environment`,
+        title: `${response.error.code}: Finishing environment`,
         message: response.error.message,
         severity: "error",
       });
@@ -64,21 +60,17 @@ export function CancelEnvironmentDialog(props) {
     }
 
     setRequest({
-      title: "Environment deleted",
-      message: "The environment was inactivated, wait for the page reloading.",
+      title: "Environment finished",
+      message: "The environment was finished, wait for the page reloading.",
       severity: "success",
     });
+
     setRequestMade(true);
-    close();
-    closeParent();
 
     // . Atualizar pagina depois de 5 segundos
     setTimeout(() => {
-      window.location.reload();
+      redirect("/my-environments");
     }, 3000);
-
-    /* // * Fechando o popUp
-    window.location.reload(false);*/
   };
 
   return (
@@ -103,7 +95,7 @@ export function CancelEnvironmentDialog(props) {
             onClick={close}
             style={{ marginRight: "0.25em" }}
           />
-          DELETE ENVIRONMENT
+          Finish environment
         </DialogTitle>
 
         <DialogContent
@@ -112,7 +104,12 @@ export function CancelEnvironmentDialog(props) {
           }}
         >
           <DialogContentText>
-            Are you sure you want to delete the environment?
+            <Typography
+              key={`msg_description_finish`}
+              style={{ margin: "0.5em 0" }}
+            >
+              Do you want to finish the environment?
+            </Typography>
           </DialogContentText>
         </DialogContent>
 
@@ -121,21 +118,22 @@ export function CancelEnvironmentDialog(props) {
             display: "flex",
             flexDirection: "row",
             alignItems: "center",
-            justifyContent: "space-between",
             background: "#d9d9d9",
           }}
         >
-          <Button autoFocus onClick={close} color="warning">
-            NO, KEEP IT
-          </Button>
-          <Button autoFocus onClick={deleteEnvironmentAction} color="warning">
-            YES, DELETE
+          <Button
+            autoFocus
+            onClick={finishEnvironmentAction}
+            color="success"
+            sx={{ fontWeight: "600" }}
+          >
+            YES, FINISH NOW
           </Button>
         </DialogActions>
       </Dialog>
 
       <Snackbar
-        key="SNACK_DELETE_REQ"
+        key="SNACK_CLONE_REQ"
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         open={requestMade}
         autoHideDuration={2500}

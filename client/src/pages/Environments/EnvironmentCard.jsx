@@ -1,4 +1,4 @@
-import { Alert, Box, Typography, Badge } from "@mui/material";
+import { Chip, Box, Typography, Badge } from "@mui/material";
 import {
   OrganizationIcon,
   BeakerIcon,
@@ -18,9 +18,6 @@ import {
 } from "../../api/Environments.jsx";
 
 export function EnvironmentCard(props) {
-  // ! Instanciando o useNavigate para redirecionar o usuário pra alguma página
-  const redirect = useNavigate();
-
   // ! Extraindo variáveis do props
   const { status, id, name, action, votingCount, cloneEnvironment } = props;
 
@@ -52,8 +49,8 @@ export function EnvironmentCard(props) {
       case "mining":
         return (
           <Box style={{ display: "flex", alignItems: "center" }}>
-            <BeakerIcon size={18} />
-            <Typography style={{ fontSize: 10, marginLeft: "0.6em" }}>
+            <BeakerIcon size={16} />
+            <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
               Mining repositories
             </Typography>
           </Box>
@@ -62,8 +59,8 @@ export function EnvironmentCard(props) {
       case "making_topics":
         return (
           <Box style={{ display: "flex", alignItems: "center" }}>
-            <BeakerIcon size={18} />
-            <Typography style={{ fontSize: 10, marginLeft: "0.6em" }}>
+            <BeakerIcon size={16} />
+            <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
               Generating topics
             </Typography>
           </Box>
@@ -72,8 +69,8 @@ export function EnvironmentCard(props) {
       case "mining_error":
         return (
           <Box style={{ display: "flex", alignItems: "center" }}>
-            <AlertFillIcon size={18} />
-            <Typography style={{ fontSize: 10, marginLeft: "0.6em" }}>
+            <AlertFillIcon size={16} />
+            <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
               Mining error
             </Typography>
           </Box>
@@ -82,8 +79,8 @@ export function EnvironmentCard(props) {
       case "topics_error":
         return (
           <Box style={{ display: "flex", alignItems: "center" }}>
-            <AlertFillIcon size={18} />
-            <Typography style={{ fontSize: 10, marginLeft: "0.6em" }}>
+            <AlertFillIcon size={16} />
+            <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
               Topics error
             </Typography>
           </Box>
@@ -92,8 +89,8 @@ export function EnvironmentCard(props) {
       case "mining_done":
         return (
           <Box style={{ display: "flex", alignItems: "center" }}>
-            <StackIcon size={18} />
-            <Typography style={{ fontSize: 10, marginLeft: "0.6em" }}>
+            <StackIcon size={16} />
+            <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
               Waiting for topics generation
             </Typography>
           </Box>
@@ -102,7 +99,7 @@ export function EnvironmentCard(props) {
       case "waiting_rcr_voting":
         return (
           <Box style={{ display: "flex", alignItems: "center" }}>
-            <PeopleIcon size={18} />
+            <PeopleIcon size={16} />
             <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
               {`Waiting for RCR definition voting (${votingCount} votes)`}
             </Typography>
@@ -112,7 +109,7 @@ export function EnvironmentCard(props) {
       case "waiting_rcr_priority":
         return (
           <Box style={{ display: "flex", alignItems: "center" }}>
-            <PeopleIcon size={18} />
+            <PeopleIcon size={16} />
             <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
               {`Waiting for RCR priority voting (${votingCount} votes)`}
             </Typography>
@@ -122,8 +119,8 @@ export function EnvironmentCard(props) {
       case "topics_done":
         return (
           <Box style={{ display: "flex", alignItems: "center" }}>
-            <StackIcon size={18} />
-            <Typography style={{ fontSize: 10, marginLeft: "0.6em" }}>
+            <StackIcon size={16} />
+            <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
               Topics generation done
             </Typography>
           </Box>
@@ -132,8 +129,8 @@ export function EnvironmentCard(props) {
       case "rcr_voting_done":
         return (
           <Box style={{ display: "flex", alignItems: "center" }}>
-            <ListOrderedIcon size={18} />
-            <Typography style={{ fontSize: 10, marginLeft: "0.6em" }}>
+            <ListOrderedIcon size={16} />
+            <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
               RCR definition voting done
             </Typography>
           </Box>
@@ -142,8 +139,8 @@ export function EnvironmentCard(props) {
       case "rcr_priority_done":
         return (
           <Box style={{ display: "flex", alignItems: "center" }}>
-            <TasklistIcon size={18} />
-            <Typography style={{ fontSize: 10, marginLeft: "0.6em" }}>
+            <TasklistIcon size={16} />
+            <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
               RCR priority voting done
             </Typography>
           </Box>
@@ -152,8 +149,8 @@ export function EnvironmentCard(props) {
       case "done":
         return (
           <Box style={{ display: "flex", alignItems: "center" }}>
-            <CheckCircleIcon size={18} />
-            <Typography style={{ fontSize: 10, marginLeft: "0.6em" }}>
+            <CheckCircleIcon size={16} />
+            <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
               Done
             </Typography>
           </Box>
@@ -162,9 +159,29 @@ export function EnvironmentCard(props) {
       case "cancelled":
         return (
           <Box style={{ display: "flex", alignItems: "center" }}>
-            <XCircleFillIcon size={18} />
-            <Typography style={{ fontSize: 10, marginLeft: "0.6em" }}>
+            <XCircleFillIcon size={16} />
+            <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
               Cancelled
+            </Typography>
+          </Box>
+        );
+
+      case "processing_rcr_voting":
+        return (
+          <Box style={{ display: "flex", alignItems: "center" }}>
+            <BeakerIcon size={16} />
+            <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
+              Processing definition votes
+            </Typography>
+          </Box>
+        );
+
+      case "processing_rcr_priority":
+        return (
+          <Box style={{ display: "flex", alignItems: "center" }}>
+            <BeakerIcon size={16} />
+            <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
+              Processing priority votes
             </Typography>
           </Box>
         );
@@ -172,8 +189,8 @@ export function EnvironmentCard(props) {
       default:
         return (
           <Box style={{ display: "flex", alignItems: "center" }}>
-            <AlertFillIcon size={18} />
-            <Typography style={{ fontSize: 10, marginLeft: "0.6em" }}>
+            <AlertFillIcon size={16} />
+            <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
               Error
             </Typography>
           </Box>
@@ -194,38 +211,39 @@ export function EnvironmentCard(props) {
   };
 
   return (
-    <Badge
-      badgeContent={
-        canClone(status) ? (
-          <CopyIcon
-            size={12}
-            style={{
-              margin: "2em !important",
-              visibility: canClone(status) ? "visible" : "hidden",
-            }}
-          />
-        ) : (
-          ""
-        )
-      }
-      key={`badge-${id}`}
-      onClick={() => {
-        cloneEnvironment();
-      }}
-      sx={{
-        "& .MuiBadge-badge": {
-          color: "black",
-          backgroundColor: canClone(status)
-            ? "#d6d6d6 !important"
-            : "transparent !important",
-          cursor: canClone(status) ? "pointer" : "default",
-          padding: "1em 0.8em",
-          "&:hover": {
-            color: "blue",
+    <Box style={{ display: "flex", width: 250, height: 150 }}>
+      {/*<Badge
+        badgeContent={
+          canClone(status) ? (
+            <CopyIcon
+              size={12}
+              style={{
+                margin: "2em !important",
+                visibility: canClone(status) ? "visible" : "hidden",
+              }}
+              onClick={() => {
+                cloneEnvironment();
+              }}
+            />
+          ) : (
+            ""
+          )
+        }
+        key={`badge-${id}`}
+        sx={{
+          "& .MuiBadge-badge": {
+            color: "black",
+            backgroundColor: canClone(status)
+              ? "#d6d6d6 !important"
+              : "transparent !important",
+            cursor: canClone(status) ? "pointer" : "default",
+            padding: "1em 0.8em",
+            "&:hover": {
+              color: "blue",
+            },
           },
-        },
-      }}
-    >
+        }}
+      >*/}
       <Box
         className="EnvironmentCard"
         style={{
@@ -251,12 +269,51 @@ export function EnvironmentCard(props) {
           >
             <OrganizationIcon size={28} />
           </Box>
-          <Typography style={{ fontWeight: "500" }}>{name}</Typography>
+          <Typography style={{ fontWeight: "500", fontSize: "0.9rem" }}>
+            {name}
+          </Typography>
         </Box>
         <Box>
-          <Typography> {getStatusMessage(status)} </Typography>
+          <Typography>{getStatusMessage(status)} </Typography>
         </Box>
       </Box>
-    </Badge>
+      {
+        // </Badge>
+      }
+
+      {canClone(status) ? (
+        <Chip
+          sx={{
+            padding: "0em",
+            cursor: "pointer",
+            "&:hover": {
+              color: "blue",
+            },
+            "& > * > *": {
+              verticalAlign: "baseline !important",
+            },
+            "& > *": {
+              paddingLeft: "5px !important",
+              paddingRight: "5px !important",
+            },
+          }}
+          onClick={() => {
+            cloneEnvironment();
+          }}
+          label={
+            <CopyIcon
+              size={10}
+              style={{
+                margin: "0em",
+                padding: "0em",
+                //visibility: canClone(status) ? "visible" : "hidden",
+              }}
+            />
+          }
+        />
+      ) : (
+        ""
+      )}
+    </Box>
   );
 }

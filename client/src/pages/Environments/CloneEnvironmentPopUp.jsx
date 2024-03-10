@@ -2,6 +2,7 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   Button,
   Typography,
@@ -108,6 +109,18 @@ export function CloneEnvironmentPopUp(props) {
             background: "#d9d9d9",
           }}
         >
+          <DialogContentText>
+            <Typography
+              key={`msg_description_clone`}
+              style={{ margin: "0.5em 0", fontSize: "0.8em", color: "red" }}
+            >
+              When cloning an environment, the new environment will be an exact
+              copy of the original environment until the topics generation and
+              the rcrs made til that point including all the data,
+              configurations and settings, but ignoring all the voting steps
+              forwards.
+            </Typography>
+          </DialogContentText>
           <Box className="ButtonArea">
             <Typography className="TextFieldLabel">Name*</Typography>
             <TextField

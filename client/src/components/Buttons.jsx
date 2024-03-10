@@ -173,3 +173,51 @@ export const SuccessButton = (props) => {
     </Button>
   );
 };
+
+export const CSVButton = (props) => {
+  const {
+    icon,
+    message,
+    uppercase,
+    width,
+    height,
+    action,
+    marginLeft,
+    marginRight,
+    backgroundColor,
+    visibility,
+    id,
+  } = props;
+
+  return (
+    <Button
+      className="Button"
+      variant="contained"
+      id="csvButton"
+      style={{
+        background: backgroundColor ? backgroundColor : "#B3DEF5",
+        color: "#000000",
+        borderRadius: "5px",
+        height: height,
+        width: width,
+        fontSize: "12px",
+        fontWeight: "bold",
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "flex-start",
+        textTransform: uppercase ? "uppercase" : "none",
+        marginLeft: marginLeft ? marginLeft : "auto",
+        marginRight: marginRight ? marginRight : "auto",
+        visibility: visibility ? visibility : "visible",
+      }}
+      onClick={action}
+    >
+      {icon}
+      <Typography
+        style={{ marginLeft: "0.5em", fontSize: "12px", fontWeight: "bold" }}
+      >
+        {message}
+      </Typography>
+    </Button>
+  );
+};
