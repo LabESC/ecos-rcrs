@@ -20,8 +20,8 @@ import theme from "../../components/MuiTheme.jsx";
 import SideBar from "../../components/SideBar.jsx";
 import { EnvironmentCard } from "./EnvironmentCard.jsx";
 import { SuccessButton } from "../../components/Buttons.jsx";
-import { RequestAgainPopUp } from "./RequestAgain.jsx";
 import { RequestAgainPopUp2 } from "./RequestAgain2.jsx";
+import { CloneEnvironmentPopUp } from "./CloneEnvironmentPopUp.jsx";
 
 // ! Importações de códigos
 import { verifyLoggedUser, removeLoggedUser } from "../../api/Auth.jsx";
@@ -313,7 +313,7 @@ const MyEnvironment = () => {
     }
   };
 
-  const requestPopUpActionCancel = () => {
+  const requestPopUpActionExclude = () => {
     // !! IMPLEMENTAR... (Mudança de status do ambiente para cancelado)
   };
 
@@ -385,11 +385,27 @@ const MyEnvironment = () => {
                 cardClick(env.id, env.name, env.status, env.voting_users_count);
               }}
               key={`ENV_${env.id}`}
+              cloneEnvironment={() => {
+                openClonePopUp(env.id);
+              }}
             />
           ))}
         </Box>
       </Box>
     );
+  };
+
+  // !Funcoes para manipulacao do popup de clone
+  const [openClone, setOpenClone] = useState(false);
+  const [environmentIdForClone, setEnvironmentIdForClone] = useState("");
+
+  const openClonePopUp = (environmentId) => {
+    setEnvironmentIdForClone(environmentId);
+    setOpenClone(true);
+  };
+
+  const closeClonePopUp = () => {
+    setOpenClone(false);
   };
 
   return (
@@ -448,6 +464,12 @@ const MyEnvironment = () => {
         autoHideDuration={2500}
         onClose={closeURLSnack}
         message="URL Copied!"
+      />
+      <CloneEnvironmentPopUp
+        open={openClone}
+        close={closeClonePopUp}
+        environmentId={environmentIdForClone}
+        loggedUser={loggedUser}
       />
     </ThemeProvider>
   );

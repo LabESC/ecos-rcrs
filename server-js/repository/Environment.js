@@ -327,17 +327,21 @@ class Environment {
   static async getDefinitionVoteExpiredEnvironments() {
     console.log(new Date());
     return await EnvironmentModel.findAll({
-      attributes: ["id", "name", "definition_data"],
+      attributes: [
+        "id",
+        //  "name", "definition_data"
+      ],
       where: {
         status: "waiting_rcr_voting",
         "definition_data.closing_date": { [Op.lt]: new Date() },
       },
-      include: [
+      raw: true,
+      /*include: [
         {
           model: UserModel,
           attributes: ["email"],
         },
-      ],
+      ],*/
     });
   }
 
@@ -367,19 +371,22 @@ class Environment {
   }
 
   static async getPriorityVoteExpiredEnvironments() {
-    console.log(new Date());
     return await EnvironmentModel.findAll({
-      attributes: ["id", "name", "priority_data"],
+      attributes: [
+        "id",
+        //, "name", "priority_data"
+      ],
       where: {
         status: "waiting_rcr_voting",
         "priority_data.closing_date": { [Op.lt]: new Date() },
       },
-      include: [
+      raw: true,
+      /*include: [
         {
           model: UserModel,
           attributes: ["email"],
         },
-      ],
+      ],*/
     });
   }
 

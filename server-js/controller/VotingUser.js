@@ -137,7 +137,7 @@ module.exports = {
       case -3:
         return res.status(400).json(ErrorSchema(400, msg_access_code_wrong));
       default:
-        return res.status(200).json(true);
+        return res.status(200).json(user);
     }
   },
 
@@ -171,7 +171,7 @@ module.exports = {
       case -3:
         return res.status(400).json(ErrorSchema(400, msg_access_code_wrong));
       default:
-        return res.status(200).json(true);
+        return res.status(200).json(user);
     }
   },
 };

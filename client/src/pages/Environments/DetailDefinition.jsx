@@ -107,7 +107,7 @@ const EnvironmentDetailDefinition = () => {
         setIsLoading(false);
         activeErrorDialog(
           `${topicRequest.error.code}: Getting topic data`,
-          topicRequest.error.message,
+          topicRequest.error.message["en-US"],
           topicRequest.status
         );
         return;
@@ -302,14 +302,14 @@ const EnvironmentDetailDefinition = () => {
   const [commentPopUpOpen, setCommentPopUpOpen] = useState(false);
   const [commentPopUpData, setCommentPopUpData] = useState({
     score: null,
-    comment: "",
+    comments: [],
   });
 
-  const openCommentPopUp = (commentScore) => {
+  const openCommentPopUp = (score, comments) => {
     setCommentPopUpData({
-      score: getScoreDescription(commentScore.score),
-      color: getScoreColor(commentScore.score),
-      comment: commentScore.comment,
+      score: getScoreDescription(score),
+      color: getScoreColor(score),
+      comments: comments,
     });
     setCommentPopUpOpen(true);
   };
@@ -461,12 +461,32 @@ const EnvironmentDetailDefinition = () => {
   const [priorityVotingPopUpOpen, setPriorityVotingPopUpOpen] = useState(false);
 
   const openVotingStartPopUp = () => {
+    // . Verificando se existe alguma rcr que foi pra votacao
+    let hasRcrToVote = false;
+    for (const rcr of rcrs) {
+      if (rcr.exclude_to_priority === false) {
+        hasRcrToVote = true;
+        break;
+      }
+    }
+
+    if (!hasRcrToVote) {
+      openAlert(
+        "error",
+        "No RCR to vote",
+        "There is no RCR to vote. Please, add at least one RCR to vote."
+      );
+      return;
+    }
+
     setPriorityVotingPopUpOpen(true);
   };
 
   const closeVotingStartPopUp = () => {
     setPriorityVotingPopUpOpen(false);
   };
+
+  const scoresAcceptedForVoteDetails = ["1", "2", "3", "4", "5"];
 
   // . Declarando elementos da página
   const pageContent = () => {
@@ -664,6 +684,7 @@ const EnvironmentDetailDefinition = () => {
                         })}
                       </Box>
                       <Box
+                        key={`box-voting_details-${rcr.id}`}
                         style={{
                           margin: "0.8em 0 0.2em 0",
                           width: "100%",
@@ -680,27 +701,70 @@ const EnvironmentDetailDefinition = () => {
                             flexDirection: "row",
                           }}
                         >
-                          {Object.keys(rcr.definition_votes).map(
-                            (key, index) => {
-                              if (key !== "comments") {
-                                return (
-                                  <Chip
-                                    label={getScoreDescriptionWithVoteCounts(
-                                      key,
-                                      rcr.definition_votes
-                                    )}
-                                    style={{
-                                      marginRight: "0.5em",
-                                      color: getScoreColor(key),
-                                      fontWeight: "bold",
-                                    }}
-                                  />
-                                );
-                              }
-                            }
-                          )}
+                          {Object.keys(rcr.definition_votes).map((key) => {
+                            if (!scoresAcceptedForVoteDetails.includes(key))
+                              return;
+                            const voteCount = rcr.definition_votes[key];
+
+                            return (
+                              <Chip
+                                label={`${getScoreDescription(
+                                  key
+                                )} (${voteCount})`}
+                                style={{
+                                  marginRight: "0.5em",
+                                  color: getScoreColor(key),
+                                  fontWeight: "bold",
+                                }}
+                              />
+                            );
+                          })}
                         </Box>
                       </Box>
+
+                      {Object.keys(rcr.definition_votes.comments).map((key) => {
+                        const comments = rcr.definition_votes.comments[key];
+                        if (comments.length < 1) return;
+
+                        console.log(key, comments);
+                        return (
+                          <Box
+                            key={`box-voting_details-${rcr.id}`}
+                            style={{
+                              margin: "0.8em 0 0.2em 0",
+                              width: "100%",
+                              display: "flex",
+                              flexDirection: "row",
+                            }}
+                          >
+                            <strong>Voting comments:</strong>
+                            <Box
+                              style={{
+                                marginRight: "0.5em",
+                                width: "90%",
+                                display: "flex",
+                                flexDirection: "row",
+                              }}
+                            >
+                              <Chip
+                                label={`${getScoreDescription(key)} (${
+                                  comments.length
+                                })`}
+                                style={{
+                                  marginRight: "0.5em",
+                                  color: getScoreColor(key),
+                                  fontWeight: "bold",
+                                  cursor: "pointer",
+                                }}
+                                onClick={() => {
+                                  openCommentPopUp(key, comments);
+                                }}
+                              />
+                            </Box>
+                          </Box>
+                        );
+                      })}
+
                       <Box
                         style={{
                           margin: "0.8em 0 0.2em 0",
@@ -721,17 +785,19 @@ const EnvironmentDetailDefinition = () => {
                             flexDirection: "row",
                           }}
                         >
-                          {rcr.definition_votes.comments.map(
-                            (comment, index) => {
+                          {Object.keys(rcr.definition_votes.comments).map(
+                            (key, comments) => {
+                              if (comments.length < 1) return;
+
                               return (
                                 <Chip
-                                  label={getScoreDescription(comment.score)}
+                                  label={`${getScoreDescription(key)}`}
                                   onClick={() => {
-                                    openCommentPopUp(comment);
+                                    openCommentPopUp(comments);
                                   }}
                                   style={{
                                     marginRight: "0.5em",
-                                    color: getScoreColor(comment.score),
+                                    color: getScoreColor(key),
                                     fontWeight: "bold",
                                   }}
                                 />

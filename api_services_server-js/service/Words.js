@@ -71,6 +71,7 @@ async function filtraArrayRequestGit(array, sysId) {
           issueId: issueId,
           body: issueBody,
           tags: issueTags,
+          state: issue.state,
         });
 
         sysId++;

@@ -90,6 +90,7 @@ class VotingUser {
    * @returns {VotingUserEnvironment} The created VotingUserEnvironment object.
    */
   static async registerDefinitionVotes(id, environmentId, votes) {
+    let returnType = "new";
     let votingUserEnvironment = await VotingUserEnvironment.findOne({
       where: { voting_user_id: id, environment_id: environmentId },
     });
@@ -101,6 +102,9 @@ class VotingUser {
         environment_id: environmentId,
       });
     }
+
+    if (votingUserEnvironment.votes_rcr_definition !== null)
+      returnType = "update";
 
     // * Update the definition votes.
     votingUserEnvironment.votes_rcr_definition = votes;
@@ -116,7 +120,7 @@ class VotingUser {
 
     votingUser.access_code = null;
     await votingUser.save();
-    return votingUserEnvironment;
+    return returnType;
   }
 
   /**
@@ -127,6 +131,7 @@ class VotingUser {
    * @returns {VotingUserEnvironment|null} - The number of rows affected or null if the relation of voting user and environment does not exist.
    */
   static async registerPriorityVotes(id, environmentId, votes) {
+    let returnType = "new";
     let votingUserEnvironment = await VotingUserEnvironment.findOne({
       where: { voting_user_id: id, environment_id: environmentId },
     });
@@ -138,6 +143,9 @@ class VotingUser {
         environment_id: environmentId,
       });
     }
+
+    if (votingUserEnvironment.votes_rcr_definition !== null)
+      returnType = "update";
 
     // * Update the priority votes.
     votingUserEnvironment = await votingUserEnvironment.update({
@@ -151,7 +159,7 @@ class VotingUser {
     votingUser.access_code = null;
     await votingUser.save();
 
-    return votingUserEnvironment;
+    return returnType;
   }
 
   /**
@@ -201,7 +209,7 @@ class VotingUser {
     if (votingUserEnvironment === null) return 0;
     if (votingUserEnvironment[0] === undefined) return 0;
 
-    return votingUserEnvironment[0].length;
+    return votingUserEnvironment.length;
   }
 
   static async countPriorityVotesOfEnvironment(environmentId) {
@@ -213,6 +221,7 @@ class VotingUser {
     });
 
     if (votingUserEnvironment === null) return 0;
+    if (votingUserEnvironment[0] === undefined) return 0;
 
     return votingUserEnvironment.length;
   }

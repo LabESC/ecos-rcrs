@@ -953,8 +953,11 @@ module.exports = {
     }
 
     // * Ending priority poll
-    const ended = await EnvironmentService.endDefinitionPoll(req.params.id);
+    // . Removendo o await pra ele executar em segundo plano
+    EnvironmentService.endDefinitionPoll(req.params.id);
 
+    return res.status(200).send(true);
+    /*
     switch (ended) {
       case -1:
         return res.status(500).send(ErrorSchema("server", msg_500));
@@ -962,7 +965,7 @@ module.exports = {
         return res.status(404).send(ErrorSchema(entity_name, msg_404));
       case true:
         return res.status(200).send(ended);
-    }
+    }*/
   },
 
   async endPriorityPoll(req, res) {
@@ -982,16 +985,18 @@ module.exports = {
     }
 
     // * Ending priority poll
-    const ended = await EnvironmentService.endPriorityPoll(req.params.id);
+    // . Removendo o await pra ele executar em segundo plano
+    EnvironmentService.endPriorityPoll(req.params.id);
 
-    switch (ended) {
+    return res.status(200).send(true);
+    /*switch (ended) {
       case -1:
         return res.status(500).send(ErrorSchema("server", msg_500));
       case -2:
         return res.status(404).send(ErrorSchema(entity_name, msg_404));
       case true:
         return res.status(200).send(ended);
-    }
+    }*/
   },
 
   async countVotesForEnvironment(req, res) {

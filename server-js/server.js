@@ -6,10 +6,19 @@ const cron = require("node-cron");
 
 // ! Tarefas agendadas
 const CronJobs = require("./service/CronJobs");
-cron.schedule("0 0,15,30,31,45 */1 * * *", function () {
-  CronJobs.updateEnvironmentsVotingStatus();
+// ! Atualiza status de votação das definições de ambiente
+cron.schedule("0 0,15,30,45 */1 * * *", function () {
+  CronJobs.updateEnvironmentsDefinitionVotingStatus();
   console.log(
     "CRON: running a task every 0,15,30 and 45 minute of hour (at second 0)"
+  );
+});
+
+// ! Atualiza status de votação das prioridades de ambiente
+cron.schedule("0 7,22,37,52 */1 * * *", function () {
+  CronJobs.updateEnvironmentsPriorityVotingStatus();
+  console.log(
+    "CRON: running a task every 7,22,37 and 52 minute of hour (at second 0)"
   );
 });
 

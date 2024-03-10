@@ -22,7 +22,7 @@ export function EnvironmentCard(props) {
   const redirect = useNavigate();
 
   // ! Extraindo variáveis do props
-  const { status, id, name, action, votingCount } = props;
+  const { status, id, name, action, votingCount, cloneEnvironment } = props;
 
   const getColor = (status) => {
     switch (status) {
@@ -210,8 +210,7 @@ export function EnvironmentCard(props) {
       }
       key={`badge-${id}`}
       onClick={() => {
-        // !! IMPLEMENTAR FUNCAO DE CLONAR AMBIENTE
-        console.log("cliquei");
+        cloneEnvironment();
       }}
       sx={{
         "& .MuiBadge-badge": {

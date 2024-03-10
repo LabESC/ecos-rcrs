@@ -70,7 +70,7 @@ export const registerDefinitionVotes = async (
     .catch((err) => {
       try {
         return {
-          error: err.response.data["en-US"],
+          error: err.response.data.message["en-US"],
           status: err.response.status,
         };
       } catch (e) {
@@ -96,7 +96,10 @@ export const registerPriorityVotes = async (
     })
     .catch((err) => {
       try {
-        return { error: err.response.data, status: err.response.status };
+        return {
+          error: err.response.data.message["en-US"],
+          status: err.response.status,
+        };
       } catch (e) {
         return getServerError();
       }

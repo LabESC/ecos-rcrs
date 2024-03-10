@@ -25,7 +25,7 @@ const EnvironmentBase = Joi.object({
   details: Joi.string().required(),
   mining_type: Joi.string().required(),
   repos: Joi.array().items(Joi.string()).required(),
-  organization_name: Joi.string().allow(null).required(),
+  organization_name: Joi.string().allow("").required(),
   mining_data: Joi.object().allow(null).required(),
   topic_data: Joi.object().allow(null).required(),
   definition_data: Joi.object().allow(null).required(),

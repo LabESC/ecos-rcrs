@@ -805,3 +805,31 @@ export const setFinalRCRLToLocalStorage = (finalRCRs) => {
   // . Parseando JSON objeto para JSON string
   localStorage.setItem("SECO_24_final-rcr", JSON.stringify(finalRCRs));
 };
+
+export const cloneEnvironment = async (
+  userId,
+  userToken,
+  environmentId,
+  newName
+) => {
+  const result = await Axios.post(
+    `${baseUrl}/environment/${environmentId}/clone`,
+    { name: newName },
+    { headers: { "user-id": userId, "user-token": userToken } }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      console.log("err", err);
+      try {
+        return {
+          error: err.response.data.message["en-US"],
+          status: err.response.status,
+        };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+  return result;
+};

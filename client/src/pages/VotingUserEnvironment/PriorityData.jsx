@@ -22,6 +22,7 @@ import SideBar from "./SideBar.jsx";
 import { IssueModalDetail } from "../Environments/Issues/IssueModalDetail.jsx";
 import { OpenRCRPriorityVotePopUp } from "./PopUps/OpenRCRPriorityVotePopUp.jsx";
 import { SuccessButton } from "../../components/Buttons.jsx";
+import { CommentPopUp } from "../Environments/CommentPopUp.jsx";
 
 // ! Importações de códigos
 import {
@@ -42,6 +43,7 @@ const PriorityDataPage = () => {
       }
       setPositions(votesUpdated);
     };
+
     // . Função para obter os topicos
     const getDetails = async () => {
       // . Obtendo o id do ambiente
@@ -78,6 +80,7 @@ const PriorityDataPage = () => {
       setEnvironmentName(response.name);
       setRCRS(response.priority_data.rcrs);
       setPositionsToPage(response.priority_data.rcrs);
+      console.log(response);
 
       // . Finalizando o carregamento
       setIsLoading(false);
@@ -126,22 +129,15 @@ const PriorityDataPage = () => {
           name: "",
           details: "",
           topicNum: "",
-          mainIssue: {
-            id: "",
-            body: "",
-            repo: "",
-            tags: "",
-            issueId: "",
+          definition_votes: {
+            1: null,
+            2: null,
+            3: null,
+            4: null,
+            5: null,
+            comments: [],
           },
-          relatedToIssues: [
-            {
-              id: "",
-              body: "",
-              repo: "",
-              tags: "",
-              issueId: "",
-            },
-          ],
+          final_vote: "",
           exclude_to_priority: true,
         },
       ], // . Armazena as RCRs do ambiente,
@@ -170,13 +166,21 @@ const PriorityDataPage = () => {
           issueId: "",
         },
       ],
+      definition_votes: {
+        1: null,
+        2: null,
+        3: null,
+        4: null,
+        5: null,
+        comments: [],
+      },
+      final_vote: "",
       exclude_to_priority: true,
     },
   ]);
   const [positions, setPositions] = useState([]);
 
   const checkRCRPosition = (rcrId) => {
-    console.log(rcrId);
     // . Buscando no array de rcrs
     for (const rcr of environment.priority_data.rcrs) {
       if (rcr.id === rcrId) {
@@ -251,13 +255,98 @@ const PriorityDataPage = () => {
     useState(false);
 
   const openPriorityRCRVoteModal = () => {
-    console.log(positions);
     setStartRCRPriorityVoteModalOpen(true);
   };
 
   const closePriorityRCRVoteModal = () => {
     setStartRCRPriorityVoteModalOpen(false);
   };
+
+  const getScoreDescriptionWithVoteCounts = (score, allVotes) => {
+    score = parseInt(score);
+    // * Contando quantos votos teve pro score, considerando que all votes é um objeto com as chaves de 1 a 5 e que voce so quer saber a quantidade de votos do score atual
+    let votes = 0;
+    for (const key in allVotes) {
+      if (parseInt(key) === score) {
+        votes += allVotes[key];
+      }
+    }
+
+    switch (score) {
+      case 1:
+        return `Strongly Disagree (${votes} votes)`;
+      case 2:
+        return `Disagree (${votes} votes)`;
+      case 3:
+        return `Neutral (${votes} votes)`;
+      case 4:
+        return `Agree (${votes} votes)`;
+      case 5:
+        return `Strongly Agree (${votes} votes)`;
+      default:
+        return "No score";
+    }
+  };
+
+  const getScoreDescription = (score) => {
+    score = parseInt(score);
+
+    switch (score) {
+      case 1:
+        return `Strongly Disagree`;
+      case 2:
+        return `Disagree`;
+      case 3:
+        return `Neutral`;
+      case 4:
+        return `Agree`;
+      case 5:
+        return `Strongly Agree`;
+      default:
+        return "No score";
+    }
+  };
+
+  const getScoreColor = (score) => {
+    score = parseInt(score);
+
+    switch (score) {
+      case 1:
+        return `#cc0e0e`;
+      case 2:
+        return `#cc540e`;
+      case 3:
+        return `#998408`;
+      case 4:
+        return `#5b9e08`;
+      case 5:
+        return `#0c9e09`;
+      default:
+        return "No score";
+    }
+  };
+
+  // ! Funções para manipulação do popup de comentario
+  const [commentPopUpOpen, setCommentPopUpOpen] = useState(false);
+  const [commentPopUpData, setCommentPopUpData] = useState({
+    score: null,
+    comments: [],
+  });
+
+  const openCommentPopUp = (score, comments) => {
+    setCommentPopUpData({
+      score: getScoreDescription(score),
+      color: getScoreColor(score),
+      comments: comments,
+    });
+    setCommentPopUpOpen(true);
+  };
+
+  const closeCommentPopUp = () => {
+    setCommentPopUpOpen(false);
+  };
+
+  const scoresAcceptedForVoteDetails = ["1", "2", "3", "4", "5"];
 
   // . Declarando elementos da página
   const pageContent = () => {
@@ -380,6 +469,22 @@ const PriorityDataPage = () => {
                             {` | ${rcr.name ? rcr.name.toUpperCase() : ""}`}
                           </Box>
                         </Box>
+                        <Box style={{ marginRight: "1em" }}>
+                          <Typography>
+                            Most votes at:
+                            <strong
+                              style={{
+                                color: getScoreColor(rcr.final_vote),
+                                marginLeft: "0.3em",
+                              }}
+                            >
+                              {getScoreDescriptionWithVoteCounts(
+                                rcr.final_vote,
+                                rcr.definition_votes
+                              )}
+                            </strong>
+                          </Typography>
+                        </Box>
                         {
                           // !! INSERIR ESCALA LIKERT com o "final_vote"
                         }
@@ -391,40 +496,86 @@ const PriorityDataPage = () => {
                         {rcr.details}
                       </Typography>
 
-                      <Box style={{ alignItems: "center !important" }}>
-                        <strong>Main Issue: </strong>
-                        <Button
-                          variant="outlined"
-                          style={{ padding: "0em", marginLeft: "0.4em" }}
-                          onClick={() => {
-                            openIssueDetailModal(rcr.mainIssue);
+                      <Box
+                        key={`box-voting_details-${rcr.id}`}
+                        style={{
+                          margin: "0.8em 0 0.2em 0",
+                          width: "100%",
+                          display: "flex",
+                          flexDirection: "row",
+                        }}
+                      >
+                        <strong>Voting details:</strong>
+                        <Box
+                          style={{
+                            marginRight: "0.5em",
+                            width: "90%",
+                            display: "flex",
+                            flexDirection: "row",
                           }}
                         >
-                          {rcr.mainIssue.id}
-                        </Button>
+                          {Object.keys(rcr.definition_votes).map((key) => {
+                            if (!scoresAcceptedForVoteDetails.includes(key))
+                              return;
+                            const voteCount = rcr.definition_votes[key];
+
+                            return (
+                              <Chip
+                                label={`${getScoreDescription(
+                                  key
+                                )} (${voteCount})`}
+                                style={{
+                                  marginRight: "0.5em",
+                                  color: getScoreColor(key),
+                                  fontWeight: "bold",
+                                }}
+                              />
+                            );
+                          })}
+                        </Box>
                       </Box>
 
-                      <Box style={{ alignItems: "center !important" }}>
-                        <strong>Related To issues:</strong>
-                        {rcr.relatedToIssues.map((issue) => {
-                          return (
-                            <Button
-                              key={`RelIssue-${issue.id}`}
-                              variant="outlined"
+                      {Object.keys(rcr.definition_votes.comments).map((key) => {
+                        const comments = rcr.definition_votes.comments[key];
+                        if (comments.length < 1) return;
+
+                        return (
+                          <Box
+                            key={`box-voting_details-${rcr.id}`}
+                            style={{
+                              margin: "0.8em 0 0.2em 0",
+                              width: "100%",
+                              display: "flex",
+                              flexDirection: "row",
+                            }}
+                          >
+                            <strong>Voting comments:</strong>
+                            <Box
                               style={{
-                                padding: "0em",
-                                marginLeft: "0.4em",
-                                marginTop: "0.8em",
-                              }}
-                              onClick={() => {
-                                openIssueDetailModal(issue);
+                                marginRight: "0.5em",
+                                width: "90%",
+                                display: "flex",
+                                flexDirection: "row",
                               }}
                             >
-                              {issue.id}
-                            </Button>
-                          );
-                        })}
-                      </Box>
+                              <Chip
+                                label={`${getScoreDescription(key)} (${
+                                  comments.length
+                                })`}
+                                style={{
+                                  marginRight: "0.5em",
+                                  color: getScoreColor(key),
+                                  fontWeight: "bold",
+                                  cursor: "pointer",
+                                }}
+                                onClick={() => {
+                                  openCommentPopUp(key, comments);
+                                }}
+                              />
+                            </Box>
+                          </Box>
+                        );
+                      })}
                     </AccordionDetails>
                   </Accordion>
                   <IconButton
@@ -504,6 +655,12 @@ const PriorityDataPage = () => {
         close={closePriorityRCRVoteModal}
         vote={positions}
         environmentId={environmentId}
+      />
+      <CommentPopUp
+        open={commentPopUpOpen}
+        close={closeCommentPopUp}
+        closeMessage={"GO BACK"}
+        commentScore={commentPopUpData}
       />
     </ThemeProvider>
   );

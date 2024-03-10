@@ -51,8 +51,10 @@ module.exports = (sequelize, DataTypes) => {
           "topics_error",
           "topics_done",
           "waiting_rcr_voting",
+          "processing_rcr_voting",
           "rcr_voting_done",
           "waiting_rcr_priority",
+          "processing_rcr_priority",
           "rcr_priority_done",
           "done",
           "cancelled"

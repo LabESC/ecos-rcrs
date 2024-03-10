@@ -103,23 +103,6 @@ const EnvironmentDetailPriority = () => {
         return;
       }
 
-      // . Obtendo o dado de topicos do ambiente
-      const topicRequest = await getTopicData(userId, userToken, environmentId);
-
-      // . Verificando se ocorreu algum erro
-      if (topicRequest.error) {
-        setIsLoading(false);
-        activeErrorDialog(
-          `${topicRequest.error.code}: Getting topic data`,
-          topicRequest.error.message,
-          topicRequest.status
-        );
-        return;
-      }
-
-      // . Armazenando os topicos
-      setAllTopicsDataToLocalStorage(topicRequest);
-
       // . Obtendo as rcrs prioritarias do usuário
       const response = await getFinalRCR(userId, userToken, environmentId);
 
@@ -268,50 +251,6 @@ const EnvironmentDetailPriority = () => {
       votesUpdated.push({ id: rcr.id, position: rcr.votes_position });
     }
     setPositions({ ...votesUpdated });
-  };
-
-  // ! Funcoes para manipulacao da issue
-  const [issueModal, setIssueModal] = useState({
-    id: null,
-    issueId: "",
-    repo: "",
-    body: "",
-    tags: "",
-    score: "",
-    relatedToScore: "",
-  });
-  const [issueModalOpen, setIssueModalOpen] = useState(false);
-
-  const openIssueDetailModal = (topicNum, issueId, mainIssueId = null) => {
-    // . Obtendo os dados do tópico
-    let issue;
-    if (mainIssueId) {
-      issue = getIssueDataWithRelatedScoreFromTopicDataAtLocalStorage(
-        topicNum,
-        issueId,
-        mainIssueId
-      );
-    } else {
-      issue = getIssueDataFromTopicDataAtLocalStorage(topicNum, issueId);
-    }
-
-    // . Verificando se ocorreu algum erro
-    if (!issue) {
-      activeErrorDialog(
-        "Getting issue data",
-        "There was an error getting the issue data",
-        500
-      );
-      return;
-    }
-
-    // . Armazenando os dados da issue
-    setIssueModal(issue);
-    setIssueModalOpen(true);
-  };
-
-  const closeIssueModal = () => {
-    setIssueModalOpen(false);
   };
 
   // . Funcao para salvar estado atual
@@ -487,45 +426,6 @@ const EnvironmentDetailPriority = () => {
                         <strong>Description: </strong>
                         {rcr.details}
                       </Typography>
-
-                      <Box style={{ alignItems: "center !important" }}>
-                        <strong>Main Issue: </strong>
-                        <Button
-                          variant="outlined"
-                          style={{ padding: "0em", marginLeft: "0.4em" }}
-                          onClick={() => {
-                            openIssueDetailModal(rcr.topicNum, rcr.mainIssue);
-                          }}
-                        >
-                          {rcr.mainIssue}
-                        </Button>
-                      </Box>
-
-                      <Box style={{ alignItems: "center !important" }}>
-                        <strong>Related To issues:</strong>
-                        {rcr.relatedToIssues.map((issue) => {
-                          return (
-                            <Button
-                              key={`RelIssue-${issue}`}
-                              variant="outlined"
-                              style={{
-                                padding: "0em",
-                                marginLeft: "0.4em",
-                                marginTop: "0.8em",
-                              }}
-                              onClick={() => {
-                                openIssueDetailModal(
-                                  rcr.topicNum,
-                                  issue,
-                                  rcr.mainIssue
-                                );
-                              }}
-                            >
-                              {issue}
-                            </Button>
-                          );
-                        })}
-                      </Box>
                     </AccordionDetails>
                   </Accordion>
                   <IconButton
@@ -572,12 +472,6 @@ const EnvironmentDetailPriority = () => {
             })}
           </Box>
         </Box>
-        <IssueModalDetail
-          open={issueModalOpen}
-          close={closeIssueModal}
-          closeMessage={"BACK"}
-          issue={issueModal}
-        />
       </>
     );
   };

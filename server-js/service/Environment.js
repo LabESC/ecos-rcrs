@@ -132,22 +132,22 @@ class Environment {
       return -1;
     }
 
-    // . Requesting topic generation
     let requestTopic = null;
+    /*// . Requesting topic generation - erro pq ele tenta solicitar denovo pro microsservico que ta em execucao
     try {
       requestTopic = await APIRequests.requestTopics(id);
     } catch (e) {
       console.log(e);
       requestTopic = false;
     }
-
+*/
     // * Sending e-mail to the user
     const environmentUser =
       await EnvironmentRepository.getCreatedUserEmailByEnvironmentId(id);
 
     const subject = `SECO - RCR: ${environmentUser.name} mining done`;
     let emailText = "";
-    if (requestTopic === false) {
+    if (!requestTopic) {
       emailText = `<br/>The mining data for your environment ${environmentUser.name} is done!\n`;
       emailText += `<br/>You need to log on the system to request the topics generation.\n`;
     } else {
@@ -532,6 +532,7 @@ class Environment {
       miningData,
       definitionData
     );
+
     // * Inputting data into environment object
     environment.definition_data = definitionData;
 
@@ -579,11 +580,12 @@ class Environment {
       return rcr.exclude_to_priority === false;
     });
 
-    // * Joining data with EnvironmentUtils
+    /*// * Joining data with EnvironmentUtils
     priorityData = EnvironmentUtils.joinMiningAndDefinition(
       miningData,
       priorityData
-    );
+    );*/
+
     // * Inputting data into environment object
     environment.priority_data = priorityData;
 
@@ -720,19 +722,28 @@ class Environment {
     // * Obtaining environment data
     let environment = null;
     try {
-      environment = await EnvironmentRepository.getById(id);
+      environment = await EnvironmentRepository.getDefinitionVoteForEnding(id);
     } catch (e) {
       console.log(e);
       return -1;
     }
 
-    // * Obtaining environment data
-    let definitionData = null;
+    if (!environment) return environment;
 
+    // . Updating environment status
+    let updateStatus = null;
     try {
-      definitionData = await EnvironmentRepository.getDefinitionData(id);
+      updateStatus = await EnvironmentRepository.updateStatus(
+        id,
+        "processing_rcr_voting"
+      );
     } catch (e) {
       console.log(e);
+      return -1;
+    }
+
+    if (updateStatus === -1) {
+      console.log(`Error updating the status of the environment with ID ${id}`);
       return -1;
     }
 
@@ -742,15 +753,11 @@ class Environment {
     try {
       votes = await VotingUserRepository.getDefinitionVotesOfEnvironment(id);
     } catch (e) {
-      console.log(
-        `CRON: Error getting the votes for the environment with ID ${id}`
-      );
+      console.log(`Error getting the votes for the environment with ID ${id}`);
     }
 
     if (votes === null) {
-      console.log(
-        `CRON: Error getting the votes for the environment with ID ${id}`
-      );
+      console.log(`Error getting the votes for the environment with ID ${id}`);
     }
 
     // . Joining all object from the arrays inside votes array into a single array
@@ -758,7 +765,7 @@ class Environment {
 
     // . Joining the definition data with the votes
     const priorityData = EnvironmentUtils.joinDefinitionDataWithVotes(
-      definitionData,
+      environment.definition_data,
       votes
     );
 
@@ -775,9 +782,7 @@ class Environment {
     }
 
     if (updated === -1) {
-      console.log(
-        `CRON: Error updating the status of the environment with ID ${id}`
-      );
+      console.log(`Error updating the status of the environment with ID ${id}`);
     }
 
     // . Ending the status of the definitionData for the environment
@@ -791,11 +796,11 @@ class Environment {
 
     if (definitionDataUpdated === -1) {
       console.log(
-        `CRON: Error ending the definitionData status for the environment with ID ${id}`
+        `Error ending the definitionData status for the environment with ID ${id}`
       );
     }
 
-    /*// . Sending the email to the user who created the environment
+    // . Sending the email to the user who created the environment
     const subject = `SECO - RCR: ${environment.name} definition rcr voting completed`;
     let emailText = `The RCR voting for your environment ${environment.name} was completed and processed!`;
     emailText += `<br/>You can log on the system to see the results.\n`;
@@ -804,7 +809,7 @@ class Environment {
       await APIRequests.sendEmail(environment.User.email, subject, emailText);
     } catch (e) {
       console.log(e);
-    }*/
+    }
     return true;
   }
 
@@ -819,21 +824,36 @@ class Environment {
       return -1;
     }
 
+    if (!environment) return environment;
+
+    // . Updating environment status
+    let updateStatus = null;
+    try {
+      updateStatus = await EnvironmentRepository.updateStatus(
+        id,
+        "processing_rcr_priority"
+      );
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    if (updateStatus === -1) {
+      console.log(`Error updating the status of the environment with ID ${id}`);
+      return -1;
+    }
+
     // . Getting the votes for the environment
     let votes = null;
 
     try {
       votes = await VotingUserRepository.getPriorityVotesOfEnvironment(id);
     } catch (e) {
-      console.log(
-        `CRON: Error getting the votes for the environment with ID ${id}`
-      );
+      console.log(`Error getting the votes for the environment with ID ${id}`);
     }
 
     if (votes === null) {
-      console.log(
-        `CRON: Error getting the votes for the environment with ID ${id}`
-      );
+      console.log(`Error getting the votes for the environment with ID ${id}`);
     }
 
     // . Joining all object from the arrays inside votes array into a single array
@@ -858,12 +878,10 @@ class Environment {
     }
 
     if (updated === -1) {
-      console.log(
-        `CRON: Error updating the status of the environment with ID ${id}`
-      );
+      console.log(`Error updating the status of the environment with ID ${id}`);
     }
 
-    // . Ending the status of the definitionData for the environment
+    // . Ending the status of the priorityData for the environment
     let priorityDataUpdated = null;
     try {
       priorityDataUpdated =
@@ -874,7 +892,7 @@ class Environment {
 
     if (priorityDataUpdated === -1) {
       console.log(
-        `CRON: Error ending the definitionData status for the environment with ID ${id}`
+        `Error ending the definitionData status for the environment with ID ${id}`
       );
     }
 

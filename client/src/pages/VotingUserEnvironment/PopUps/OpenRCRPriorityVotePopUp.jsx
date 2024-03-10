@@ -65,10 +65,7 @@ export function OpenRCRPriorityVotePopUp(props) {
     severity: "error",
   });
   const [alertOpen, setAlertOpen] = useState(false);
-  const [finalStepContent, setFinalStepContent] = useState({
-    url: "",
-    message: "",
-  });
+  const [voteRegisteredType, setVoteRegisteredType] = useState("new");
   const steps = getSteps();
 
   const goToNextStep = () => {
@@ -161,7 +158,7 @@ export function OpenRCRPriorityVotePopUp(props) {
       accessCode
     );
 
-    if (request !== true) {
+    if (request !== true && typeof request !== "string") {
       setAlertContent({
         title: "Error",
         message: request.error,
@@ -172,6 +169,7 @@ export function OpenRCRPriorityVotePopUp(props) {
       return;
     }
 
+    setVoteRegisteredType(request);
     setIsLoading(false);
     goToNextStep();
   };
@@ -263,7 +261,8 @@ export function OpenRCRPriorityVotePopUp(props) {
                 key="t3"
                 style={{ fontWeight: "bold" }}
               >
-                Vote registered! You can close this window now.
+                Vote {voteRegisteredType === "new" ? "registered" : "updated"}!
+                You can close this window now.
               </Typography>
             </Box>
           </>
@@ -299,13 +298,7 @@ export function OpenRCRPriorityVotePopUp(props) {
         >
           <ArrowCircleLeftIcon
             className="BackButton"
-            onClick={
-              finalStepContent.url !== ""
-                ? () => {
-                    redirect("/my-environments");
-                  }
-                : close
-            }
+            onClick={close}
             style={{ marginRight: "2em" }}
           />
           Register RCR Definition Vote

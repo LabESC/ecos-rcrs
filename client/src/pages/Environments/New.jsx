@@ -166,12 +166,31 @@ const NewEnvironment = () => {
     setRepositories(newRepos);
   };
 
+  const removeRepositoryFromOrgRepositories = (repo) => {
+    // * Se o usuário remover um repositorio ao estar na opção de organização, ele estará trocando o tipo da mineração para repos
+    const newRepos = orgRepositories.filter((r) => r !== repo);
+    setRepositories([...newRepos]);
+    setMiningType("repos");
+  };
+
   const createNewEnvironment = async () => {
     const name = document.getElementById("txt-name").value;
     const details = document.getElementById("txt-details").value;
     const userId = loggedUser.userId;
     const userToken = loggedUser.userToken;
     const organization = document.getElementById("txt-organization").value;
+
+    if (name === "") {
+      setSearchError({ title: "Name", message: "Name is required" });
+      setHasSearchError(true);
+      return;
+    }
+
+    if (details === "") {
+      setSearchError({ title: "Details", message: "Details is required" });
+      setHasSearchError(true);
+      return;
+    }
 
     if (miningType === "organization" && organization === "") {
       setSearchError({
@@ -201,6 +220,8 @@ const NewEnvironment = () => {
     }
 
     setIsLoading(true);
+
+    console.log(miningType);
     const res = await createEnvironment(
       userId,
       userToken,
@@ -262,7 +283,7 @@ const NewEnvironment = () => {
           <Box className="LoginCardContent">
             <Box className="DivLoginTextAndButtons">
               <Box className="ButtonArea">
-                <Typography className="TextFieldLabel">Name</Typography>
+                <Typography className="TextFieldLabel">Name*</Typography>
                 <TextField
                   id="txt-name"
                   variant="outlined"
@@ -271,7 +292,7 @@ const NewEnvironment = () => {
                 />
               </Box>
               <Box className="ButtonArea">
-                <Typography className="TextFieldLabel">Description</Typography>
+                <Typography className="TextFieldLabel">Description*</Typography>
                 <TextField
                   id="txt-details"
                   variant="outlined"
@@ -286,7 +307,7 @@ const NewEnvironment = () => {
                   id="radio-button-mining_type"
                   className="TextFieldLabel"
                 >
-                  Mining Type
+                  Mining Type*
                 </FormLabel>
                 <RadioGroup
                   row
@@ -424,7 +445,7 @@ const NewEnvironment = () => {
                             key={`CHP_${index}`}
                             style={{ margin: "0.25em" }}
                             onDelete={() => {
-                              removeRepositoryFromRepositories(repo);
+                              removeRepositoryFromOrgRepositories(repo);
                             }}
                           />
                         );

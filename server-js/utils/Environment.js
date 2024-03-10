@@ -97,7 +97,15 @@ module.exports = class Environment {
     // . Joining the votes with the rcrs
     for (const rcr of definitionData.rcrs) {
       delete rcr.going_to_vote;
-      rcr.definition_votes = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, comments: [] };
+      rcr.definition_votes = {
+        1: 0,
+        2: 0,
+        3: 0,
+        4: 0,
+        5: 0,
+        comments: [],
+        counts: 0,
+      };
       rcr.final_vote = 0;
       rcr.exclude_to_priority = true;
       rcr.position = 0;
@@ -107,6 +115,8 @@ module.exports = class Environment {
 
       for (const rcrVote of votesForThisRCR) {
         rcr.definition_votes[rcrVote.score] += 1;
+        rcr.definition_votes.counts += 1;
+
         if (rcrVote.comment) {
           rcr.definition_votes.comments.push({
             comment: rcrVote.comment,
@@ -172,8 +182,25 @@ module.exports = class Environment {
 
     // * Ordenar as rcrs pela nota final
     definitionData.rcrs.sort((a, b) => {
-      return b.final_vote - a.final_vote;
+      return b.definition_votes.counts - a.definition_votes.counts;
     });
+
+    // * No atributo definition_votes.comments para cada rcr, agrupar pelo score (fazer ele como key) e concatenar os comentarios como string num array (value)
+    for (let i = 0; i < definitionData.rcrs.length; i++) {
+      const rcr = definitionData.rcrs[i];
+      const comments = rcr.definition_votes.comments;
+      const commentsByScore = {};
+
+      for (const comment of comments) {
+        if (commentsByScore[comment.score]) {
+          commentsByScore[comment.score].push(comment.comment);
+        } else {
+          commentsByScore[comment.score] = [comment.comment];
+        }
+      }
+
+      definitionData.rcrs[i].definition_votes.comments = commentsByScore;
+    }
 
     // * Definir a posição de cada rcr
     for (let i = 0; i < definitionData.rcrs.length; i++) {
@@ -205,11 +232,16 @@ module.exports = class Environment {
       const positions = objects.map((obj) => obj.position);
       return {
         id: parseInt(id),
+        // crie um atributo positions com um objeto chave valor onde a chave é a posicao e o valor é a quantidade de votos
+        positions: positions.reduce((acc, position) => {
+          acc[position] = (acc[position] || 0) + 1;
+          return acc;
+        }, {}),
         positionsSum: positions.reduce((a, b) => a + b, 0),
       };
     });
 
-    // . Calculando a media das posicoes
+    /*// . Calculando a media das posicoes
     const positionsAverage = positionsSum.map((obj) => {
       return { ...obj, positionsAverage: obj.positionsSum / votes.length };
     });
@@ -217,6 +249,11 @@ module.exports = class Environment {
     // . Ordenando os objetos pela media das posicoes ascentemente
     const sortedVotes = positionsAverage.sort(
       (a, b) => a.positionsAverage - b.positionsAverage
+    );*/
+
+    // . Ordenando os objetos pela soma das posições ascentemente
+    const sortedVotes = positionsSum.sort(
+      (a, b) => a.positionsSum - b.positionsSum
     );
 
     // . Joining the sorted votes with the rcrs and
@@ -226,6 +263,7 @@ module.exports = class Environment {
       const rcr = priorityData.rcrs.find((rcr) => rcr.id === vote.id);
       rcr.votes_position = i + 1;
       rcr.position = i + 1;
+      rcr.positions = vote.positions;
     }
 
     // * Ordenar as rcrs pelo votes_position ascendentemente

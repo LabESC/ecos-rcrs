@@ -96,7 +96,7 @@ export function CancelEnvironmentDialog(props) {
             NO, KEEP IT
           </Button>
           <Button autoFocus onClick={btnSubmit} color="warning">
-            YES, CANCEL
+            YES, DELETE
           </Button>
         </DialogActions>
       </Dialog>
