@@ -38,6 +38,30 @@ const MyEnvironment = () => {
   // ! Instanciando o useNavigate para redirecionar o usuário pra alguma página
   const redirect = useNavigate();
 
+  // ! Definindo ordem dos ambientes
+  const orderEnvironments = (environments) => {
+    const order = [
+      "done",
+      "mining",
+      "mining_error",
+      "mining_done",
+      "making_topics",
+      "topics_error",
+      "topics_done",
+      "waiting_rcr_voting",
+      "rcr_voting_done",
+      "waiting_rcr_priority",
+      "rcr_priority_done",
+      "cancelled",
+    ];
+
+    const orderedEnvironments = environments.sort((a, b) => {
+      return order.indexOf(a.status) - order.indexOf(b.status);
+    });
+
+    return orderedEnvironments;
+  };
+
   // ! Executado ao iniciar o componente
   useEffect(() => {
     // . Mudando nome da página
@@ -60,8 +84,11 @@ const MyEnvironment = () => {
         return;
       }
 
+      // . Ordenando os ambientes
+      const orderedEnvironments = orderEnvironments(response);
+
       // . Armazenando os ambientes
-      setEnvironments(response);
+      setEnvironments(orderedEnvironments);
       setIsLoading(false);
     };
 

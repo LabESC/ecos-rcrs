@@ -585,7 +585,10 @@ const EnvironmentDetailDefinition = () => {
                     inputProps={{ "aria-label": "controlled" }}
                     color="success"
                   />
-                  <Accordion key={`Acc-${rcr.id}`} style={{ minWidth: "90%" }}>
+                  <Accordion
+                    key={`Acc-${rcr.id}`}
+                    style={{ minWidth: "90%", maxWidth: "90%" }}
+                  >
                     <AccordionSummary
                       expandIcon={<ExpandMoreIcon />}
                       aria-controls="panel1a-content"
