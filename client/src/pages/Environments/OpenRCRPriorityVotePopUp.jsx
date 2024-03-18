@@ -327,7 +327,7 @@ export function OpenRCRPriorityVotePopUp(props) {
             }
             style={{ marginRight: "2em" }}
           />
-          Start Priority RCR poll
+          Start Priority RCR voting
         </DialogTitle>
 
         <DialogContent dividers style={{ background: "#e5e5e5" }}>

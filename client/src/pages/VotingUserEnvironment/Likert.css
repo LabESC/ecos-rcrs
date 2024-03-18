@@ -9,3 +9,30 @@
 .likertScale {
   margin-bottom: 0 !important;
 }
+
+.likert1 > .likertBand > .likertResponse > input:checked + .likertIndicator {
+  background-color: #fe0000 !important;
+}
+
+.likert1 {
+  margin-bottom: 0 !important;
+  border: none;
+}
+
+.likert2 > .likertBand > .likertResponse > input:checked + .likertIndicator {
+  background-color: #9b9400 !important;
+}
+
+.likert2 {
+  margin-bottom: 0 !important;
+  border: none;
+}
+
+.likert3 > .likertBand > .likertResponse > input:checked + .likertIndicator {
+  background-color: #006e1b !important;
+}
+
+.likert3 {
+  margin-bottom: 0 !important;
+  border: none;
+}

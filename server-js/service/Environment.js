@@ -781,7 +781,7 @@ class Environment {
     return issue ? issue : -2;
   }
 
-  static async endDefinitionPoll(id) {
+  static async endDefinitionVoting(id) {
     // * Obtaining environment data
     let environment = null;
     try {
@@ -876,7 +876,7 @@ class Environment {
     return true;
   }
 
-  static async endPriorityPoll(id) {
+  static async endPriorityVoting(id) {
     // * Obtaining environment data
     let environment = null;
 

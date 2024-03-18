@@ -521,7 +521,7 @@ export function OpenRCRDefinitionVotePopUp(props) {
             }
             style={{ marginRight: "2em" }}
           />
-          Start Definition RCR poll
+          Start Definition RCR voting
         </DialogTitle>
 
         <DialogContent dividers style={{ background: "#e5e5e5" }}>

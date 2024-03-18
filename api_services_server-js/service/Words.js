@@ -1,5 +1,7 @@
 const cheerio = require("cheerio");
 
+const { removeStopwords } = require("stopword");
+
 // * Palavras poluentes ao texto
 const wordsToRemove = ["\n", "\r", "\r\n", "\r\n\r\n", "[x]", "[X]", "[ ]"];
 
@@ -61,8 +63,11 @@ async function filtraArrayRequestGit(array, sysId) {
       // . Removendo espaços demasiados em branco
       issueBody = issueBody.replace(/\s+/g, " ");
 
+      // * Removendo stop-words
+      issueBody = removeStopwords(issueBody.split(" ")).join(" ");
+
       // . Se o corpo da issue acabar ficando nulo, retorne
-      if (issueBody === null) return;
+      if (issueBody === null || issueBody === " ") continue;
 
       // . Se o id da issue não for falso e o tamanho do corpo da issue for maior que 0, adicione no array
       if (issueId !== false && issueBody.length > 0) {

@@ -1013,7 +1013,7 @@ module.exports = {
     }
   },
 
-  async endDefinitionPoll(req, res) {
+  async endDefinitionVoting(req, res) {
     // . LOGGER
     Logger(req.method, req.url);
 
@@ -1029,9 +1029,9 @@ module.exports = {
       return res.status(422).json(ErrorSchema(422, "Id not provided!"));
     }
 
-    // * Ending priority poll
+    // * Ending definition voting
     // . Removendo o await pra ele executar em segundo plano
-    EnvironmentService.endDefinitionPoll(req.params.id);
+    EnvironmentService.endDefinitionVoting(req.params.id);
 
     return res.status(200).send(true);
     /*
@@ -1045,7 +1045,7 @@ module.exports = {
     }*/
   },
 
-  async endPriorityPoll(req, res) {
+  async endPriorityVoting(req, res) {
     // . LOGGER
     Logger(req.method, req.url);
 
@@ -1061,9 +1061,9 @@ module.exports = {
       return res.status(422).json(ErrorSchema(422, "Id not provided!"));
     }
 
-    // * Ending priority poll
+    // * Ending priority voting
     // . Removendo o await pra ele executar em segundo plano
-    EnvironmentService.endPriorityPoll(req.params.id);
+    EnvironmentService.endPriorityVoting(req.params.id);
 
     return res.status(200).send(true);
     /*switch (ended) {

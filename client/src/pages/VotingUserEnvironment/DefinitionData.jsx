@@ -27,6 +27,7 @@ import { SuccessButton } from "../../components/Buttons.jsx";
 import { OpenRCRDefinitionVotePopUp } from "./OpenRCRDefinitionVotePopUp.jsx";
 import { IssueModalDetail } from "../Environments/Issues/IssueModalDetail.jsx";
 import LikertScale from "./LikertScale.jsx";
+import VotingScale from "./VotingScale.jsx";
 
 // ! Importações de códigos
 import {
@@ -186,16 +187,15 @@ const DefinitionDataPage = () => {
       return;
     }
 
-    /*
-    // !! Restricao de comentario removida (abaixo de 3, obrigar comentario)
-    if (scoreData.score < 3 && comment.trim() === "") {
+    // !! Restricao de comentario (se igual a "Não", obrigar comentario)
+    if (scoreData.score === 1 && comment.trim() === "") {
       activeErrorDialog(
         `SECO - RCR: Registering vote`,
-        "Comment is required for scores below 3.",
+        "Comment is required for 'NO' vote.",
         "400"
       );
       return;
-    }*/
+    }
 
     // . Verificar se ja existe o voto em "definitionDataVoted", se sim, alterar, senão, adicionar
     const newDefinitionDataVoted = [...definitionDataVoted];
@@ -304,14 +304,18 @@ const DefinitionDataPage = () => {
         </Box>
         <Box>
           <Box sx={{ margin: "1.1em 1.5em" }}>
-            <strong>Levels of agreement:</strong>
+            Please populate the voting with your agreement on the requirement
+            changes request.
+            {/*<strong>
+              Levels of agreement
+            </strong>
             <ul>
               <li>1 - Strongly disagree</li>
               <li>2 - Disagree</li>
               <li>3 - Neutral</li>
               <li>4 - Agree</li>
               <li>5 - Strongly agree</li>
-            </ul>
+            </ul>*/}
           </Box>
           {environment.definition_data.rcrs.map((defData) => {
             return (
@@ -377,18 +381,16 @@ const DefinitionDataPage = () => {
                           {`#${defData.id} - ${defData.name.toUpperCase()}`}
                         </Box>
                       </Box>
-                      <LikertScale
-                        onChangeLevel={handleScoreIssue}
-                        rcrId={defData.id}
-                      />
-                      {/* <Rating
-                        key={`rating-${defData.id}`}
-                        id={`rating-${defData.id}`}
-                        style={{ marginRight: "0.5em" }}
-                        onChange={(event, newValue) => {
-                          handleScoreIssue(newValue, defData.id);
-                        }}
-                      />*/}
+                      {
+                        <VotingScale
+                          onChangeLevel={handleScoreIssue}
+                          rcrId={defData.id}
+                        />
+                      }
+                      {/*<LikertScale
+                          onChangeLevel={handleScoreIssue}
+                          rcrId={defData.id}
+                        />*/}
                     </Box>
                   </AccordionSummary>
                   <AccordionDetails>

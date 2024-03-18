@@ -125,8 +125,8 @@ module.exports = class Environment {
         1: 0,
         2: 0,
         3: 0,
-        4: 0,
-        5: 0,
+        /*4: 0,
+        5: 0,*/
         comments: [],
         counts: 0,
       };
@@ -150,7 +150,7 @@ module.exports = class Environment {
       }
 
       // * Verificar em qual dos atributos de nota há mais votos e definir o atributo final_vote na rcr
-      if (
+      /*if (
         rcr.definition_votes[5] === rcr.definition_votes[4] &&
         rcr.definition_votes[5] !== 0
       ) {
@@ -175,7 +175,7 @@ module.exports = class Environment {
         rcr.final_vote = 4;
         continue;
       }
-
+    */
       if (
         rcr.definition_votes[3] === rcr.definition_votes[2] &&
         rcr.definition_votes[3] !== 0

@@ -69,7 +69,7 @@ const EnvironmentResponseFiltered = Joi.object({
 });
 
 const DataError = Joi.object({
-  error: Joi.object().required(),
+  error: Joi.string().required(),
 });
 
 const MiningData = Joi.object({

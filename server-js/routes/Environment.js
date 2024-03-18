@@ -51,10 +51,10 @@ router.get(
   "/:id/miningdata/:issueId",
   EnvironmentController.getIssueFromMiningData
 );
-router.put("/:id/endvoting/priority", EnvironmentController.endPriorityPoll);
+router.put("/:id/endvoting/priority", EnvironmentController.endPriorityVoting);
 router.put(
   "/:id/endvoting/definition",
-  EnvironmentController.endDefinitionPoll
+  EnvironmentController.endDefinitionVoting
 );
 router.post(
   "/:id/end",

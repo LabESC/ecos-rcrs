@@ -73,7 +73,9 @@ router.post("/api/request/topics", async (req, res) => {
         },
       }
     )
-    .catch((err) => {});
+    .catch(async (err) => {
+      await updateEnvironmentStatus(environment_id, "topics_error");
+    });
 });
 
 // ! Rota de solicitação de mineração
