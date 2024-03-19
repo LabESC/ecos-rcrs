@@ -282,16 +282,16 @@ const EnvironmentDetailDefinition = () => {
 
     switch (score) {
       case 1:
-        return `Strongly Disagree (${votes} votes - ${percent}%)`;
+        return `No (${votes} votes - ${percent}%)`; // `Strongly Disagree (${votes} votes - ${percent}%)`;
 
       case 2:
-        return `Disagree (${votes} votes - ${percent}%)`;
+        return `I don't know (${votes} votes - ${percent}%)`; //`Disagree (${votes} votes - ${percent}%)`;
       case 3:
-        return `Neutral (${votes} votes - ${percent}%)`;
-      case 4:
+        return `Yes (${votes} votes - ${percent}%)`; //`Neutral (${votes} votes - ${percent}%)`;
+      /*case 4:
         return `Agree (${votes} votes - ${percent}%)`;
       case 5:
-        return `Strongly Agree (${votes} votes - ${percent}%)`;
+        return `Strongly Agree (${votes} votes - ${percent}%)`;*/
       default:
         return "No score";
     }
