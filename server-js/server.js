@@ -22,6 +22,14 @@ cron.schedule("0 7,22,37,52 */1 * * *", function () {
   );
 });
 
+// ! Atualiza status dos ambientes cuja mineracao ou geracao de topicos ultrapassou 24h
+cron.schedule("0 3,12,27,42 */1 * * *", function () {
+  CronJobs.updateExpiringEnvironments();
+  console.log(
+    "CRON: running a task every 3, 12, 27 and 42 minute of hour (at second 0)"
+  );
+});
+
 // ! Autenticando com o banco e iniciando servidor
 db.sequelize
   .authenticate({ logging: false })

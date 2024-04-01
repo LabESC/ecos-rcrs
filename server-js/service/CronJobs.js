@@ -22,7 +22,7 @@ async function updateEnvironmentsDefinitionVotingStatus() {
 
   // . Updating the status of the environments
   for (let environment of environments) {
-    await EnvironmentService.endDefinitionPoll(environment.id);
+    await EnvironmentService.endDefinitionVoting(environment.id);
     /*environment = await EnvironmentRepository.getDefinitionVoteForEnding(
       environment.id
     );
@@ -130,7 +130,7 @@ async function updateEnvironmentsPriorityVotingStatus() {
 
   // . Updating the status of the environments
   for (let environment of environments) {
-    await EnvironmentService.endPriorityPoll(environment.id);
+    await EnvironmentService.endPriorityVoting(environment.id);
 
     /* environment = await EnvironmentRepository.getPriorityVoteForEnding(
       environment.id
@@ -221,7 +221,34 @@ async function updateEnvironmentsPriorityVotingStatus() {
   return true;
 }
 
+async function updateExpiringEnvironments() {
+  let environments = null;
+  try {
+    environments = await EnvironmentRepository.getExpiringEnvironments();
+  } catch (e) {
+    console.log(e);
+    return -1;
+  }
+
+  if (environments.length === 0) {
+    console.log("CRON: No environments expired");
+    return false;
+  }
+
+  for (let environment of environments) {
+    if (environment.status === "mining") {
+      await EnvironmentService.updateStatus(environment.id, "mining_error");
+    }
+    if (environment.status === "making_topics") {
+      await EnvironmentService.updateStatus(environment.id, "topics_error");
+    }
+  }
+
+  return;
+}
+
 module.exports = {
   updateEnvironmentsDefinitionVotingStatus,
   updateEnvironmentsPriorityVotingStatus,
+  updateExpiringEnvironments,
 };

@@ -3,6 +3,7 @@ const getOrganizationRepositories = require("./GitHubOrg");
 const doesRepoExist = require("./GitHubRepo");
 const { updateEnvironmentMiningData } = require("./DBRequests");
 const { formatIssuesToArray } = require("./Words");
+const { getSCRFilter } = require("./ModelRequests");
 
 class GitHubRequest {
   #requestsQueue;
@@ -27,6 +28,22 @@ class GitHubRequest {
       // * Executando requisições
       result = await getRepos(repos);
 
+      // * Filtrando issues por SCR (Microsservico de topicos)
+      /*const issuesForSCRRequest = result.issues.map((issue) => {
+        return { id: issue.id, body: issue.body };
+      });
+
+      const scrFilter = await getSCRFilter(environment_id, issuesForSCRRequest);
+
+      if (scrFilter) {
+        // Obtendo o conjunto de ids de cada issue do scrFilter
+        const scrFilterIds = scrFilter.issues.map((issue) => issue.id);
+        // Filtrando as issues do resultado original que estão no scrFilter
+        result.issues = result.issues.filter((issue) =>
+          scrFilterIds.includes(issue.id)
+        );
+      }
+      */
       // * Finalizando serviço
       this.#isRunning = false;
 
