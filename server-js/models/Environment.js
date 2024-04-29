@@ -24,6 +24,11 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.ENUM("organization", "repos"),
         allowNull: false,
       },
+      filter_type: {
+        type: DataTypes.ENUM("none", "keywords", "linreg"),
+        allowNull: false,
+        defaultValue: "none",
+      },
       organization_name: {
         type: DataTypes.STRING(255),
       },

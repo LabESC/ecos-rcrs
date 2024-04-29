@@ -90,22 +90,23 @@ class Environment {
     let emailText = `<br/>${user.name}, your environment was created and the mining starts soon!\n`;
     emailText += `<br/><strong>Environment name</strong>: ${environment.name}\n`;
     emailText += `<br/><strong>Mining type</strong>: ${environment.mining_type}\n`;
-    emailText += `<br/><strong>Repositories</strong>: ${environment.repos.join(
-      ", "
-    )}\n`;
+    emailText += `<br/><strong>Filter type</strong>: ${environment.filter_type}\n`;
     if (environment.mining_type === "organization") {
       emailText += `<br/><strong>Organization name</strong>: ${environment.organization_name}\n`;
     }
+    emailText += `<br/><strong>Repositories</strong>: ${environment.repos.join(
+      " | "
+    )}\n`;
     emailText += `<br/><strong>Details</strong>: ${environment.details}\n`;
 
     try {
       await APIRequests.sendEmail(user.email, subject, emailText);
     } catch (e) {
       console.log(e);
-      await EnvironmentRepository.updateStatus(
+      /* await EnvironmentRepository.updateStatus(
         newEnvironment.id,
         "mining_error"
-      );
+      );*/
     }
 
     return newEnvironment;

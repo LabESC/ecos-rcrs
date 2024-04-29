@@ -326,6 +326,7 @@ export const createEnvironment = async (
   details,
   repos,
   miningType,
+  filterType,
   organizationName
 ) => {
   const result = await Axios.post(
@@ -336,6 +337,7 @@ export const createEnvironment = async (
       details: details,
       repos: repos,
       mining_type: miningType,
+      filter_type: filterType,
       organization_name: organizationName,
       mining_data: null,
       topic_data: null,

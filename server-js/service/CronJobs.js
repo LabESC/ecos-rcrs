@@ -224,7 +224,7 @@ async function updateEnvironmentsPriorityVotingStatus() {
 async function updateExpiringEnvironments() {
   let environments = null;
   try {
-    environments = await EnvironmentRepository.getExpiringEnvironments();
+    environments = await EnvironmentRepository.getExpiredEnvironments();
   } catch (e) {
     console.log(e);
     return -1;
@@ -243,8 +243,6 @@ async function updateExpiringEnvironments() {
       await EnvironmentService.updateStatus(environment.id, "topics_error");
     }
   }
-
-  return;
 }
 
 module.exports = {

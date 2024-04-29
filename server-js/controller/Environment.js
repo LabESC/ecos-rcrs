@@ -163,7 +163,8 @@ module.exports = {
     // * Sending mining request for the new environment
     const miningRequest = await APIRequests.requestMining(
       newEnvironment.id,
-      newEnvironment.repos
+      newEnvironment.repos,
+      newEnvironment.filter_type
     );
 
     if (!miningRequest) {

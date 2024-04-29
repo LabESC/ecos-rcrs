@@ -14,12 +14,17 @@ import {
   Snackbar,
   Alert,
   AlertTitle,
+  Tooltip,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import { PopUpError } from "../../components/PopUp.jsx";
 import { useNavigate } from "react-router-dom";
-import { FeedPlusIcon, CodescanCheckmarkIcon } from "@primer/octicons-react";
+import {
+  FeedPlusIcon,
+  CodescanCheckmarkIcon,
+  InfoIcon,
+} from "@primer/octicons-react";
 
 // ! Importações de componentes criados
 import theme from "../../components/MuiTheme.jsx";
@@ -86,6 +91,7 @@ const NewEnvironment = () => {
   // ! Variáveis e funções para manipulação dos elementos
   const [loggedUser, setLoggedUser] = useState({ userId: "", userToken: "" });
   const [miningType, setMiningType] = useState("organization");
+  const [filterType, setFilterType] = useState("none");
   const [repositories, setRepositories] = useState([]);
   const [orgRepositories, setOrgRepositories] = useState([]);
   const [isLoadingSearch, setIsLoadingSearch] = useState(false);
@@ -221,7 +227,7 @@ const NewEnvironment = () => {
 
     setIsLoading(true);
 
-    console.log(miningType);
+    console.log(filterType);
     const res = await createEnvironment(
       userId,
       userToken,
@@ -229,6 +235,7 @@ const NewEnvironment = () => {
       details,
       miningType === "repos" ? repositories : orgRepositories,
       miningType,
+      filterType,
       organization
     );
     setIsLoading(false);
@@ -453,6 +460,40 @@ const NewEnvironment = () => {
                 </Box>
               </Box>
             </Box>
+            <FormControl className="ButtonArea">
+              <FormLabel
+                id="radio-button-mining_type"
+                className="TextFieldLabel"
+              >
+                Filter Type*
+              </FormLabel>
+              <RadioGroup
+                row
+                aria-labelledby="radio-button-filter_type"
+                name="radioButton-filterType"
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+              >
+                <FormControlLabel
+                  value="none"
+                  control={<Radio />}
+                  label="No Filter"
+                />
+
+                <FormControlLabel
+                  value="keywords"
+                  control={<Radio />}
+                  label={
+                    <Tooltip title="This will applly a filter of requirement change keywords at the issues mined">
+                      <Box>
+                        {"By keywords     "}
+                        <InfoIcon size={16} />
+                      </Box>
+                    </Tooltip>
+                  }
+                ></FormControlLabel>
+              </RadioGroup>
+            </FormControl>
             <Button className="LoginBtnSignUp" onClick={createNewEnvironment}>
               {isLoading ? "REQUESTING..." : "REQUEST"}
             </Button>
