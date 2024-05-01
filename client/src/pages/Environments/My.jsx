@@ -7,12 +7,13 @@ import {
   AlertTitle,
   IconButton,
   Typography,
+  Tooltip,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import { PopUpError } from "../../components/PopUp.jsx";
 import { useNavigate } from "react-router-dom";
-import { DiffAddedIcon } from "@primer/octicons-react";
+import { DiffAddedIcon, SyncIcon } from "@primer/octicons-react";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
 // ! Importações de componentes criados
@@ -283,6 +284,8 @@ const MyEnvironment = () => {
   };
 
   const requestPopUpAction = async () => {
+    setIsLoading(true); // . Ativando o carregamento
+
     switch (action.status) {
       case "mining_error":
         await requestMiningData(
@@ -340,6 +343,7 @@ const MyEnvironment = () => {
       default:
         break;
     }
+    setIsLoading(false); // . Desativando o carregamento
   };
 
   const requestPopUpActionExclude = () => {
@@ -407,6 +411,26 @@ const MyEnvironment = () => {
             backgroundColor={"#9fff64"}
             action={goNewEnvironment}
           />
+          <Tooltip title="Refresh environments">
+            <IconButton
+              onClick={() => {
+                getEnvironments();
+              }}
+              sx={{
+                fontSize: "0.8em",
+                color: "rgba(0, 0, 0, 0.87)",
+                bgcolor: "rgba(40, 202, 244, 0.52)",
+                transition: "0.2s",
+                "&:hover": {
+                  bgcolor: "rgba(141, 226, 248, 0.52)",
+                  transform: "rotate(180deg)",
+                },
+              }}
+              aria-label="copy-url"
+            >
+              <SyncIcon />
+            </IconButton>
+          </Tooltip>
         </Box>
         <Box className="ContainerEnvironments">
           {environments.map((env) => (
@@ -442,18 +466,37 @@ const MyEnvironment = () => {
     setOpenClone(false);
   };
 
+  // . Função para obter os ambientes do usuário
+  const getEnvironments = async () => {
+    setIsLoading(true);
+    // . Obtendo os ambientes do usuário
+    const response = await getMyEnvironments(
+      loggedUser.userId,
+      loggedUser.userToken
+    );
+
+    // . Verificando se ocorreu algum erro
+    if (response.error) {
+      setIsLoading(false);
+      activeErrorDialog(
+        `${response.error.code}: Getting environments`,
+        response.error.message,
+        response.status
+      );
+      return;
+    }
+
+    // . Ordenando os ambientes
+    const orderedEnvironments = orderEnvironments(response);
+
+    // . Armazenando os ambientes
+    setEnvironments(orderedEnvironments);
+    setIsLoading(false);
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <SideBar pageContent={pageContent} isLoading={isLoading} />
-      <Backdrop
-        sx={{
-          background: "rgba(0,0,0,0.5)",
-          zIndex: (theme) => theme.zIndex.drawer + 1,
-        }}
-        open={isLoading}
-      >
-        <CircularProgress sx={{ color: "#0084fe" }} />
-      </Backdrop>
       <PopUpError
         open={hasLoginError}
         close={closeErrorDialog}
@@ -505,6 +548,15 @@ const MyEnvironment = () => {
         environmentId={environmentIdForClone}
         loggedUser={loggedUser}
       />
+      <Backdrop
+        sx={{
+          background: "rgba(0,0,0,0.5)",
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+        }}
+        open={isLoading}
+      >
+        <CircularProgress sx={{ color: "#0084fe" }} />
+      </Backdrop>
     </ThemeProvider>
   );
 };

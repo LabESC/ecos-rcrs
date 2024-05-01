@@ -37,7 +37,7 @@ class APIRequests {
    * @param {Array<string>} repos - The list of repositories.
    * @returns {boolean} - True if the request is successful, or false otherwise.
    */
-  static async requestMining(environmentId, repos) {
+  static async requestMining(environmentId, repos, filter_type) {
     // * Defining url
     const url = `${config.apiMicroserviceBase}/github/mining/repos`;
 
@@ -45,7 +45,11 @@ class APIRequests {
     try {
       await axios.post(
         url,
-        { environment_id: environmentId, repos: repos },
+        {
+          environment_id: environmentId,
+          repos: repos,
+          filter_type: filter_type,
+        },
         {
           headers: {
             "service-login": config.servicesLogin,

@@ -14,6 +14,7 @@ const basicFields = [
   "name",
   "details",
   "mining_type",
+  "filter_type",
   "organization_name",
   "status",
   "repos",
@@ -428,6 +429,18 @@ class Environment {
       { priority_data: priorityData },
       { where: { id: environmentId } }
     );
+  }
+
+  static async getExpiredEnvironments() {
+    const currentTimeMinus24Hours = new Date() - 24 * 60 * 60 * 1000;
+    return await EnvironmentModel.findAll({
+      attributes: ["id", "status"],
+      where: {
+        status: { [Op.in]: ["mining", "making_topics"] },
+        updatedAt: { [Op.lt]: currentTimeMinus24Hours },
+      },
+      raw: true,
+    });
   }
 }
 
