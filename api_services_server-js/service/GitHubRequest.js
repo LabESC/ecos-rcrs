@@ -4,6 +4,7 @@ const doesRepoExist = require("./GitHubRepo");
 const { updateEnvironmentMiningData } = require("./DBRequests");
 const { formatIssuesToArray } = require("./Words");
 const { getSCRFilter } = require("./ModelRequests");
+const { allWords: keywordsArr } = require("../utils/Keywords");
 
 class GitHubRequest {
   #requestsQueue;
@@ -20,7 +21,7 @@ class GitHubRequest {
    * @param {Array} repos Array de repositórios (strings).
    * @param {string} environment_id O id do ambiente (BD) que solicitou a mineração.
    **/
-  async run(repos, environment_id) {
+  async run(repos, environment_id, filter_type) {
     // * Iniciando serviço
     this.#isRunning = true;
     let result = null;
@@ -28,7 +29,7 @@ class GitHubRequest {
       // * Executando requisições
       result = await getRepos(repos);
 
-      // * Filtrando issues por SCR (Microsservico de topicos)
+      // * Filtrando issues por SCR (Microsservico de topicos - não implementado ainda)
       /*const issuesForSCRRequest = result.issues.map((issue) => {
         return { id: issue.id, body: issue.body };
       });
@@ -102,6 +103,36 @@ class GitHubRequest {
       return;
     }
 
+    // * Filtrando issues por condição de filtro
+    if (filter_type === "none") {
+      console.log("No filter applied."); // !! LOG
+    }
+    if (filter_type === "keywords") {
+      console.log("Keyword filter applied."); // !! LOG
+      let newResultsIssueArr = [];
+      for (const issue of result.issues) {
+        const issueTags = issue.tags ? issue.tags.split(",") : [];
+        const issueWords = issue.body.toLowerCase().split(" ");
+
+        // * Verificando se as tags da issue possuem alguma palavra-chave
+        const foundTags = issueTags.some((tag) => keywordsArr.includes(tag));
+
+        if (foundTags) {
+          newResultsIssueArr.push(issue);
+          continue;
+        }
+
+        // * Verificando se o corpo da issue possui alguma palavra-chave
+        const found = issueWords.some((word) => keywordsArr.includes(word));
+
+        if (found) {
+          newResultsIssueArr.push(issue);
+        }
+      }
+      result.issues = newResultsIssueArr;
+      newResultsIssueArr = null; // Limpando memória
+    }
+
     // * Enviando resultado para o banco de dados
     const sendToDB = await updateEnvironmentMiningData(
       environment_id,
@@ -125,7 +156,11 @@ class GitHubRequest {
     while (this.#requestsQueue.length !== 0) {
       // * Executando requisição
       const nextRequest = this.#requestsQueue.shift();
-      this.run(nextRequest.repos, nextRequest.environment_id);
+      this.run(
+        nextRequest.repos,
+        nextRequest.environment_id,
+        nextRequest.filter_type
+      );
     }
   }
 
@@ -134,10 +169,15 @@ class GitHubRequest {
    *
    * @param {Array} repos Array de repositórios (strings).
    * @param {string} environment_id Id do ambiente (BD) que solicitou a mineração.
+   * @param {string} filter_type Tipo de filtro a ser aplicado.
    **/
-  async addQueue(repos, environment_id) {
+  async addQueue(repos, environment_id, filter_type) {
     // * Adicionando requisição na fila
-    this.#requestsQueue.push({ repos: repos, environment_id: environment_id });
+    this.#requestsQueue.push({
+      repos: repos,
+      environment_id: environment_id,
+      filter_type: filter_type,
+    });
 
     console.log("this.#isRunning: ", this.#isRunning);
     // * Se não houver requisições em andamento, executar

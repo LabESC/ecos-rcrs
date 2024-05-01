@@ -506,15 +506,6 @@ const NewEnvironment = () => {
   return (
     <ThemeProvider theme={theme}>
       <SideBar pageContent={pageContent} isLoading={isLoading} />
-      <Backdrop
-        sx={{
-          background: "rgba(0,0,0,0.5)",
-          zIndex: (theme) => theme.zIndex.drawer + 1,
-        }}
-        open={isLoading || isLoadingSearch}
-      >
-        <CircularProgress sx={{ color: "#0084fe" }} />
-      </Backdrop>
       <PopUpError
         open={hasCreatedError}
         close={closeErrorDialog}
@@ -537,6 +528,15 @@ const NewEnvironment = () => {
           {searchError.message}
         </Alert>
       </Snackbar>
+      <Backdrop
+        sx={{
+          background: "rgba(0,0,0,0.5)",
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+        }}
+        open={isLoading || isLoadingSearch}
+      >
+        <CircularProgress sx={{ color: "#0084fe" }} />
+      </Backdrop>
     </ThemeProvider>
   );
 };

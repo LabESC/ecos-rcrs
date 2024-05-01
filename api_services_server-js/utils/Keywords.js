@@ -1,4 +1,4 @@
-// Article: https://www.researchgate.net/publication/343676895_Requirements_Change_Requests_Classification_An_Ontology-Based_Approach
+// ! Article: https://www.researchgate.net/publication/343676895_Requirements_Change_Requests_Classification_An_Ontology-Based_Approach
 const customerChangeRequestWords = [
   // . Functional change
   "must contain",
@@ -17,6 +17,7 @@ const customerChangeRequestWords = [
   "syncronize",
   "appearance",
   "transaction",
+
   // . External change
   "cannot",
   "please",
@@ -62,29 +63,7 @@ const customerChangeRequestWords = [
   "repair",
 ];
 
-// Article: https://doi.org/10.1016/j.jss.2017.12.028
-
-const lifeCycleWords = [
-  "platform",
-  "OS",
-  "development",
-  "testing",
-  "debug",
-  "maintain",
-  "evolve",
-  "document",
-  "localize",
-  "manual",
-  "portable",
-  "configurable",
-  "installation",
-  "compile",
-  "build",
-];
-
-const allWords = [
-  ...new Set([...customerChangeRequestWords, ...lifeCycleWords]),
-];
+const allWords = [...new Set([...customerChangeRequestWords])];
 
 module.exports = {
   allWords,

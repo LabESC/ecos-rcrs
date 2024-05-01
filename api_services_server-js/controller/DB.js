@@ -115,12 +115,13 @@ router.post("/api/request/mining", async (req, res) => {
   // * Solicitando a rota de mineração github
   const baseURL = `${req.protocol}://${req.get("host")}/api`;
 
-  res.status(200).json({ message: "Mining request sent1." });
+  res.status(200).json({ message: "Mining request sent." });
   return axios.post(
     `${baseURL}/github/mining/repos`,
     {
       environment_id: environment_id,
       repos: environmentData.repos,
+      filter_type: environmentData.filter_type,
     },
     {
       headers: {

@@ -14,6 +14,7 @@ const basicFields = [
   "name",
   "details",
   "mining_type",
+  "filter_type",
   "organization_name",
   "status",
   "repos",

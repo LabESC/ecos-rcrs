@@ -35,10 +35,10 @@ router.post("/api/github/mining/repos", async (req, res) => {
   }
 
   // * Obtendo repos e environment_id
-  const { repos, environment_id } = body;
+  const { repos, environment_id, filter_type } = body;
 
   // * Adicionando requisição na fila
-  await gitHubRequest.addQueue(repos, environment_id);
+  await gitHubRequest.addQueue(repos, environment_id, filter_type);
 
   return res.status(200).json({ message: "Mining request received." });
 });
