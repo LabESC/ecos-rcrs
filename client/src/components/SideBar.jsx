@@ -1,16 +1,8 @@
 // Sidebar.js
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 
 // ! Componentes MUI + Estilização
-import {
-  Drawer,
-  Button,
-  Container,
-  Box,
-  Backdrop,
-  CircularProgress,
-} from "@mui/material";
+import { Drawer, Button, Container, Box, Typography } from "@mui/material";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import MenuIcon from "@mui/icons-material/Menu";
 import { ThemeProvider } from "@mui/material/styles";
@@ -73,27 +65,38 @@ const Sidebar = (props) => {
             <Box
               style={{
                 display: "flex",
+                flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
               <Box
-                sx={{
-                  borderLeft: !open ? "4px solid #0084fe" : "6px solid #0084fe",
-                  height: !open ? "18px" : "25px",
-                  marginRight: "10px",
-                  color: "#0084fe",
-                  transition: "height .2s",
-                }}
-              />
-              <Box
-                className="EcosIc"
-                sx={{
-                  fontSize: !open ? "0px !important" : "15px !important",
-                  transition: "font-size .2s",
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                SECO - RCR
+                <Box
+                  sx={{
+                    borderLeft: !open
+                      ? "4px solid #0084fe"
+                      : "6px solid #0084fe",
+                    height: !open ? "18px" : "25px",
+                    marginRight: "10px",
+                    color: "#0084fe",
+                    transition: "height .2s",
+                  }}
+                />
+                <Box
+                  className="EcosIc"
+                  sx={{
+                    fontSize: !open ? "0px !important" : "15px !important",
+                    transition: "font-size .2s",
+                  }}
+                >
+                  SECO - RCR
+                </Box>
               </Box>
             </Box>
             <Button
@@ -107,6 +110,18 @@ const Sidebar = (props) => {
               )}
             </Button>
           </Box>
+
+          <Typography
+            sx={{
+              fontSize: "0.8em",
+              marginTop: "-10em",
+              fontWeight: "500",
+              visibility: open ? "visible" : "hidden",
+            }}
+          >
+            {localStorage.getItem("SECO_24_user-name")}
+          </Typography>
+
           <Box
             style={{
               display: "flex",

@@ -21,6 +21,25 @@ export const getEnvironmentIdFromLocalStorage = () => {
   return environmentId;
 };
 
+export const setEnvironmentDetailsToLocalStorage = (environment) => {
+  if (!environment) {
+    return;
+  }
+
+  // . Parseando JSON objeto para JSON string
+  localStorage.setItem("SECO_24_env-details", JSON.stringify(environment));
+};
+
+export const getEnvironmentDetailsFromLocalStorage = () => {
+  const environment = localStorage.getItem("SECO_24_env-details");
+
+  if (!environment) {
+    return null;
+  }
+
+  return JSON.parse(environment);
+};
+
 export const setEnvironmentNameToLocalStorage = (environmentName) => {
   localStorage.setItem("SECO_24_env-name", environmentName);
   return;

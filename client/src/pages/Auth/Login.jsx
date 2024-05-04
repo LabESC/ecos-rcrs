@@ -37,7 +37,7 @@ const Login = () => {
       activeErrorDialog(res.error.code, res.error.message, res.status);
     } else {
       console.log(res);
-      await registerLoggedUser(res.id, res.token);
+      await registerLoggedUser(res.id, res.token, res.name);
       return redirect("/my-environments"); // ! Redireciona para a página de ambientes
     }
   };

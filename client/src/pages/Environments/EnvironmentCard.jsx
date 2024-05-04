@@ -246,16 +246,17 @@ export function EnvironmentCard(props) {
       >*/}
       <Box
         className="EnvironmentCard"
-        style={{
+        sx={{
           display: "flex",
           marginBottom: 20,
-          borderRadius: 8,
+          borderRadius: 5,
           padding: "0.8em",
           width: 230,
           height: 125,
           background: getColor(status),
           flexDirection: "column",
           justifyContent: "space-between",
+          transition: "0.2s",
         }}
         onClick={action}
       >

@@ -1,6 +1,6 @@
 import {
-  TextField,
-  Button,
+  Tooltip,
+  IconButton,
   Link,
   Typography,
   Box,
@@ -16,7 +16,7 @@ import { useState, useEffect } from "react";
 import { ThemeProvider } from "@mui/material/styles";
 import { PopUpError } from "../../components/PopUp.jsx";
 import { useNavigate } from "react-router-dom";
-import { DiffAddedIcon, RepoIcon, PeopleIcon } from "@primer/octicons-react";
+import { InfoIcon, RepoIcon, PeopleIcon } from "@primer/octicons-react";
 
 // ! Importações de componentes criados
 import theme from "../../components/MuiTheme.jsx";
@@ -25,12 +25,14 @@ import { IssueCard } from "./Issues/IssueCard.jsx";
 import { SuccessButton } from "../../components/Buttons.jsx";
 import { ListAssociatedRCRsEnvPopUp } from "./RCR/ListAssociatedRCRsEnvironment.jsx";
 import { OpenRCRDefinitionVotePopUp } from "./OpenRCRDefinitionVotePopUp.jsx";
+import { DetailsEnvironmentModal } from "./DetailsEnvironmentModal.jsx";
 
 // ! Importações de códigos
 import { verifyLoggedUser } from "../../api/Auth.jsx";
 import {
   setTopicDataToLocalStorage,
   getEnvironmentIdFromUrl,
+  getEnvironmentDetailsFromLocalStorage,
   getTopicData,
   getEnvironmentNameFromLocalStorage,
   getDefinitionRCRs,
@@ -214,6 +216,17 @@ const EnvironmentDetail = () => {
     setStartRCRDefinitionVoteModalOpen(false);
   };
 
+  // ! Variáveis e funções para manipulação do Dialog de Detalhes do Environment
+  const [detailsModal, setDetailsModal] = useState(false);
+
+  const openDetailsModal = () => {
+    setDetailsModal(true);
+  };
+
+  const closeDetailsModal = () => {
+    setDetailsModal(false);
+  };
+
   // . Declarando elementos da página
   const pageContent = () => {
     return (
@@ -224,6 +237,26 @@ const EnvironmentDetail = () => {
           }}
           className="ContainerTitle"
         >
+          <Tooltip title="Details of environment">
+            <IconButton
+              onClick={() => {
+                openDetailsModal();
+              }}
+              sx={{
+                fontSize: "0.8em",
+                color: "rgba(0, 0, 0, 0.87)",
+                bgcolor: "rgba(40, 202, 244, 0.52)",
+                transition: "0.2s",
+                "&:hover": {
+                  bgcolor: "rgba(141, 226, 248, 0.52)",
+                },
+              }}
+              aria-label="copy-url"
+            >
+              <InfoIcon />
+            </IconButton>
+          </Tooltip>
+
           <Typography
             variant="h5"
             style={{
@@ -235,18 +268,6 @@ const EnvironmentDetail = () => {
             {environmentName}
           </Typography>
 
-          <Typography
-            variant="h6"
-            visibility={
-              topics.length > 0
-                ? topics[0].id !== null
-                  ? "visible"
-                  : "hidden"
-                : "hidden"
-            }
-          >
-            {"Topics quantity: " + topics.length}
-          </Typography>
           <SuccessButton
             icon={<PeopleIcon size={18} />}
             message={"Start RCR Definition Voting"}
@@ -360,6 +381,13 @@ const EnvironmentDetail = () => {
         close={closeDefinitionRCRVoteModal}
         rcrs={definitionRCRs}
         environmentId={environmentId}
+      />
+      <DetailsEnvironmentModal
+        open={detailsModal}
+        close={closeDetailsModal}
+        closeMessage={"CLOSE"}
+        environment={getEnvironmentDetailsFromLocalStorage()}
+        topicsLength={topics.length}
       />
     </ThemeProvider>
   );

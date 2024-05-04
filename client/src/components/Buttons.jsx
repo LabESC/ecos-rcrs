@@ -13,7 +13,7 @@ export const MyEnvironmentsButtonOpened = () => {
     <Button
       className="Button"
       variant="contained"
-      style={{
+      sx={{
         background: "#B3DEF5",
         color: "#000000",
         borderRadius: "5px",
@@ -24,6 +24,11 @@ export const MyEnvironmentsButtonOpened = () => {
         flexDirection: "row",
         justifyContent: "flex-start",
         textTransform: "none",
+        transition: "0.2s",
+        "&:hover": {
+          backgroundColor: "#B3DEF5",
+          color: "#000000",
+        },
       }}
       onClick={goToMyEnvironments}
     >
@@ -51,7 +56,7 @@ export const MyEnvironmentsButtonClosed = () => {
     <Button
       className="Button"
       variant="contained"
-      style={{
+      sx={{
         background: "#B3DEF5",
         color: "#000000",
         borderRadius: "5px",
@@ -59,6 +64,11 @@ export const MyEnvironmentsButtonClosed = () => {
         display: "flex",
         flexDirection: "row",
         justifyContent: "center",
+        transition: "0.2s",
+        "&:hover": {
+          backgroundColor: "#B3DEF5",
+          color: "#000000",
+        },
       }}
       onClick={goToMyEnvironments}
     >
@@ -87,6 +97,7 @@ export const LogOutButtonOpened = () => {
         flexDirection: "row",
         justifyContent: "center",
         boxShadow: "none",
+        transition: "0.2s",
       }}
       onClick={logOut}
     >
@@ -120,6 +131,7 @@ export const LogOutButtonClosed = () => {
         flexDirection: "row",
         justifyContent: "center",
         boxShadow: "none",
+        transition: "0.2s",
       }}
       onClick={logOut}
     >
@@ -146,7 +158,7 @@ export const SuccessButton = (props) => {
     <Button
       className="Button"
       variant="contained"
-      style={{
+      sx={{
         background: backgroundColor ? backgroundColor : "#B3DEF5",
         color: "#000000",
         borderRadius: "5px",
@@ -161,6 +173,11 @@ export const SuccessButton = (props) => {
         marginLeft: marginLeft ? marginLeft : "auto",
         marginRight: marginRight ? marginRight : "auto",
         visibility: visibility ? visibility : "visible",
+        transition: "0.2s",
+        "&:hover": {
+          backgroundColor: backgroundColor ? backgroundColor : "#B3DEF5",
+          color: "#000000",
+        },
       }}
       onClick={action}
     >

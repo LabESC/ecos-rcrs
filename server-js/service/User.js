@@ -192,7 +192,7 @@ class User {
         return user;
       }
 
-      return { id: user.id, token: user.token };
+      return { id: user.id, token: user.token, name: user.name };
     } catch (e) {
       console.log(e);
       return -1;

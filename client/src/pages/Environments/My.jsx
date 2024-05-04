@@ -30,6 +30,7 @@ import {
   getMyEnvironments,
   setEnvironmentNameToLocalStorage,
   setEnvironmentStatusToLocalStorage,
+  setEnvironmentDetailsToLocalStorage,
   requestMiningData,
   requestTopicData,
   forceEndVote,
@@ -89,6 +90,7 @@ const MyEnvironment = () => {
       const orderedEnvironments = orderEnvironments(response);
 
       // . Armazenando os ambientes
+      console.log(orderedEnvironments);
       setEnvironments(orderedEnvironments);
       setIsLoading(false);
     };
@@ -152,7 +154,13 @@ const MyEnvironment = () => {
   // ! Variáveis e funções para manipulação do Dialog de erro/interrupção
   const [action, setAction] = useState(null);
 
-  const cardClick = async (environmentId, name, status, votingCount) => {
+  const cardClick = async (
+    environmentId,
+    name,
+    status,
+    votingCount,
+    environment
+  ) => {
     switch (status) {
       case "mining_error":
         await setAction({
@@ -258,24 +266,28 @@ const MyEnvironment = () => {
 
       case "topics_done":
         setEnvironmentNameToLocalStorage(name);
+        setEnvironmentDetailsToLocalStorage(environment);
         goEnvironmentDetail(environmentId);
         break;
 
       case "rcr_voting_done":
         setEnvironmentNameToLocalStorage(name);
         setEnvironmentStatusToLocalStorage(status);
+        setEnvironmentDetailsToLocalStorage(environment);
         goEnvironmentDetailAfterDefinitionVoting(environmentId);
         break;
 
       case "rcr_priority_done":
         setEnvironmentNameToLocalStorage(name);
         setEnvironmentStatusToLocalStorage(status);
+        setEnvironmentDetailsToLocalStorage(environment);
         goEnvironmentDetailAfterPriorityVoting(environmentId);
         break;
 
       case "done":
         setEnvironmentNameToLocalStorage(name);
         setEnvironmentStatusToLocalStorage(status);
+        setEnvironmentDetailsToLocalStorage(environment);
         goEnvironmentFinalReport(environmentId);
         break;
       default: // * mining, making_topics, não faz nada
@@ -440,7 +452,13 @@ const MyEnvironment = () => {
               status={env.status}
               votingCount={env.voting_users_count}
               action={() => {
-                cardClick(env.id, env.name, env.status, env.voting_users_count);
+                cardClick(
+                  env.id,
+                  env.name,
+                  env.status,
+                  env.voting_users_count,
+                  env
+                );
               }}
               key={`ENV_${env.id}`}
               cloneEnvironment={() => {
