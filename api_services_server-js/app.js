@@ -14,5 +14,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(require("./controller/GitHub.js"));
 app.use(require("./controller/Email.js"));
 app.use(require("./controller/DB.js"));
+app.use(require("./controller/Keywords.js"));
 
 module.exports = app;

@@ -346,7 +346,8 @@ export const createEnvironment = async (
   repos,
   miningType,
   filterType,
-  organizationName
+  organizationName,
+  keywords
 ) => {
   const result = await Axios.post(
     `${baseUrl}/environment`,
@@ -363,6 +364,7 @@ export const createEnvironment = async (
       definition_data: null,
       priority_data: null,
       final_rcr: null,
+      keywords: keywords,
     },
     { headers: { "user-id": userId, "user-token": userToken } }
   )

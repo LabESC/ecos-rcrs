@@ -7,6 +7,7 @@ const EnvironmentModel = require("../database/db").Environment;
 const UserModel = require("../database/db").User;
 const VotingUserModel = require("../database/db").VotingUser;
 const VotingUserEnvironment = require("../database/db").VotingUserEnvironment;
+const sequelize = require("../database/db").sequelize;
 
 const basicFields = [
   "id",
@@ -15,6 +16,7 @@ const basicFields = [
   "details",
   "mining_type",
   "filter_type",
+  "keywords",
   "organization_name",
   "status",
   "repos",
@@ -441,6 +443,27 @@ class Environment {
       },
       raw: true,
     });
+  }
+
+  static async getIssuesLengthFromMiningData(environmentId) {
+    const query = await sequelize.query(
+      'SELECT "mining_data"->>\'issuesFilteredLength\' AS "issuesFilteredLength", "mining_data"->>\'issuesObtainedLength\' AS "issuesObtainedLength" FROM "ic"."environments" AS "Environment" WHERE "Environment"."id" = \'' +
+        environmentId +
+        "';"
+    );
+
+    try {
+      return query[0][0];
+    } catch (e) {
+      return {};
+    }
+    /*return await EnvironmentModel.findOne({
+      attributes: [
+        ["mining_data->issuesFilteredLength", "issuesFilteredLength"],
+        ["mining_data->issuesObtainedLength", "issuesObtainedLength"],
+      ],
+      where: { id: environmentId },
+    });*/
   }
 }
 

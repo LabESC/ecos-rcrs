@@ -164,7 +164,8 @@ module.exports = {
     const miningRequest = await APIRequests.requestMining(
       newEnvironment.id,
       newEnvironment.repos,
-      newEnvironment.filter_type
+      newEnvironment.filter_type,
+      newEnvironment.keywords
     );
 
     if (!miningRequest) {

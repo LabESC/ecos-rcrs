@@ -10,6 +10,9 @@ async function checkVariables(requestHeaders, requestBody) {
   if (!Array.isArray(requestBody.repos)) return false;
   if (typeof requestBody.environment_id != "string") return false;
   if (typeof requestBody.filter_type != "string") return false;
+  if (requestBody.keywords !== null) {
+    if (!Array.isArray(requestBody.keywords)) return false;
+  }
   if (typeof requestHeaders["service-login"] != "string") return false;
   if (typeof requestHeaders["service-pwd"] != "string") return false;
 

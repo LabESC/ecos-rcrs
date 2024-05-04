@@ -29,6 +29,9 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: "none",
       },
+      keywords: {
+        type: DataTypes.ARRAY(DataTypes.STRING),
+      },
       organization_name: {
         type: DataTypes.STRING(255),
       },

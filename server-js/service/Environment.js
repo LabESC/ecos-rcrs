@@ -37,6 +37,18 @@ class Environment {
     if (environments === null) return null;
 
     for (const env of environments) {
+      if (
+        env.status !== "mining" &&
+        env.status !== "mining_error" &&
+        env.status !== "mining_done" &&
+        env.status !== "making_topics" &&
+        env.status !== "topics_error"
+      ) {
+        const issuesLengthData =
+          await EnvironmentRepository.getIssuesLengthFromMiningData(env.id);
+        env.issuesLength = issuesLengthData;
+      }
+
       if (env.status === "waiting_rcr_voting") {
         const votingUsers =
           await VotingUserRepository.countDefinitionVotesOfEnvironment(env.id);

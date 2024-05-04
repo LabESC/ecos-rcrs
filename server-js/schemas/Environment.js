@@ -32,6 +32,7 @@ const EnvironmentBase = Joi.object({
   definition_data: Joi.object().allow(null).required(),
   priority_data: Joi.object().allow(null).required(),
   final_rcr: Joi.object().allow(null).required(),
+  keywords: Joi.array().items(Joi.string()).required().allow(null),
 });
 
 const EnvironmentRequest = EnvironmentBase;

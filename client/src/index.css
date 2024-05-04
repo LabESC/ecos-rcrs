@@ -427,3 +427,17 @@ body {
   transition: color 0.3s !important;
   transition: background-color 0.3s !important;
 }
+
+.NewEnvironmentContent {
+  width: 100% !important;
+  margin-top: 20px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.NewEnvironmentContent > .LoginCardContent {
+  margin-left: 1.5em !important;
+  margin-right: 1.5em !important;
+}

@@ -33,7 +33,11 @@ import SideBar from "../../components/SideBar.jsx";
 // ! Importações de códigos
 import { verifyLoggedUser } from "../../api/Auth.jsx";
 import { createEnvironment } from "../../api/Environments.jsx";
-import { doesRepoExist, getOrganizationRepos } from "../../api/GitHub.jsx";
+import {
+  doesRepoExist,
+  getOrganizationRepos,
+  getRCRKeywords,
+} from "../../api/GitHub.jsx";
 
 const NewEnvironment = () => {
   // ! Instanciando o useNavigate para redirecionar o usuário pra alguma página
@@ -45,6 +49,16 @@ const NewEnvironment = () => {
     document.title = "SECO-RCR: My Environments";
     document.body.style.background = "white";
 
+    const getKeywords = async () => {
+      const res = await getRCRKeywords();
+      if (res.error) {
+        activeErrorDialog(res.error.code, res.error.message, res.status);
+        return;
+      }
+
+      setRCRKeywords(res);
+    };
+
     // . Verificando se o usuário está logado e obtendo seus dados
     const checkUser = async () => {
       const verifyUser = await verifyLoggedUser();
@@ -55,6 +69,7 @@ const NewEnvironment = () => {
         return;
       }
       setLoggedUser(verifyUser);
+      await getKeywords();
       setIsLoading(false);
     };
 
@@ -98,6 +113,9 @@ const NewEnvironment = () => {
   const [hasSearchError, setHasSearchError] = useState(false);
   const [searchError, setSearchError] = useState({ title: "", message: "" });
   const [addButtonRepoColor, setAddButtonRepoColor] = useState("#0084fe");
+  const [addButtonKeywordColor, setAddButtonKeywordColor] = useState("#0084fe");
+  const [rcrKeywords, setRCRKeywords] = useState([]);
+  const [keywords, setKeywords] = useState([]);
 
   const closeSearchErrorDialog = () => {
     setHasSearchError(false);
@@ -130,6 +148,7 @@ const NewEnvironment = () => {
       setOrgRepositories(res);
       setIsLoadingSearch(false);
     }
+    document.getElementById("txt-organization").value = "";
   };
 
   const checkRepoAvailable = async () => {
@@ -165,6 +184,7 @@ const NewEnvironment = () => {
       setRepositories([...repositories, repo]);
       setIsLoadingSearch(false);
     }
+    document.getElementById("txt-add-repository").value = "";
   };
 
   const removeRepositoryFromRepositories = (repo) => {
@@ -236,7 +256,8 @@ const NewEnvironment = () => {
       miningType === "repos" ? repositories : orgRepositories,
       miningType,
       filterType,
-      organization
+      organization,
+      keywords
     );
     setIsLoading(false);
 
@@ -249,6 +270,19 @@ const NewEnvironment = () => {
         201
       );
     }
+  };
+
+  const addKeyword = () => {
+    const keyword = document.getElementById("txt-repository").value;
+    if (keyword === "") return;
+
+    setKeywords([...keywords, keyword]);
+    document.getElementById("txt-repository").value = "";
+  };
+
+  const removeKeyword = (keyword) => {
+    const newKeywords = keywords.filter((k) => k !== keyword);
+    setKeywords(newKeywords);
   };
 
   // . Declarando elementos da página
@@ -287,63 +321,179 @@ const NewEnvironment = () => {
             justifyContent: "center",
           }}
         >
-          <Box className="LoginCardContent">
-            <Box className="DivLoginTextAndButtons">
-              <Box className="ButtonArea">
-                <Typography className="TextFieldLabel">Name*</Typography>
-                <TextField
-                  id="txt-name"
-                  variant="outlined"
-                  fullWidth
-                  placeholder="Insert the name of the environment"
-                />
-              </Box>
-              <Box className="ButtonArea">
-                <Typography className="TextFieldLabel">Description*</Typography>
-                <TextField
-                  id="txt-details"
-                  variant="outlined"
-                  fullWidth
-                  placeholder="Insert a description for the environment"
-                  multiline
-                  maxRows={4}
-                />
+          <Box className="NewEnvironmentContent">
+            <Box className="LoginCardContent">
+              <Box className="DivLoginTextAndButtons">
+                <Box className="ButtonArea">
+                  <Typography className="TextFieldLabel">Name*</Typography>
+                  <TextField
+                    id="txt-name"
+                    variant="outlined"
+                    fullWidth
+                    placeholder="Insert the name of the environment"
+                  />
+                </Box>
+                <Box className="ButtonArea">
+                  <Typography className="TextFieldLabel">
+                    Description*
+                  </Typography>
+                  <TextField
+                    id="txt-details"
+                    variant="outlined"
+                    fullWidth
+                    placeholder="Insert a description for the environment"
+                    multiline
+                    maxRows={4}
+                  />
+                </Box>
+                <FormControl className="ButtonArea">
+                  <FormLabel
+                    id="radio-button-mining_type"
+                    className="TextFieldLabel"
+                  >
+                    Mining Type*
+                  </FormLabel>
+                  <RadioGroup
+                    row
+                    aria-labelledby="radio-button-mining_type"
+                    name="radioButton-miningType"
+                    value={miningType}
+                    onChange={(e) => setMiningType(e.target.value)}
+                  >
+                    <FormControlLabel
+                      value="organization"
+                      control={<Radio />}
+                      label="Organization"
+                    />
+                    <FormControlLabel
+                      value="repos"
+                      control={<Radio />}
+                      label="Many Repos"
+                    />
+                  </RadioGroup>
+                </FormControl>
+                <Box
+                  className="ButtonArea"
+                  style={{
+                    visibility:
+                      miningType === "organization" ? "visible" : "collapse",
+                  }}
+                >
+                  <Typography className="TextFieldLabel">
+                    GitHub Organization
+                  </Typography>
+                  <Box
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      width: "100%",
+                    }}
+                  >
+                    <TextField
+                      id="txt-organization"
+                      fullWidth
+                      variant="outlined"
+                      placeholder="Insert the disered GitHub organization"
+                    />
+                    <Button
+                      onClick={getOrganizationRepositories}
+                      style={{ marginLeft: "0.5em" }}
+                      id="btn-add-repository"
+                      onMouseOver={() => {
+                        setAddButtonRepoColor("#7da7fa");
+                      }}
+                      onMouseOut={() => {
+                        setAddButtonRepoColor("#0084fe");
+                      }}
+                    >
+                      <CodescanCheckmarkIcon
+                        size={24}
+                        fill={addButtonRepoColor}
+                      />
+                    </Button>
+                  </Box>
+                </Box>
+                <Box
+                  className="ButtonArea"
+                  style={{
+                    visibility: miningType === "repos" ? "visible" : "collapse",
+                  }}
+                >
+                  <Typography className="TextFieldLabel">
+                    GitHub Repository
+                  </Typography>
+                  <Box
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      width: "100%",
+                    }}
+                  >
+                    <TextField
+                      id="txt-add-repository"
+                      fullWidth
+                      variant="outlined"
+                      placeholder="Insert the disered GitHub repository"
+                    />
+                    <Button
+                      onClick={checkRepoAvailable}
+                      style={{ marginLeft: "0.5em" }}
+                      id="btn-add-repository"
+                      onMouseOver={() => {
+                        setAddButtonRepoColor("#7da7fa");
+                      }}
+                      onMouseOut={() => {
+                        setAddButtonRepoColor("#0084fe");
+                      }}
+                    >
+                      <FeedPlusIcon size={24} fill={addButtonRepoColor} />
+                    </Button>
+                  </Box>
+                </Box>
               </Box>
               <FormControl className="ButtonArea">
                 <FormLabel
                   id="radio-button-mining_type"
                   className="TextFieldLabel"
                 >
-                  Mining Type*
+                  Filter Type*
                 </FormLabel>
                 <RadioGroup
                   row
-                  aria-labelledby="radio-button-mining_type"
-                  name="radioButton-miningType"
-                  value={miningType}
-                  onChange={(e) => setMiningType(e.target.value)}
+                  aria-labelledby="radio-button-filter_type"
+                  name="radioButton-filterType"
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value)}
                 >
                   <FormControlLabel
-                    value="organization"
+                    value="none"
                     control={<Radio />}
-                    label="Organization"
+                    label="No Filter"
                   />
+
                   <FormControlLabel
-                    value="repos"
+                    value="keywords"
                     control={<Radio />}
-                    label="Many Repos"
-                  />
+                    label={
+                      <Tooltip title="This will applly a filter of requirement change keywords (RCR) and allow you to add specific project keywords that refers to RCR at the issues mined">
+                        <Box>
+                          {"By keywords     "}
+                          <InfoIcon size={16} />
+                        </Box>
+                      </Tooltip>
+                    }
+                  ></FormControlLabel>
                 </RadioGroup>
               </FormControl>
               <Box
                 className="ButtonArea"
                 style={{
                   visibility:
-                    miningType === "organization" ? "visible" : "collapse",
+                    filterType === "keywords" ? "visible" : "collapse",
                 }}
               >
                 <Typography className="TextFieldLabel">
-                  GitHub Organization
+                  Environment keywords
                 </Typography>
                 <Box
                   style={{
@@ -353,73 +503,42 @@ const NewEnvironment = () => {
                   }}
                 >
                   <TextField
-                    id="txt-organization"
+                    id="txt-repository"
                     fullWidth
                     variant="outlined"
-                    placeholder="Insert the disered GitHub organization"
+                    placeholder="Insert the disered keyword for the filter"
                   />
                   <Button
-                    onClick={getOrganizationRepositories}
+                    onClick={addKeyword}
                     style={{ marginLeft: "0.5em" }}
-                    id="btn-add-repository"
+                    id="btn-add-keyword"
                     onMouseOver={() => {
-                      setAddButtonRepoColor("#7da7fa");
+                      setAddButtonKeywordColor("#7da7fa");
                     }}
                     onMouseOut={() => {
-                      setAddButtonRepoColor("#0084fe");
+                      setAddButtonKeywordColor("#0084fe");
                     }}
                   >
-                    <CodescanCheckmarkIcon
-                      size={24}
-                      fill={addButtonRepoColor}
-                    />
+                    <FeedPlusIcon size={24} fill={addButtonKeywordColor} />
                   </Button>
                 </Box>
               </Box>
+              <Button className="LoginBtnSignUp" onClick={createNewEnvironment}>
+                {isLoading ? "REQUESTING..." : "REQUEST"}
+              </Button>
+            </Box>
+            <Box className="LoginCardContent">
               <Box
                 className="ButtonArea"
                 style={{
-                  visibility: miningType === "repos" ? "visible" : "collapse",
+                  visibility:
+                    (repositories.length > 0 && miningType === "repos") ||
+                    (orgRepositories.length > 0 && miningType !== "repos")
+                      ? "visible"
+                      : "hidden",
                 }}
               >
                 <Typography className="TextFieldLabel">
-                  GitHub Repository
-                </Typography>
-                <Box
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    width: "100%",
-                  }}
-                >
-                  <TextField
-                    id="txt-add-repository"
-                    fullWidth
-                    variant="outlined"
-                    placeholder="Insert the disered GitHub repository"
-                  />
-                  <Button
-                    onClick={checkRepoAvailable}
-                    style={{ marginLeft: "0.5em" }}
-                    id="btn-add-repository"
-                    onMouseOver={() => {
-                      setAddButtonRepoColor("#7da7fa");
-                    }}
-                    onMouseOut={() => {
-                      setAddButtonRepoColor("#0084fe");
-                    }}
-                  >
-                    <FeedPlusIcon size={24} fill={addButtonRepoColor} />
-                  </Button>
-                </Box>
-              </Box>
-              <Box className="ButtonArea">
-                <Typography
-                  className="TextFieldLabel"
-                  style={{
-                    visibility: repositories.length > 0 ? "visible" : "hidden",
-                  }}
-                >
                   Selected GitHub repositories
                 </Typography>
                 <Box
@@ -430,6 +549,8 @@ const NewEnvironment = () => {
                     justifyContent: "center",
                     flexWrap: "wrap",
                     width: "inherit",
+                    maxHeight: "150px",
+                    overflow: "auto",
                   }}
                 >
                   {miningType === "repos"
@@ -459,44 +580,81 @@ const NewEnvironment = () => {
                       })}
                 </Box>
               </Box>
+              <Box
+                className="ButtonArea"
+                style={{
+                  visibility: filterType === "keywords" ? "visible" : "hidden",
+                }}
+              >
+                <Typography
+                  className="TextFieldLabel"
+                  style={{
+                    visibility:
+                      filterType === "keywords" && rcrKeywords.length > 0
+                        ? "visible"
+                        : "hidden",
+                  }}
+                >
+                  RCR keywords
+                </Typography>
+                <Box
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexWrap: "wrap",
+                    width: "inherit",
+                    maxHeight: "150px",
+                    overflow: "auto",
+                  }}
+                >
+                  {rcrKeywords.map((keyword, index) => {
+                    return (
+                      <Chip
+                        label={keyword}
+                        key={`CHP-RCRKEY_${index}`}
+                        style={{ margin: "0.25em" }}
+                      />
+                    );
+                  })}
+                </Box>
+                <Typography
+                  className="TextFieldLabel"
+                  sx={{
+                    marginTop: "1em",
+                    visibility: keywords.length > 0 ? "visible" : "hidden",
+                  }}
+                >
+                  Environment keywords
+                </Typography>
+                <Box
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexWrap: "wrap",
+                    width: "inherit",
+                    maxHeight: "150px",
+                    overflow: "auto",
+                  }}
+                >
+                  {keywords.map((keyword, index) => {
+                    return (
+                      <Chip
+                        label={keyword}
+                        key={`CHP-KEY_${index}`}
+                        style={{ margin: "0.25em" }}
+                        onDelete={() => {
+                          removeKeyword(keyword);
+                        }}
+                      />
+                    );
+                  })}
+                </Box>
+              </Box>
             </Box>
-            <FormControl className="ButtonArea">
-              <FormLabel
-                id="radio-button-mining_type"
-                className="TextFieldLabel"
-              >
-                Filter Type*
-              </FormLabel>
-              <RadioGroup
-                row
-                aria-labelledby="radio-button-filter_type"
-                name="radioButton-filterType"
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-              >
-                <FormControlLabel
-                  value="none"
-                  control={<Radio />}
-                  label="No Filter"
-                />
-
-                <FormControlLabel
-                  value="keywords"
-                  control={<Radio />}
-                  label={
-                    <Tooltip title="This will applly a filter of requirement change keywords at the issues mined">
-                      <Box>
-                        {"By keywords     "}
-                        <InfoIcon size={16} />
-                      </Box>
-                    </Tooltip>
-                  }
-                ></FormControlLabel>
-              </RadioGroup>
-            </FormControl>
-            <Button className="LoginBtnSignUp" onClick={createNewEnvironment}>
-              {isLoading ? "REQUESTING..." : "REQUEST"}
-            </Button>
           </Box>
         </Box>
       </Box>

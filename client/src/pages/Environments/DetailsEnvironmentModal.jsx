@@ -30,24 +30,37 @@ export function DetailsEnvironmentModal(props) {
         <Typography gutterBottom>
           <strong> Description: </strong> {environment.details}
         </Typography>
-
         <Typography gutterBottom>
           <strong> Mining Type: </strong>
           {environment.mining_type === "repos"
             ? "Many Repositories"
             : "Orgqanization"}
         </Typography>
-
         <Typography gutterBottom>
           <strong> Filter Type: </strong>
           {environment.filter_type === "keywords" ? "Keywords" : "None"}
         </Typography>
 
+        {environment.filter_type !== "none" &&
+        environment.issuesLength.issuesObtainedLength &&
+        environment.issuesLength.issuesFilteredLength ? (
+          <>
+            <Typography gutterBottom>
+              <strong> {"Issues Obtained:"} </strong>
+              {environment.issuesLength.issuesObtainedLength}
+            </Typography>
+            <Typography gutterBottom>
+              <strong> {"Issues Mined (after filters):"} </strong>
+              {environment.issuesLength.issuesFilteredLength}
+            </Typography>
+          </>
+        ) : (
+          ""
+        )}
         <Typography gutterBottom>
           <strong> Topics quantity: </strong>
           {topicsLength}
         </Typography>
-
         {environment.mining_type !== "repos" ? (
           <Typography gutterBottom sx={{ marginTop: "1em" }}>
             <strong> GitHub Organization: </strong>
@@ -56,6 +69,17 @@ export function DetailsEnvironmentModal(props) {
         ) : (
           ""
         )}
+        {environment.keywords && environment.keywords.length > 0 ? (
+          <Typography gutterBottom sx={{ marginTop: "1em" }}>
+            <strong> Environment keywords: </strong>
+            {environment.keywords.map((keyword) => (
+              <li key={keyword}>{keyword}</li>
+            ))}
+          </Typography>
+        ) : (
+          ""
+        )}
+        {}
         {environment.repos.length > 0 ? (
           <Typography gutterBottom sx={{ marginTop: "1em" }}>
             <strong> Repositories: </strong>

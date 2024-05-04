@@ -37,7 +37,7 @@ class APIRequests {
    * @param {Array<string>} repos - The list of repositories.
    * @returns {boolean} - True if the request is successful, or false otherwise.
    */
-  static async requestMining(environmentId, repos, filter_type) {
+  static async requestMining(environmentId, repos, filter_type, keywords) {
     // * Defining url
     const url = `${config.apiMicroserviceBase}/github/mining/repos`;
 
@@ -49,6 +49,7 @@ class APIRequests {
           environment_id: environmentId,
           repos: repos,
           filter_type: filter_type,
+          keywords: keywords,
         },
         {
           headers: {

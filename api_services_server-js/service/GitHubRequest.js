@@ -21,7 +21,7 @@ class GitHubRequest {
    * @param {Array} repos Array de repositórios (strings).
    * @param {string} environment_id O id do ambiente (BD) que solicitou a mineração.
    **/
-  async run(repos, environment_id, filter_type) {
+  async run(repos, environment_id, filter_type, keywords) {
     // * Iniciando serviço
     this.#isRunning = true;
     let result = null;
@@ -103,19 +103,25 @@ class GitHubRequest {
       return;
     }
 
+    // . Registrando qtd de issues obtidas
+    result.issuesObtainedLength = result.issues.length;
+
     // * Filtrando issues por condição de filtro
     if (filter_type === "none") {
       console.log("No filter applied."); // !! LOG
     }
     if (filter_type === "keywords") {
       console.log("Keyword filter applied."); // !! LOG
+      if (!keywords) keywords = [];
+      const allKeywords = [...new Set([...keywordsArr, ...keywords])];
+
       let newResultsIssueArr = [];
       for (const issue of result.issues) {
         const issueTags = issue.tags ? issue.tags.split(",") : [];
         const issueWords = issue.body.toLowerCase().split(" ");
 
         // * Verificando se as tags da issue possuem alguma palavra-chave
-        const foundTags = issueTags.some((tag) => keywordsArr.includes(tag));
+        const foundTags = issueTags.some((tag) => allKeywords.includes(tag));
 
         if (foundTags) {
           newResultsIssueArr.push(issue);
@@ -123,12 +129,13 @@ class GitHubRequest {
         }
 
         // * Verificando se o corpo da issue possui alguma palavra-chave
-        const found = issueWords.some((word) => keywordsArr.includes(word));
+        const found = issueWords.some((word) => allKeywords.includes(word));
 
         if (found) {
           newResultsIssueArr.push(issue);
         }
       }
+      result.issuesFilteredLength = newResultsIssueArr.length;
       result.issues = newResultsIssueArr;
       newResultsIssueArr = null; // Limpando memória
     }
@@ -159,7 +166,8 @@ class GitHubRequest {
       this.run(
         nextRequest.repos,
         nextRequest.environment_id,
-        nextRequest.filter_type
+        nextRequest.filter_type,
+        nextRequest.keywords
       );
     }
   }
@@ -171,12 +179,13 @@ class GitHubRequest {
    * @param {string} environment_id Id do ambiente (BD) que solicitou a mineração.
    * @param {string} filter_type Tipo de filtro a ser aplicado.
    **/
-  async addQueue(repos, environment_id, filter_type) {
+  async addQueue(repos, environment_id, filter_type, keywords) {
     // * Adicionando requisição na fila
     this.#requestsQueue.push({
       repos: repos,
       environment_id: environment_id,
       filter_type: filter_type,
+      keywords: keywords,
     });
 
     console.log("this.#isRunning: ", this.#isRunning);
