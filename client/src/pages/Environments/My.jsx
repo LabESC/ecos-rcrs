@@ -15,6 +15,7 @@ import { PopUpError } from "../../components/PopUp.jsx";
 import { useNavigate } from "react-router-dom";
 import { DiffAddedIcon, SyncIcon } from "@primer/octicons-react";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import "color-legend-element";
 
 // ! Importações de componentes criados
 import theme from "../../components/MuiTheme.jsx";
@@ -444,28 +445,51 @@ const MyEnvironment = () => {
             </IconButton>
           </Tooltip>
         </Box>
-        <Box className="ContainerEnvironments">
-          {environments.map((env) => (
-            <EnvironmentCard
-              id={env.id}
-              name={env.name}
-              status={env.status}
-              votingCount={env.voting_users_count}
-              action={() => {
-                cardClick(
-                  env.id,
-                  env.name,
-                  env.status,
-                  env.voting_users_count,
-                  env
-                );
-              }}
-              key={`ENV_${env.id}`}
-              cloneEnvironment={() => {
-                openClonePopUp(env.id);
-              }}
+        <Box className="ContainerEnvironments" sx={{ flexDirection: "column" }}>
+          <Box>
+            <color-legend
+              titleText="Card color legend"
+              scaleType="categorical"
+              markType="line"
+              class="columns"
+              domain='["Error","With pendencies","Processed"]'
+              range='["#E12939","#fcba03","#09b035"]'
             />
-          ))}
+            <Typography
+              variant="h5"
+              style={{
+                textDecoration: "underline",
+                marginLeft: "1em",
+                fontWeight: "600",
+                marginTop: "1em",
+              }}
+            >
+              My environments
+            </Typography>
+          </Box>
+          <Box className="ContainerEnvironments">
+            {environments.map((env) => (
+              <EnvironmentCard
+                id={env.id}
+                name={env.name}
+                status={env.status}
+                votingCount={env.voting_users_count}
+                action={() => {
+                  cardClick(
+                    env.id,
+                    env.name,
+                    env.status,
+                    env.voting_users_count,
+                    env
+                  );
+                }}
+                key={`ENV_${env.id}`}
+                cloneEnvironment={() => {
+                  openClonePopUp(env.id);
+                }}
+              />
+            ))}
+          </Box>
         </Box>
       </Box>
     );
