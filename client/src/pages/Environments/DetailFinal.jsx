@@ -56,16 +56,17 @@ const EnvironmentFinalReport = () => {
 
       switch (score) {
         case 1:
-          return `Strongly Disagree`;
+          return "No"; //`Strongly Disagree`;
         case 2:
-          return `Disagree`;
+          return "I don't know"; //`Disagree`;
         case 3:
-          return `Neutral`;
-        case 4:
+          return "Yes"; //`Neutral`;
+        /*case 4:
           return `Agree`;
         case 5:
-          return `Strongly Agree`;
+          return `Strongly Agree`;*/
         default:
+          console.log("no", score);
           return "No score";
       }
     };
@@ -83,11 +84,9 @@ const EnvironmentFinalReport = () => {
           relatedToIssues: rcr.relatedToIssues
             .map((issue) => issue.url)
             .toString(),
-          definitions_vote_count_strongly_agree: rcr.definition_votes[5],
-          definitions_vote_count_agree: rcr.definition_votes[4],
-          definitions_vote_count_neutral: rcr.definition_votes[3],
-          definitions_vote_count_disagree: rcr.definition_votes[2],
-          definitions_vote_count_strongly_disagree: rcr.definition_votes[1],
+          definitions_vote_count_yes: rcr.definition_votes[3],
+          definitions_vote_count_i_dont_know: rcr.definition_votes[2],
+          definitions_vote_count_no: rcr.definition_votes[1],
           final_vote: getScoreDescription(rcr.final_vote),
         });
       });
@@ -250,7 +249,10 @@ const EnvironmentFinalReport = () => {
     score = parseInt(score);
     // * Contando quantos votos teve pro score, considerando que all votes é um objeto com as chaves de 1 a 5 e que voce so quer saber a quantidade de votos do score atual
     let votes = 0;
+    let allVotesLength = 0;
     for (const key in allVotes) {
+      if (parseInt(key)) allVotesLength = allVotesLength + allVotes[key];
+
       if (parseInt(key) === score) {
         votes += allVotes[key];
       }
@@ -258,15 +260,15 @@ const EnvironmentFinalReport = () => {
 
     switch (score) {
       case 1:
-        return `Strongly Disagree (${votes} votes)`;
+        return `No (${votes} votes of ${parseInt(allVotesLength)})`; //return `Strongly Disagree (${votes} votes)`;
       case 2:
-        return `Disagree (${votes} votes)`;
+        return `I don't know (${votes} votes of ${parseInt(allVotesLength)})`; //`Disagree (${votes} votes)`;
       case 3:
-        return `Neutral (${votes} votes)`;
-      case 4:
+        return `Yes (${votes} votes of ${parseInt(allVotesLength)})`; //`Neutral (${votes} votes)`;
+      /*case 4:
         return `Agree (${votes} votes)`;
       case 5:
-        return `Strongly Agree (${votes} votes)`;
+        return `Strongly Agree (${votes} votes)`;*/
       default:
         return "No score";
     }
@@ -291,16 +293,16 @@ const EnvironmentFinalReport = () => {
 
     switch (score) {
       case 1:
-        return `Strongly Disagree (${votes} votes - ${percent}%)`;
+        return `No (${votes} votes - ${percent}%)`; // `Strongly Disagree (${votes} votes - ${percent}%)`;
 
       case 2:
-        return `Disagree (${votes} votes - ${percent}%)`;
+        return `I don't know (${votes} votes - ${percent}%)`; //`Disagree (${votes} votes - ${percent}%)`;
       case 3:
-        return `Neutral (${votes} votes - ${percent}%)`;
-      case 4:
+        return `Yes (${votes} votes - ${percent}%)`; //`Neutral (${votes} votes - ${percent}%)`;
+      /*case 4:
         return `Agree (${votes} votes - ${percent}%)`;
       case 5:
-        return `Strongly Agree (${votes} votes - ${percent}%)`;
+        return `Strongly Agree (${votes} votes - ${percent}%)`;*/
       default:
         return "No score";
     }
@@ -311,16 +313,17 @@ const EnvironmentFinalReport = () => {
 
     switch (score) {
       case 1:
-        return `Strongly Disagree`;
+        return "No"; //`Strongly Disagree`;
       case 2:
-        return `Disagree`;
+        return "I don't know"; //`Disagree`;
       case 3:
-        return `Neutral`;
-      case 4:
+        return "Yes"; //`Neutral`;
+      /*case 4:
         return `Agree`;
       case 5:
-        return `Strongly Agree`;
+        return `Strongly Agree`;*/
       default:
+        console.log("no", score);
         return "No score";
     }
   };
@@ -331,16 +334,18 @@ const EnvironmentFinalReport = () => {
     switch (score) {
       case 1:
         return `#cc0e0e`;
-      case 2:
+      /*case 2:
         return `#cc540e`;
-      case 3:
+      case 3:*/
+      case 2:
         return `#998408`;
-      case 4:
+      /*case 4:
         return `#5b9e08`;
-      case 5:
+      case 5:*/
+      case 3:
         return `#0c9e09`;
       default:
-        return "No score";
+        return "#000000";
     }
   };
 

@@ -34,6 +34,7 @@ import {
   getEnvironmentIdFromUrl,
   getEnvironmentDetailsFromLocalStorage,
   getTopicData,
+  getTopicDataFromLocalStorage,
   getEnvironmentNameFromLocalStorage,
   getDefinitionRCRs,
   setAllTopicsDataToLocalStorage,
@@ -102,9 +103,23 @@ const EnvironmentDetail = () => {
       const topics = orderIssuesByRelatedTo(response);
       setTopics(topics);
 
+      // . Verificando se há topico selecionado no localStorage
+      const topicsLocalStorage = getTopicDataFromLocalStorage();
+      let actualTopic = 0;
+      if (topicsLocalStorage !== null) {
+        const topicIndex = topics.findIndex(
+          (topic) => topic.id === topicsLocalStorage.id
+        );
+
+        if (topicIndex !== -1) {
+          actualTopic = topicIndex;
+        }
+      }
+
       // . Setando o topico atual no localStorage e todos os topicos
+      setActualTopic(actualTopic);
       setAllTopicsDataToLocalStorage(topics);
-      setTopicDataToLocalStorage(topics[0]);
+      setTopicDataToLocalStorage(topics[actualTopic]);
 
       // . Obtendo rcrs prioritarias associadas
       const definitionRCRs = await getDefinitionRCRs(

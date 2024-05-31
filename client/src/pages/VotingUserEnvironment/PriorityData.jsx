@@ -39,7 +39,10 @@ const PriorityDataPage = () => {
       // . Obtendo cada id e a posicao e salvando
       const votesUpdated = [];
       for (const rcr of rcrs) {
-        votesUpdated.push({ id: rcr.id, position: rcr.votes_position });
+        votesUpdated.push({
+          id: rcr.id,
+          position: rcr.position ? rcr.position : rcr.votes_position,
+        });
       }
       setPositions(votesUpdated);
     };
@@ -133,8 +136,6 @@ const PriorityDataPage = () => {
             1: null,
             2: null,
             3: null,
-            4: null,
-            5: null,
             comments: [],
           },
           final_vote: "",
@@ -170,8 +171,6 @@ const PriorityDataPage = () => {
         1: null,
         2: null,
         3: null,
-        4: null,
-        5: null,
         comments: [],
       },
       final_vote: "",
@@ -184,7 +183,7 @@ const PriorityDataPage = () => {
     // . Buscando no array de rcrs
     for (const rcr of environment.priority_data.rcrs) {
       if (rcr.id === rcrId) {
-        return rcr.votes_position;
+        return rcr.position;
       }
     }
   };
@@ -199,9 +198,9 @@ const PriorityDataPage = () => {
             return;
           }
 
-          const temp = newRCRs[i].votes_position;
-          newRCRs[i].votes_position = newRCRs[i - 1].votes_position;
-          newRCRs[i - 1].votes_position = temp;
+          const temp = newRCRs[i].position;
+          newRCRs[i].position = newRCRs[i - 1].position;
+          newRCRs[i - 1].position = temp;
           break;
         } else {
           if (i === newRCRs.length - 1) {
@@ -209,21 +208,21 @@ const PriorityDataPage = () => {
             return;
           }
 
-          const temp = newRCRs[i].votes_position;
-          newRCRs[i].votes_position = newRCRs[i + 1].votes_position;
-          newRCRs[i + 1].votes_position = temp;
+          const temp = newRCRs[i].position;
+          newRCRs[i].position = newRCRs[i + 1].position;
+          newRCRs[i + 1].position = temp;
           break;
         }
       }
     }
 
     // . Reordenando o array de rcrs de acordo com a nova posição
-    newRCRs.sort((a, b) => a.votes_position - b.votes_position);
+    newRCRs.sort((a, b) => a.position - b.position);
 
     // . Obtendo cada id e a posicao e salvando
     const votesUpdated = [];
     for (const rcr of rcrs) {
-      votesUpdated.push({ id: rcr.id, position: rcr.votes_position });
+      votesUpdated.push({ id: rcr.id, position: rcr.position });
     }
     setPositions(votesUpdated);
   };
@@ -266,7 +265,10 @@ const PriorityDataPage = () => {
     score = parseInt(score);
     // * Contando quantos votos teve pro score, considerando que all votes é um objeto com as chaves de 1 a 5 e que voce so quer saber a quantidade de votos do score atual
     let votes = 0;
+    let allVotesLength = 0;
     for (const key in allVotes) {
+      if (parseInt(key)) allVotesLength = allVotesLength + allVotes[key];
+
       if (parseInt(key) === score) {
         votes += allVotes[key];
       }
@@ -274,15 +276,15 @@ const PriorityDataPage = () => {
 
     switch (score) {
       case 1:
-        return `Strongly Disagree (${votes} votes)`;
+        return `No (${votes} votes of ${parseInt(allVotesLength)})`; //return `Strongly Disagree (${votes} votes)`;
       case 2:
-        return `Disagree (${votes} votes)`;
+        return `I don't know (${votes} votes of ${parseInt(allVotesLength)})`; //`Disagree (${votes} votes)`;
       case 3:
-        return `Neutral (${votes} votes)`;
-      case 4:
+        return `Yes (${votes} votes of ${parseInt(allVotesLength)})`; //`Neutral (${votes} votes)`;
+      /*case 4:
         return `Agree (${votes} votes)`;
       case 5:
-        return `Strongly Agree (${votes} votes)`;
+        return `Strongly Agree (${votes} votes)`;*/
       default:
         return "No score";
     }
@@ -293,16 +295,17 @@ const PriorityDataPage = () => {
 
     switch (score) {
       case 1:
-        return `Strongly Disagree`;
+        return "No"; //`Strongly Disagree`;
       case 2:
-        return `Disagree`;
+        return "I don't know"; //`Disagree`;
       case 3:
-        return `Neutral`;
-      case 4:
+        return "Yes"; //`Neutral`;
+      /*case 4:
         return `Agree`;
       case 5:
-        return `Strongly Agree`;
+        return `Strongly Agree`;*/
       default:
+        console.log("no", score);
         return "No score";
     }
   };
@@ -313,16 +316,18 @@ const PriorityDataPage = () => {
     switch (score) {
       case 1:
         return `#cc0e0e`;
-      case 2:
+      /*case 2:
         return `#cc540e`;
-      case 3:
+      case 3:*/
+      case 2:
         return `#998408`;
-      case 4:
+      /*case 4:
         return `#5b9e08`;
-      case 5:
+      case 5:*/
+      case 3:
         return `#0c9e09`;
       default:
-        return "No score";
+        return "#000000";
     }
   };
 
@@ -346,7 +351,7 @@ const PriorityDataPage = () => {
     setCommentPopUpOpen(false);
   };
 
-  const scoresAcceptedForVoteDetails = ["1", "2", "3", "4", "5"];
+  const scoresAcceptedForVoteDetails = ["1", "2", "3"];
 
   // . Declarando elementos da página
   const pageContent = () => {

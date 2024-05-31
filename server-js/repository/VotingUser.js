@@ -187,7 +187,10 @@ class VotingUser {
    */
   static async getPriorityVotesOfEnvironment(environmentId) {
     const votingUserEnvironment = await VotingUserEnvironment.findAll({
-      where: { environment_id: environmentId },
+      where: {
+        environment_id: environmentId,
+        votes_rcr_priority: { [Op.not]: null },
+      },
     });
 
     if (votingUserEnvironment === null) return null;

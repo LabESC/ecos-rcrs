@@ -131,8 +131,34 @@ const EnvironmentDetailDefinition = () => {
       }
       console.log(response.rcrs);
 
+      // . Ordenando o response.rcrs por maior final_vote com a maior quantidade de definition_votes pro final_vote
+      let response2 = { ...response };
+      response2.rcrs = response.rcrs.sort((a, b) => {
+        //if (a.final_vote > b.final_vote) return -1;
+        //if (a.final_vote < b.final_vote) return 1;
+
+        let aVotes = 0;
+        let bVotes = 0;
+        aVotes = a.definition_votes[a.final_vote] / a.definition_votes.counts;
+        bVotes = b.definition_votes[b.final_vote] / b.definition_votes.counts;
+
+        // Após obter o coeficiente de votos, pondere a partir do coefifiente de votos e se o voto final é maior ou menor
+        // a posição do voto final é mais importante que a quantidade de votos
+        if (a.final_vote > b.final_vote) return -1;
+        if (a.final_vote <= b.final_vote) {
+          console.log(aVotes, bVotes);
+          if (aVotes > bVotes) return -1;
+          if (aVotes < bVotes) return 1;
+          if (aVotes === bVotes) return 1;
+        }
+
+        return 0;
+      });
+
+      console.log(response2.rcrs);
+
       // . Armazenando os ambientes
-      setRCRS(response.rcrs);
+      setRCRS(response2.rcrs);
 
       // . Setando o topico atual no localStorage e todos os topicos
       setPriorityRCRLToLocalStorage(response);
@@ -470,11 +496,42 @@ const EnvironmentDetailDefinition = () => {
   // ! Funções para manipulação de dados da rcr
   const saveActualState = async () => {
     setIsLoading(true);
+    let newRCRs = [...rcrs];
+
+    // Ordenando as rcrs
+    newRCRs = newRCRs.sort((a, b) => {
+      if (a.exclude_to_priority === true) return 1; // Se a rcr foi excluida, ela deve ser a ultima
+      if (b.exclude_to_priority === true) {
+        let aVotes = 0;
+        let bVotes = 0;
+        aVotes = a.definition_votes[a.final_vote] / a.definition_votes.counts;
+        bVotes = b.definition_votes[b.final_vote] / b.definition_votes.counts;
+
+        // Após obter o coeficiente de votos, pondere a partir do coefifiente de votos e se o voto final é maior ou menor
+        // a posição do voto final é mais importante que a quantidade de votos
+        if (a.final_vote > b.final_vote) return -1;
+        if (a.final_vote <= b.final_vote) {
+          if (aVotes > bVotes) return -1;
+          else return 1;
+        }
+      }
+    });
+
+    // Gerando a nova posicao de "positions"
+    for (let i = 0, j = 1; i < newRCRs.length; i++) {
+      if (newRCRs[i].exclude_to_priority === false) {
+        newRCRs[i].position = j;
+        j++;
+      }
+    }
+
+    console.log(newRCRs);
+
     const request = await setPriorityData(
       loggedUser.userId,
       loggedUser.userToken,
       environmentId,
-      rcrs
+      newRCRs //rcrs
     );
 
     if (request === true) {

@@ -4,7 +4,8 @@ const doesRepoExist = require("./GitHubRepo");
 const { updateEnvironmentMiningData } = require("./DBRequests");
 const { formatIssuesToArray } = require("./Words");
 const { getSCRFilter } = require("./ModelRequests");
-const { allWords: keywordsArr } = require("../utils/Keywords");
+const { allWordsWithLemma } = require("../utils/Keywords");
+const { lemmatize } = require("../utils/Lemma");
 
 class GitHubRequest {
   #requestsQueue;
@@ -29,22 +30,6 @@ class GitHubRequest {
       // * Executando requisições
       result = await getRepos(repos);
 
-      // * Filtrando issues por SCR (Microsservico de topicos - não implementado ainda)
-      /*const issuesForSCRRequest = result.issues.map((issue) => {
-        return { id: issue.id, body: issue.body };
-      });
-
-      const scrFilter = await getSCRFilter(environment_id, issuesForSCRRequest);
-
-      if (scrFilter) {
-        // Obtendo o conjunto de ids de cada issue do scrFilter
-        const scrFilterIds = scrFilter.issues.map((issue) => issue.id);
-        // Filtrando as issues do resultado original que estão no scrFilter
-        result.issues = result.issues.filter((issue) =>
-          scrFilterIds.includes(issue.id)
-        );
-      }
-      */
       // * Finalizando serviço
       this.#isRunning = false;
 
@@ -113,15 +98,25 @@ class GitHubRequest {
     if (filter_type === "keywords") {
       console.log("Keyword filter applied."); // !! LOG
       if (!keywords) keywords = [];
-      const allKeywords = [...new Set([...keywordsArr, ...keywords])];
+      // . Lemmatizando palavras chaves do contexto do ambiente
+      keywords = keywords.map((word) => lemmatize(word));
+      // . Unindo palavras-chave do contexto do ambiente com as palavras-chave lemmatizadas do sistema
+      let allKeywords = [...new Set([...allWordsWithLemma, ...keywords])];
 
       let newResultsIssueArr = [];
       for (const issue of result.issues) {
-        const issueTags = issue.tags ? issue.tags.split(",") : [];
-        const issueWords = issue.body.toLowerCase().split(" ");
+        // . Obtendo e lemmatizando os labels da issue...
+        let issueLabels = issue.tags ? issue.tags.split(",") : [];
+        issueLabels = issueLabels.map((label) => lemmatize(label));
+
+        // . Obtendo e lemmatizando os textos da issue...
+        let issueWords = issue.body.toLowerCase().split(" ");
+        issueWords = issueWords.map((word) => lemmatize(word));
 
         // * Verificando se as tags da issue possuem alguma palavra-chave
-        const foundTags = issueTags.some((tag) => allKeywords.includes(tag));
+        const foundTags = issueLabels.some((label) =>
+          allKeywords.includes(label)
+        );
 
         if (foundTags) {
           newResultsIssueArr.push(issue);

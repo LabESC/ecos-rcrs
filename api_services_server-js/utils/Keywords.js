@@ -65,6 +65,11 @@ const customerChangeRequestWords = [
 
 const allWords = [...new Set([...customerChangeRequestWords])];
 
+// . Aplicando lemmatizacao ao conjunto allWords (para cada texto no array, aplicar o lemmatize)
+const { lemmatize } = require("./Lemma");
+const allWordsWithLemma = allWords.map((word) => lemmatize(word));
+
 module.exports = {
   allWords,
+  allWordsWithLemma,
 };

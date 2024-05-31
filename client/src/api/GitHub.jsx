@@ -57,6 +57,7 @@ export const doesRepoExist = async (repository) => {
       return res.data;
     })
     .catch(async (err) => {
+      console.log(err.response.data);
       try {
         return { error: err.response.data, status: err.response.status };
       } catch (e) {

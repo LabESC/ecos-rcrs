@@ -96,6 +96,16 @@ export const getIssueDetailsWithRelatedScoreFromTopicDataLocalStorage = (
   return relatedIssue;
 };
 
+export const getTopicSelectedFromLocalStorage = () => {
+  const topicSelected = localStorage.getItem("SECO_24_topic-selected");
+  return topicSelected;
+};
+
+export const setTopicSelectedToLocalStorage = (topicSelected) => {
+  localStorage.setItem("SECO_24_topic-selected", topicSelected);
+  return;
+};
+
 export const getEnvironmentIdFromUrlVoting = () => {
   // . Obtendo o id do ambiente
   const url = window.location.href;

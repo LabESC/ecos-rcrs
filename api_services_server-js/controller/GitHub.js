@@ -71,7 +71,7 @@ router.get("/api/github/organization/:org/repos", async (req, res) => {
   if (repos.errors.length > 0) {
     console.log(repos.errors[0].error);
     if (repos.errors[0].error === "Organization not found.") {
-      return res.status(404).json(repos.errors[0].error);
+      return res.status(200).json(false);
     }
     return res.status(400).json(repos.errors[0].error);
   }

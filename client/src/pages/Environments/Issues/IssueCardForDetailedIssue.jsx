@@ -13,6 +13,21 @@ export function IssueCardForDetailedIssue(props) {
 
   return (
     <Box className="IssueCard" onClick={onClick}>
+      {issue.id ? (
+        <Typography
+          className="IssueCardTxt"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            color: "#313131",
+            fontSize: 10,
+          }}
+        >
+          <strong style={{ marginRight: "4px" }}> Issue ID: </strong>#{issue.id}
+        </Typography>
+      ) : (
+        ""
+      )}
       <Box className="IssueCardRepoAndQuantity">
         <Typography
           className="IssueCardTxt"

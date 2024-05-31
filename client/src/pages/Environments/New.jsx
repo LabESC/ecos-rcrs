@@ -127,6 +127,27 @@ const NewEnvironment = () => {
 
     setIsLoadingSearch(true);
     const res = await getOrganizationRepos(org);
+
+    if (res === false) {
+      setSearchError({
+        title: "Organization",
+        message: "Organization not found",
+      });
+      setHasSearchError(true);
+      setIsLoadingSearch(false);
+      return;
+    }
+
+    if (!res) {
+      setSearchError({
+        title: "Server not responding",
+        message: "Try again later.",
+      });
+      setHasSearchError(true);
+      setIsLoadingSearch(false);
+      return;
+    }
+
     if (res.error) {
       setSearchError({ title: res.error.code, message: res.error.message });
       setHasSearchError(true);
@@ -148,6 +169,7 @@ const NewEnvironment = () => {
       setOrgRepositories(res);
       setIsLoadingSearch(false);
     }
+
     document.getElementById("txt-organization").value = "";
   };
 
