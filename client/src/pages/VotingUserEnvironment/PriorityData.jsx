@@ -23,6 +23,7 @@ import { IssueModalDetail } from "../Environments/Issues/IssueModalDetail.jsx";
 import { OpenRCRPriorityVotePopUp } from "./PopUps/OpenRCRPriorityVotePopUp.jsx";
 import { SuccessButton } from "../../components/Buttons.jsx";
 import { CommentPopUp } from "../Environments/CommentPopUp.jsx";
+import { RCROldDetailVote } from "./PopUps/RCROldDetail.jsx";
 
 // ! Importações de códigos
 import {
@@ -140,6 +141,7 @@ const PriorityDataPage = () => {
           },
           final_vote: "",
           exclude_to_priority: true,
+          olds: [],
         },
       ], // . Armazena as RCRs do ambiente,
     },
@@ -175,6 +177,7 @@ const PriorityDataPage = () => {
       },
       final_vote: "",
       exclude_to_priority: true,
+      olds: [],
     },
   ]);
   const [positions, setPositions] = useState([]);
@@ -349,6 +352,42 @@ const PriorityDataPage = () => {
 
   const closeCommentPopUp = () => {
     setCommentPopUpOpen(false);
+  };
+
+  // . Funções para modal de OLD RCRs
+  const [oldRCROpen, setOldRCROpen] = useState(false);
+  const [oldRCR, setOldRCR] = useState({
+    id: null,
+    name: null,
+    details: null,
+    relatedToIssues: [],
+    mainIssue: null,
+  });
+  const [newRCR, setNewRCR] = useState({
+    id: null,
+    name: null,
+    details: null,
+    relatedToIssues: [],
+    mainIssue: null,
+  });
+
+  const formatDate = (date) => {
+    try {
+      const newDate = new Date(date);
+      return newDate.toLocaleDateString() + " " + newDate.toLocaleTimeString();
+    } catch (e) {
+      return date;
+    }
+  };
+
+  const openOldRCR = (oldRCR, newRCR) => {
+    setOldRCR(oldRCR);
+    setNewRCR(newRCR);
+    setOldRCROpen(true);
+  };
+
+  const closeOldRCR = () => {
+    setOldRCROpen(false);
   };
 
   const scoresAcceptedForVoteDetails = ["1", "2", "3"];
@@ -581,6 +620,45 @@ const PriorityDataPage = () => {
                           </Box>
                         );
                       })}
+
+                      {rcr.olds.length > 0 ? (
+                        <Box
+                          style={{
+                            margin: "0.8em 0 0.2em 0",
+                            width: "100%",
+                            display: "flex",
+                            flexDirection: "row",
+                          }}
+                        >
+                          <strong>Old versions:</strong>
+                          <Box
+                            style={{
+                              marginRight: "0.5em",
+                              width: "90%",
+                              display: "flex",
+                              flexDirection: "row",
+                            }}
+                          >
+                            {rcr.olds.map((old) => {
+                              return (
+                                <Chip
+                                  label={`${formatDate(old.updatedAt)}`}
+                                  style={{
+                                    marginRight: "0.5em",
+                                    color: "black",
+                                    fontWeight: "bold",
+                                  }}
+                                  onClick={() => {
+                                    openOldRCR(old, rcr);
+                                  }}
+                                />
+                              );
+                            })}
+                          </Box>
+                        </Box>
+                      ) : (
+                        ""
+                      )}
                     </AccordionDetails>
                   </Accordion>
                   <IconButton
@@ -666,6 +744,12 @@ const PriorityDataPage = () => {
         close={closeCommentPopUp}
         closeMessage={"GO BACK"}
         commentScore={commentPopUpData}
+      />
+      <RCROldDetailVote
+        open={oldRCROpen}
+        close={closeOldRCR}
+        oldRCR={oldRCR}
+        newRCR={newRCR}
       />
     </ThemeProvider>
   );

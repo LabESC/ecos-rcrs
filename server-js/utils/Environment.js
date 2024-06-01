@@ -133,6 +133,7 @@ module.exports = class Environment {
       rcr.final_vote = 0;
       rcr.exclude_to_priority = true;
       rcr.position = 0;
+      rcr.olds = [];
 
       // . Filtering all the votes for the current RCR
       const votesForThisRCR = votes.filter((vote) => vote.id === rcr.id);

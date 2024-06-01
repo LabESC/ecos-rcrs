@@ -694,6 +694,8 @@ class Environment {
       definition_data: null,
       priority_data: null,
       final_data: null,
+      filter_type: environment.filter_type,
+      keywords: environment.keywords,
     };
 
     // * Obtaining mining_data

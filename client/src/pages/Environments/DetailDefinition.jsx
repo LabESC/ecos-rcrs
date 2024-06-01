@@ -39,6 +39,7 @@ import { SuccessButton } from "../../components/Buttons.jsx";
 import { UpdateRCRPopUp } from "./RCR/UpdateRCR.jsx";
 import { OpenRCRPriorityVotePopUp } from "./OpenRCRPriorityVotePopUp.jsx";
 import { CommentPopUp } from "./CommentPopUp.jsx";
+import { RCROldDetail } from "./RCR/RCROldDetail.jsx";
 
 // ! Importações de códigos
 import { verifyLoggedUser } from "../../api/Auth.jsx";
@@ -129,7 +130,6 @@ const EnvironmentDetailDefinition = () => {
         );
         return;
       }
-      console.log(response.rcrs);
 
       // . Ordenando o response.rcrs por maior final_vote com a maior quantidade de definition_votes pro final_vote
       let response2 = { ...response };
@@ -228,6 +228,7 @@ const EnvironmentDetailDefinition = () => {
       final_vote: null,
       votes_position: 0,
       exclude_to_priority: false,
+      olds: [],
     },
   ]); // . Armazena os ambientes do usuário
   const [loggedUser, setLoggedUser] = useState({
@@ -249,14 +250,12 @@ const EnvironmentDetailDefinition = () => {
     let arrPosition = -1;
     for (let i = 0; i < newRCRs.length; i++) {
       if (newRCRs[i].id === rcrId) {
-        console.log("Achei ", rcrId, " na posicao ", i, " do array");
         arrPosition = i; // . Armazenando a posição da rcr no array
         newRCRs[i].exclude_to_priority = !newRCRs[i].exclude_to_priority; // . Invertendo o valor de exclusão
         break;
       }
     }
 
-    console.log(newRCRs);
     setRCRS([...newRCRs]);
   };
 
@@ -338,7 +337,6 @@ const EnvironmentDetailDefinition = () => {
       case 5:
         return `Strongly Agree`;*/
       default:
-        console.log("no", score);
         return "No score";
     }
   };
@@ -441,6 +439,22 @@ const EnvironmentDetailDefinition = () => {
   const [editRCRTitle, setEditRCRTitle] = useState(""); // . Armazena o nome da RCR posta para edicao
   const [editRCRDetails, setEditRCRDetails] = useState(""); // . Armazena os detalhes da RCR posta para edicao
 
+  const [oldRCROpen, setOldRCROpen] = useState(false);
+  const [oldRCR, setOldRCR] = useState({
+    id: null,
+    name: null,
+    details: null,
+    relatedToIssues: [],
+    mainIssue: null,
+  });
+  const [newRCR, setNewRCR] = useState({
+    id: null,
+    name: null,
+    details: null,
+    relatedToIssues: [],
+    mainIssue: null,
+  });
+
   const openEditRCR = (rcr) => {
     setEditRCR(rcr);
     setEditRCRTitle(rcr.name);
@@ -457,6 +471,15 @@ const EnvironmentDetailDefinition = () => {
     const newRcrs = rcrs;
     for (let i = 0; i < newRcrs.length; i++) {
       if (newRcrs[i].id === editRCR.id) {
+        // . Salvando os dados antigos da RCR
+        newRcrs[i].olds.push({
+          name: newRcrs[i].name,
+          details: newRcrs[i].details,
+          relatedToIssues: newRcrs[i].relatedToIssues,
+          updatedAt: new Date().toISOString(),
+        });
+
+        // . Atualizando os dados da RCR
         newRcrs[i].name = editRCRTitle;
         newRcrs[i].details = editRCRDetails;
         newRcrs[i].relatedToIssues = editRCRRelatedIssues;
@@ -469,6 +492,25 @@ const EnvironmentDetailDefinition = () => {
       `RCR #${editRCR.id} updated at browser.`,
       `If you want to register your actual state, please click on "Save Actual State"`
     );
+  };
+
+  const formatDate = (date) => {
+    try {
+      const newDate = new Date(date);
+      return newDate.toLocaleDateString() + " " + newDate.toLocaleTimeString();
+    } catch (e) {
+      return date;
+    }
+  };
+
+  const openOldRCR = (oldRCR, newRCR) => {
+    setOldRCR(oldRCR);
+    setNewRCR(newRCR);
+    setOldRCROpen(true);
+  };
+
+  const closeOldRCR = () => {
+    setOldRCROpen(false);
   };
 
   // ! Funções para manipulação do alerta
@@ -524,8 +566,6 @@ const EnvironmentDetailDefinition = () => {
         j++;
       }
     }
-
-    console.log(newRCRs);
 
     const request = await setPriorityData(
       loggedUser.userId,
@@ -830,7 +870,6 @@ const EnvironmentDetailDefinition = () => {
                         const comments = rcr.definition_votes.comments[key];
                         if (comments.length < 1) return;
 
-                        console.log(key, comments);
                         return (
                           <Box
                             key={`box-voting_details-${rcr.id}`}
@@ -910,6 +949,45 @@ const EnvironmentDetailDefinition = () => {
                           )}
                         </Box>
                       </Box>
+
+                      {rcr.olds.length > 0 ? (
+                        <Box
+                          style={{
+                            margin: "0.8em 0 0.2em 0",
+                            width: "100%",
+                            display: "flex",
+                            flexDirection: "row",
+                          }}
+                        >
+                          <strong>Old versions:</strong>
+                          <Box
+                            style={{
+                              marginRight: "0.5em",
+                              width: "90%",
+                              display: "flex",
+                              flexDirection: "row",
+                            }}
+                          >
+                            {rcr.olds.map((old) => {
+                              return (
+                                <Chip
+                                  label={`${formatDate(old.updatedAt)}`}
+                                  style={{
+                                    marginRight: "0.5em",
+                                    color: "black",
+                                    fontWeight: "bold",
+                                  }}
+                                  onClick={() => {
+                                    openOldRCR(old, rcr);
+                                  }}
+                                />
+                              );
+                            })}
+                          </Box>
+                        </Box>
+                      ) : (
+                        ""
+                      )}
                     </AccordionDetails>
                     <AccordionActions
                       style={{
@@ -953,6 +1031,13 @@ const EnvironmentDetailDefinition = () => {
           setTitle={setEditRCRTitle}
           details={editRCRDetails}
           setDetails={setEditRCRDetails}
+        />
+        <RCROldDetail
+          open={oldRCROpen}
+          close={closeOldRCR}
+          oldRCR={oldRCR}
+          newRCR={newRCR}
+          openRelatedIssue={openIssueDetailModal}
         />
         <OpenRCRPriorityVotePopUp
           open={priorityVotingPopUpOpen}
