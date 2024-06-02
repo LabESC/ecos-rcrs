@@ -108,6 +108,7 @@ const NewEnvironment = () => {
   const [miningType, setMiningType] = useState("organization");
   const [filterType, setFilterType] = useState("none");
   const [repositories, setRepositories] = useState([]);
+  const [organizationName, setOrganizationName] = useState("");
   const [orgRepositories, setOrgRepositories] = useState([]);
   const [isLoadingSearch, setIsLoadingSearch] = useState(false);
   const [hasSearchError, setHasSearchError] = useState(false);
@@ -168,6 +169,7 @@ const NewEnvironment = () => {
     if (res.length > 0) {
       setOrgRepositories(res);
       setIsLoadingSearch(false);
+      setOrganizationName(org);
     }
 
     document.getElementById("txt-organization").value = "";
@@ -226,7 +228,6 @@ const NewEnvironment = () => {
     const details = document.getElementById("txt-details").value;
     const userId = loggedUser.userId;
     const userToken = loggedUser.userToken;
-    const organization = document.getElementById("txt-organization").value;
 
     if (name === "") {
       setSearchError({ title: "Name", message: "Name is required" });
@@ -240,7 +241,7 @@ const NewEnvironment = () => {
       return;
     }
 
-    if (miningType === "organization" && organization === "") {
+    if (miningType === "organization" && organizationName === "") {
       setSearchError({
         title: "Organization",
         message: "Organization is required",
@@ -269,7 +270,6 @@ const NewEnvironment = () => {
 
     setIsLoading(true);
 
-    console.log(filterType);
     const res = await createEnvironment(
       userId,
       userToken,
@@ -278,7 +278,7 @@ const NewEnvironment = () => {
       miningType === "repos" ? repositories : orgRepositories,
       miningType,
       filterType,
-      organization,
+      organizationName,
       keywords
     );
     setIsLoading(false);

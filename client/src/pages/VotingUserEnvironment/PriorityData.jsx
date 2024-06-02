@@ -478,7 +478,7 @@ const PriorityDataPage = () => {
                       maxWidth: "3%",
                     }}
                   >
-                    {rcr.votes_position}
+                    {rcr.position}
                   </Box>
 
                   <Accordion
