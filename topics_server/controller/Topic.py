@@ -4,21 +4,10 @@ import json
 
 # Importando dependencias locais
 from service.Top2Vec import Top2VecImpl
-from service.Databases import Database
 from service.Auth import Auth as authValidator
 from service.DBRequests import DBRequests
 from schemas.Topic import TopicReposRequest
-from service.Similarity import gera_similares_de_topicos
 from service.Similarity2 import generate_topics_similarity
-
-"""from schemas.Environment import (
-    EnvironmentResponse,
-    EnvironmentRequest,
-    EnvironmentResponseFiltered,
-)
-from validations.Auth import Auth as authValidator
-from utils.Error import error"""
-
 
 router_topic = APIRouter(prefix="/api/topic", tags=["Topic"])
 
@@ -45,31 +34,6 @@ msg_user_not_active = {
 
 
 # Rotas
-
-
-@router_topic.get("/t2v/android")
-async def busca_android_top2vec():
-    # Obtendo issues de vários repositórios
-    df = Database.get_android()
-    print(df.head())
-    modelagem_topicos = await Top2VecImpl.obtem_topicos_pd(df)
-    if modelagem_topicos is False:
-        return JSONResponse(
-            content={"erro": "Não há issues suficientes para gerar o modelo"},
-            status_code=400,
-        )
-
-    # !! TESTE - Salvando JSON para visualizar
-    with open("./internal_data/modelagem_topicos_t2v.json", "w") as outfile:
-        json.dump(modelagem_topicos, outfile)
-
-    # ! Inserir o resultado no BD
-    return {
-        "comparacoes": modelagem_topicos["comparacoes"],
-        "topicos": modelagem_topicos["topicos"],
-    }
-
-
 @router_topic.post("/t2v")
 async def busca_repos_top2vec(body: TopicReposRequest, request: Request):
     # * Validando usuário e senha
@@ -115,23 +79,3 @@ async def busca_repos_top2vec(body: TopicReposRequest, request: Request):
         topic_generation,  # topic_generation["comparisons"],
         "topics_done",
     )
-
-
-"""
-@router_topic.get("/buscaPython/t2v")
-async def busca_python_top2vec():
-    # Obtendo issues de vários repositórios
-    df = python_base()
-
-    modelagem_topicos = await obtem_topicos_pd(df)
-    if modelagem_topicos is False:
-        return JSONResponse(
-            content={"erro": "Não há issues suficientes para gerar o modelo"},
-            status_code=400,
-        )
-
-    return {
-        "comparacoes": modelagem_topicos["comparacoes"],
-        "topicos": modelagem_topicos["topicos"],
-    }
-"""

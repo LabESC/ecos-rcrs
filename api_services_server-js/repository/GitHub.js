@@ -56,9 +56,7 @@ class GitHub {
   async getRepositoriesIssues(repo, page) {
     // * Fazendo requisição
     let response = await this.requests.get(
-      // ! - DEV:
       `repos/${repo}/issues?page=${page}&per_page=100?&state=open`,
-      // ! - PROD: `repos/${repo}/issues?page=${page}&per_page=100?&state=all`,
       {
         headers: this.#request_headers,
       }

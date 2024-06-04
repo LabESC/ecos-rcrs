@@ -1,7 +1,7 @@
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# Load a pre-trained SentenceTransformer model
+# Lendo um modelo pré-treinado
 model = SentenceTransformer("paraphrase-MiniLM-L6-v2")
 
 
@@ -32,19 +32,3 @@ def generate_topics_similarity(topic_array):
             topic["issues"][i] = updated_dict
 
     return topic_array
-
-
-"""# Example usage:
-array_of_dicts = [
-    {'id': 1, 'body': "text for checking similarity", 'similarity': None, 'relatedTo': []},
-    {'id': 2, 'body': "another text", 'similarity': None, 'relatedTo': []},
-    {'id': 3, 'body': "more text", 'similarity': None, 'relatedTo': []},
-    # Add more dictionaries as needed
-]
-
-
-
-# Print the result
-for d in array_of_dicts:
-    print(d)
-"""

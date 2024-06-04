@@ -29,6 +29,17 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: "pending",
       },
+      github_user: {
+        type: DataTypes.STRING(255),
+      },
+      github_access_token: {
+        type: DataTypes.STRING(255),
+      },
+      github_refresh_token: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+      },
     },
     {
       tableName: "users",
