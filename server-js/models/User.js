@@ -37,7 +37,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       github_refresh_token: {
         type: DataTypes.DATE,
-        allowNull: false,
+        //allowNull: false,
         defaultValue: DataTypes.NOW,
       },
     },
