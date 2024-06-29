@@ -83,6 +83,7 @@ async function getEnvironmentRepos(environmentId, userId, userToken) {
     });
     return req.data;
   } catch (e) {
+    console.log(e.response.data);
     return null;
   }
 }
@@ -111,13 +112,14 @@ async function updateGitHubInstallationByGitHubUser(
     );
     return true;
   } catch (e) {
+    console.log(e.response.data);
     return false;
   }
 }
 
 async function cleanGitHubInstallationByGitHubUser(githubUser) {
   // * Definindo url
-  const url = `${DB_MICROSERVICE_BASE}/user/github/installation/${github_user}`;
+  const url = `${DB_MICROSERVICE_BASE}/user/github/installation/${githubUser}`;
 
   // * Fazendo requisição
   try {

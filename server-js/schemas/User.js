@@ -48,7 +48,7 @@ const UserUpdate = Joi.object({
 
 const GitHubRequest = Joi.object({
   github_user: Joi.string().required(),
-  installation_id: Joi.string().required(),
+  installation_id: Joi.number().required(),
 });
 
 module.exports = {

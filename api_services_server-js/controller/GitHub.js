@@ -161,22 +161,25 @@ router.post("/api/github/user/auth", (req, res) => {
 // ! Rota do Webhook GitHub App
 router.post("/api/github/installation/webhook", async (req, res) => {
   const body = req.body;
+
   if (body.action === "created") {
     // . Obtendo o installation id e o login do usuario
     const { id: installationId } = body.installation;
     const { login: githubUser } = body.installation.account;
 
     // . Enviar a requisicao para o BD para salvar o ID de instalacao
-    DBRequests.updateGitHubInstallationByGitHubUser(githubUser, installationId);
+    await DBRequests.updateGitHubInstallationByGitHubUser(
+      githubUser,
+      installationId
+    );
   } else if (body.action === "deleted") {
     // . Obtendo o login do usuario
     const { login: githubUser } = body.installation.account;
 
     // . Enviar a requisicao para o BD para remover o ID de instalacao
-    DBRequests.cleanGitHubInstallationByGitHubUser(githubUser);
+    await DBRequests.cleanGitHubInstallationByGitHubUser(githubUser);
   }
 
-  console.log(req.body);
   res.status(200).json({ message: "Success" });
 });
 
