@@ -40,6 +40,17 @@ const PasswordRequest = Joi.object({
   token: Joi.string().required(),
 });
 
+const UserUpdate = Joi.object({
+  name: Joi.string(),
+  email: Joi.string().email(),
+  github_user: Joi.string(),
+});
+
+const GitHubRequest = Joi.object({
+  github_user: Joi.string().required(),
+  installation_id: Joi.string().required(),
+});
+
 module.exports = {
   UserBase,
   UserRequest,
@@ -48,4 +59,6 @@ module.exports = {
   AuthRequest,
   AuthResponse,
   PasswordRequest,
+  UserUpdate,
+  GitHubRequest,
 };

@@ -70,6 +70,11 @@ module.exports = {
       return res.status(400).json(ErrorSchema(400, "Id not provided!"));
     }
 
+    // * Checking if id is the same of the authenticated user
+    if (req.params.id !== header["user-id"]) {
+      return res.status(401).json(ErrorSchema("Auth", "Unauthorized!"));
+    }
+
     // * Getting user by id
     const user = await UserService.getById(req.params.id);
 
@@ -234,7 +239,7 @@ module.exports = {
     }
 
     // * Validating body schema
-    const { error, value } = UserSchemas.UserRequest.validate(req.body);
+    const { error, value } = UserSchemas.UserUpdate.validate(req.body);
 
     if (error) {
       return res.status(400).json(ErrorSchema(400, error.details[0].message));
@@ -348,6 +353,181 @@ module.exports = {
       case false:
         return res.status(401).json(ErrorSchema("token", "Token invalid"));
       case null:
+        return res.status(404).json(ErrorSchema("user", "User not found"));
+      default:
+        return res.status(200).json(user);
+    }
+  },
+
+  /**
+   * Updates the GitHub user and installation ID.
+   *
+   * @param {Object} req - The request object.
+   * @param {Object} res - The response object.
+   * @returns {Object|{code, error}} The response object with the appropriate status and data.
+   */
+  async updateGitHubUserAndInstallationId(req, res) {
+    // * Check if id was provided
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(422).json(ErrorSchema(422, "Id not provided!"));
+    }
+
+    // * Validating body schema
+    const { error, value } = UserSchemas.GitHubRequest.validate(req.body);
+
+    if (error) {
+      return res.status(400).json(ErrorSchema(400, error.details[0].message));
+    }
+
+    // * Updating GitHub user and installation ID
+    const { github_user, installation_id } = req.body;
+    const user = await UserService.updateGitHubUserAndInstallationId(
+      id,
+      github_user,
+      installation_id
+    );
+
+    switch (user) {
+      case -1:
+        return res.status(500).json(ErrorSchema(500, msg_500));
+      case false:
+        return res.status(404).json(ErrorSchema("user", "User not found"));
+      default:
+        return res.status(200).json(user);
+    }
+  },
+
+  /**
+   * Retrieves the GitHub user and installation ID.
+   * @param {uuidv4} id - The ID of the user.
+   * @returns {Object|-1} - Returns an object containing the GitHub user and installation ID if the user was found, or -1 if occurred a server error.
+   */
+
+  async getGitHubUserAndInstallationId(req, res) {
+    // * Check if id was provided
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(422).json(ErrorSchema(422, "Id not provided!"));
+    }
+
+    // * Getting GitHub user and installation ID
+    const user = await UserService.getGitHubUserAndInstallationId(id);
+
+    switch (user) {
+      case -1:
+        return res.status(500).json(ErrorSchema(500, msg_500));
+      default:
+        return res.status(200).json(user);
+    }
+  },
+
+  /**
+   * Retrieves the user by their GitHub user.
+   *
+   * @param {Object} req - The request object.
+   * @param {Object} res - The response object.
+   * @returns {Object|{code, error}} The user object or an error response.
+   */
+
+  async getByGitHubUser(req, res) {
+    // * Check if GitHub user was provided
+    const { github_user } = req.params;
+
+    if (!github_user) {
+      return res
+        .status(422)
+        .json(ErrorSchema(422, "GitHub user not provided!"));
+    }
+
+    // * Getting user by GitHub user
+    const user = await UserService.getByGitHubUser(github_user);
+
+    switch (user) {
+      case -1:
+        return res.status(500).json(ErrorSchema(500, msg_500));
+      case null:
+        return res.status(404).json(ErrorSchema("user", "User not found"));
+      default:
+        return res.status(200).json(user);
+    }
+  },
+
+  /**
+   * Updates the GitHub installation by GitHub user.
+   *
+   * @param {Object} req - The request object.
+   * @param {Object} res - The response object.
+   * @returns {Object|{code, error}} The response object with the appropriate status and data.
+   */
+  async updateGitHubInstallationByGitHubUser(req, res) {
+    // * Validating service auth
+    const header = req.headers;
+    const auth = await AuthValidator.validateService(header);
+
+    if (!auth) {
+      return res.status(401).json(ErrorSchema("Auth", "Unauthorized!"));
+    }
+
+    // * Validating body schema
+    const { error, value } = UserSchemas.GitHubRequest.validate(req.body);
+
+    if (error) {
+      return res.status(400).json(ErrorSchema(400, error.details[0].message));
+    }
+
+    // * Updating GitHub installation by GitHub user
+    const { github_user, installation_id } = req.body;
+    const user = await UserService.updateGitHubInstallationByGitHubUser(
+      github_user,
+      installation_id
+    );
+
+    switch (user) {
+      case -1:
+        return res.status(500).json(ErrorSchema(500, msg_500));
+      case false:
+        return res.status(404).json(ErrorSchema("user", "User not found"));
+      default:
+        return res.status(200).json(user);
+    }
+  },
+
+  /**
+   * Cleans GitHub Installation by GitHub User.
+   * @param {Object} req - The request object.
+   * @param {Object} res - The response object.
+   * @returns {Object|{code, error}} The response object with the appropriate status and data.
+   */
+  async cleanGitHubInstallationByGitHubUser(req, res) {
+    // * Validating service auth
+    const header = req.headers;
+    const auth = await AuthValidator.validateService(header);
+
+    if (!auth) {
+      return res.status(401).json(ErrorSchema("Auth", "Unauthorized!"));
+    }
+
+    // * Check if GitHub user was provided
+    const { github_user } = req.params;
+
+    if (!github_user) {
+      return res
+        .status(422)
+        .json(ErrorSchema(422, "GitHub user not provided!"));
+    }
+
+    // * Cleaning GitHub installation by GitHub user
+    const user = await UserService.cleanGitHubInstallationByGitHubUser(
+      github_user
+    );
+
+    switch (user) {
+      case -1:
+        return res.status(500).json(ErrorSchema(500, msg_500));
+      case false:
         return res.status(404).json(ErrorSchema("user", "User not found"));
       default:
         return res.status(200).json(user);

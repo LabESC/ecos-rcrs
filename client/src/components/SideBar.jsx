@@ -2,7 +2,14 @@
 import React, { useState, useEffect } from "react";
 
 // ! Componentes MUI + Estilização
-import { Drawer, Button, Container, Box, Typography } from "@mui/material";
+import {
+  Drawer,
+  Button,
+  Container,
+  Box,
+  Typography,
+  Link,
+} from "@mui/material";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import MenuIcon from "@mui/icons-material/Menu";
 import { ThemeProvider } from "@mui/material/styles";
@@ -111,7 +118,16 @@ const Sidebar = (props) => {
             </Button>
           </Box>
 
-          <Typography
+          <Link
+            href="/my-data"
+            underline="hover"
+            className="ForgotYourPassword"
+            sx={{ color: "#000 !important" }}
+          >
+            {localStorage.getItem("SECO_24_user-name")}
+          </Link>
+
+          {/*<Typography
             sx={{
               fontSize: "0.8em",
               marginTop: "-10em",
@@ -120,7 +136,7 @@ const Sidebar = (props) => {
             }}
           >
             {localStorage.getItem("SECO_24_user-name")}
-          </Typography>
+          </Typography>*/}
 
           <Box
             style={{

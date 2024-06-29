@@ -80,8 +80,10 @@ export const getUsers = async () => {
   return result;
 };
 
-export const getUserById = async (id) => {
-  const result = await Axios.get(`${baseUrl}/user/${id}`)
+export const getUserById = async (id, token) => {
+  const result = await Axios.get(`${baseUrl}/user/${id}`, {
+    headers: { "user-id": id, "user-token": token },
+  })
     .then((res) => {
       return res.data;
     })
@@ -158,6 +160,32 @@ export const updatePassword = async (email, password, token) => {
   })
     .then((res) => {
       return res.status;
+    })
+    .catch((err) => {
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+
+  return result;
+};
+
+export const updateUser = async (userId, token, name, email, githubUser) => {
+  const result = await Axios.put(
+    `${baseUrl}/user/${userId}`,
+    {
+      name: name,
+      email: email,
+      github_user: githubUser,
+    },
+    {
+      headers: { "user-id": userId, "user-token": token },
+    }
+  )
+    .then((res) => {
+      return res.data;
     })
     .catch((err) => {
       try {

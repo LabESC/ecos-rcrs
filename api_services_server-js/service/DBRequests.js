@@ -87,9 +87,56 @@ async function getEnvironmentRepos(environmentId, userId, userToken) {
   }
 }
 
+async function updateGitHubInstallationByGitHubUser(
+  githubUser,
+  installationId
+) {
+  // * Definindo url
+  const url = `${DB_MICROSERVICE_BASE}/user/github/installation`;
+
+  // * Fazendo requisição
+  try {
+    const req = await axios.post(
+      url,
+      {
+        github_user: githubUser,
+        installation_id: installationId,
+      },
+      {
+        headers: {
+          "service-login": USER_LOGIN,
+          "service-pwd": USER_PWD,
+        },
+      }
+    );
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+async function cleanGitHubInstallationByGitHubUser(githubUser) {
+  // * Definindo url
+  const url = `${DB_MICROSERVICE_BASE}/user/github/installation/${github_user}`;
+
+  // * Fazendo requisição
+  try {
+    await axios.delete(url, {
+      headers: {
+        "service-login": USER_LOGIN,
+        "service-pwd": USER_PWD,
+      },
+    });
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
 module.exports = {
   updateEnvironmentStatus,
   updateEnvironmentMiningData,
   getEnvironmentMiningData,
   getEnvironmentRepos,
+  updateGitHubInstallationByGitHubUser,
+  cleanGitHubInstallationByGitHubUser,
 };

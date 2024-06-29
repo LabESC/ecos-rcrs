@@ -31,14 +31,10 @@ module.exports = (sequelize, DataTypes) => {
       },
       github_user: {
         type: DataTypes.STRING(255),
+        unique: true,
       },
-      github_access_token: {
+      github_installation_id: {
         type: DataTypes.STRING(255),
-      },
-      github_refresh_token: {
-        type: DataTypes.DATE,
-        //allowNull: false,
-        defaultValue: DataTypes.NOW,
       },
     },
     {

@@ -17,3 +17,4 @@ app.use(require("./controller/DB.js"));
 app.use(require("./controller/Keywords.js"));
 
 module.exports = app;
+//export default app;

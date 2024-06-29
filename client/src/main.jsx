@@ -9,6 +9,7 @@ import "./index.css";
 import Login from "./pages/Auth/Login.jsx";
 import SignUp from "./pages/Auth/SignUp.jsx";
 import ForgotPassword from "./pages/Auth/ForgotPassword.jsx";
+import MyPersonalData from "./pages/Auth/MyPersonalData.jsx";
 
 // . Environments
 import MyEnvironment from "./pages/Environments/My.jsx";
@@ -38,6 +39,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <Route path="/" element={<Login />}></Route>
         <Route path="/register" element={<SignUp />}></Route>
         <Route path="/forgot-password" element={<ForgotPassword />}></Route>
+        <Route path="/my-data" element={<MyPersonalData />}></Route>
         <Route path="/my-environments" element={<MyEnvironment />}></Route>
         <Route path="/environment/:id" element={<EnvironmentDetail />}></Route>
         <Route
