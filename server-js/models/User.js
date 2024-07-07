@@ -33,9 +33,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(255),
         unique: true,
       },
-      github_installation_id: {
-        type: DataTypes.STRING(255),
-      },
     },
     {
       tableName: "users",

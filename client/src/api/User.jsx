@@ -197,3 +197,48 @@ export const updateUser = async (userId, token, name, email, githubUser) => {
 
   return result;
 };
+
+export const updateGitHubInstallationByGitHubUser = async (
+  userId,
+  token,
+  githubUser,
+  installationId
+) => {
+  const result = await Axios.post(
+    `${baseUrl}/user/github/installation`,
+    { github_user: githubUser, installation_id: installationId },
+    {
+      headers: { "user-id": userId, "user-token": token },
+    }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+
+  return result;
+};
+
+export const getGitHubUserAndInstallationId = async (userId, token) => {
+  const result = await Axios.get(`${baseUrl}/user/${userId}/github`, {
+    headers: { "user-id": userId, "user-token": token },
+  })
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+
+  return result;
+};

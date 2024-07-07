@@ -200,6 +200,8 @@ export const GitHubButton = (props) => {
     action,
     marginLeft,
     marginRight,
+    marginTop,
+    marginBottom,
     visibility,
   } = props;
 
@@ -221,6 +223,8 @@ export const GitHubButton = (props) => {
         textTransform: uppercase ? "uppercase" : "none",
         marginLeft: marginLeft ? marginLeft : "auto",
         marginRight: marginRight ? marginRight : "auto",
+        marginTop: marginTop ? marginTop : "0",
+        marginBottom: marginBottom ? marginBottom : "0",
         visibility: visibility ? visibility : "visible",
         transition: "0.2s",
         "&:hover": {

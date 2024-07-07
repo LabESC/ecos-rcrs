@@ -38,10 +38,32 @@ router.post("/api/github/mining/repos", async (req, res) => {
   }
 
   // * Obtendo repos e environment_id
-  const { repos, environment_id, filter_type, keywords } = body;
+  const { environment_id, filter_type, keywords, user_id } = body;
+  let repos = body.repos;
+
+  // * Se não houver repositórios, retorne erro
+  if (repos.length === 0) {
+    return res.status(400).json({ error: "Invalid repositories." });
+  }
+
+  // . Ordenando repositorios
+  repos = repos.sort();
+
+  // * Se o userId for recebido, obter os installation id para o usuario gerar o access token
+  // . Obtendo installation id para o usuario/organizacao para o usuario no BD
+  let installationIds = null;
+  if (user_id) {
+    installationIds = await DBRequests.getInstallationsIdByUserId(user_id);
+  }
 
   // * Adicionando requisição na fila
-  await gitHubRequest.addQueue(repos, environment_id, filter_type, keywords);
+  await gitHubRequest.addQueue(
+    repos,
+    environment_id,
+    filter_type,
+    keywords,
+    installationIds
+  );
 
   return res.status(200).json({ message: "Mining request received." });
 });
@@ -52,18 +74,40 @@ router.get("/api/github/organization/:org/repos", async (req, res) => {
   console.log(`${req.method} ${req.url} - ${new Date().toLocaleString()}`);
 
   // * Obtendo dados da requisição
-  const { params } = req;
+  const { params, headers } = req;
 
   // * Obtendo organização
-  let org = null;
+  let organization = null;
   try {
-    org = params.org;
+    organization = params.org;
   } catch (e) {
     return res.status(400).json({ error: "Invalid organization." });
   }
 
+  // * Se o userId for recebido, obter os installation id para o usuario gerar o access token
+  // . Obtendo installation id para o usuario/organizacao para o usuario no BD
+  let installationId = null;
+  if (headers["ecos-user-id"]) {
+    installationId =
+      await DBRequests.getInstallationIdByUserIdAndGitHubUserOrOrganization(
+        headers["ecos-user-id"],
+        organization
+      );
+  }
+
+  // * Gerando access token para o installationId, se este for obtido
+  let accessToken = null;
+  if (installationId) {
+    accessToken = await gitHubRequest.generateAccessTokenForInstallationID(
+      installationId
+    );
+  }
+
   // * Obtendo repositórios da organização
-  const repos = await gitHubRequest.searchOrganizationRepos(org);
+  const repos = await gitHubRequest.searchOrganizationRepos(
+    organization,
+    accessToken
+  );
 
   // * Se não houver repositórios, retorne erro
   if (repos === null) {
@@ -88,7 +132,7 @@ router.get("/api/github/repo/:organization/:repo/exists", async (req, res) => {
   console.log(`${req.method} ${req.url} - ${new Date().toLocaleString()}`);
 
   // * Obtendo dados da requisição
-  const { params } = req;
+  const { params, headers } = req;
 
   // * Obtendo repositório
   let organization = null;
@@ -100,8 +144,30 @@ router.get("/api/github/repo/:organization/:repo/exists", async (req, res) => {
     return res.status(400).json({ error: "Invalid repository." });
   }
 
+  // * Se o userId for recebido, obter os installation id para o usuario gerar o access token
+  // . Obtendo installation id para o usuario/organizacao para o usuario no BD
+  let installationId = null;
+  if (headers["ecos-user-id"]) {
+    installationId =
+      await DBRequests.getInstallationIdByUserIdAndGitHubUserOrOrganization(
+        headers["ecos-user-id"],
+        organization
+      );
+  }
+
+  // * Gerando access token para o installationId, se este for obtido
+  let accessToken = null;
+  if (installationId) {
+    accessToken = await gitHubRequest.generateAccessTokenForInstallationID(
+      installationId
+    );
+  }
+
   // * Verificando se o repositório existe
-  const exists = await gitHubRequest.doesRepoExist(organization + "/" + repo);
+  const exists = await gitHubRequest.doesRepoExist(
+    organization + "/" + repo,
+    accessToken
+  );
 
   // * Se ocorrer um erro não identificado, retorne erro
   try {
@@ -110,52 +176,8 @@ router.get("/api/github/repo/:organization/:repo/exists", async (req, res) => {
     }
   } catch (e) {}
 
-  // * Se for falso, retorne erro
-  if (!exists) {
-    return res.status(200).json(false);
-  }
-
-  return res.status(200).json(true);
-});
-
-// ! Rota de autenticacao do GitHub
-router.post("/api/github/user/auth", (req, res) => {
-  // . Obtendo o token JWT
-  const token = require("./service/Octikit");
-
-  if (req.body.github_user) {
-    /*
-    axios({
-      method: "get",
-      url: `https://api.github.com/users/${req.body.github_user}/installation`,
-      //url: `https://api.github.com/user/repos?per_page=100`,
-      // Set the content type header, so that we get the response in JSON
-      headers: {
-        accept: "application/json",
-        Authorization: "Bearer " + token,
-      },
-    })
-      .then(async (response) => {
-        console.log(response.data);
-        res.json(response.data);
-      })
-      .catch(async (error) => {
-        if (error.response.status !== 404) {
-          res
-            .status(500)
-            .json(
-              "An error occurred while trying to get the installation. Please try again later."
-            );
-        }
-      });*/
-
-    res.redirect(
-      `https://github.com/apps/seco-rcr/installations/select_target`
-      //`https://github.com/login/oauth/authorize?client_id=${clientID}`
-    );
-  }
-
-  res.status(422).json("The github_user was not provided.");
+  // * Senão, retorne se o repositório existe
+  return res.status(200).json(exists);
 });
 
 // ! Rota do Webhook GitHub App
@@ -163,21 +185,27 @@ router.post("/api/github/installation/webhook", async (req, res) => {
   const body = req.body;
 
   if (body.action === "created") {
-    // . Obtendo o installation id e o login do usuario
+    // . Obtendo o installation id e o login do usuario/organizacao e o aprovador
     const { id: installationId } = body.installation;
-    const { login: githubUser } = body.installation.account;
+    const { login: githubUserOrOrganization } = body.installation.account;
+    const { login: githubUser } = body.sender;
 
     // . Enviar a requisicao para o BD para salvar o ID de instalacao
     await DBRequests.updateGitHubInstallationByGitHubUser(
       githubUser,
+      githubUserOrOrganization,
       installationId
     );
   } else if (body.action === "deleted") {
-    // . Obtendo o login do usuario
-    const { login: githubUser } = body.installation.account;
+    // . Obtendo o installation Id e o login do usuario/organizacao
+    const { id: installationId } = body.installation;
+    const { login: githubUserOrOrganization } = body.installation.account;
 
     // . Enviar a requisicao para o BD para remover o ID de instalacao
-    await DBRequests.cleanGitHubInstallationByGitHubUser(githubUser);
+    await DBRequests.cleanGitHubInstallationByGitHubUser(
+      githubUserOrOrganization,
+      installationId.toString()
+    );
   }
 
   res.status(200).json({ message: "Success" });

@@ -20,12 +20,16 @@ router.put("/:email/update-password", UserController.updatePassword);
 // ! GitHub - 29/06/24
 router.post(
   "/github/installation",
-  UserController.updateGitHubInstallationByGitHubUser
+  UserController.setGitHubInstallationByGitHubUser
 );
 router.delete(
-  "/github/installation/:github_user",
+  "/github/installation",
   UserController.cleanGitHubInstallationByGitHubUser
 );
-//router.get("/github/user/auth-callback", UserController.githubAuthCallback);
+router.get("/:id/github/installations", UserController.getGitHubInstallations);
+router.get(
+  "/:id/github/:githubUserOrOrg",
+  UserController.getInstallationIdByUserIdAndGitHubUserOrOrganization
+);
 
 module.exports = router;

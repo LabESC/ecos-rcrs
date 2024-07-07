@@ -1,7 +1,7 @@
 const GitHubRepository = require("../repository/GitHub");
 const { formatReposToStringArray, hasNextLinkString } = require("./Words");
 
-async function getOrganizationRepos(organization) {
+async function getOrganizationRepos(organization, accessToken = null) {
   // * Instanciando json de issues
   let repos = [];
   const errors = [];
@@ -20,7 +20,8 @@ async function getOrganizationRepos(organization) {
     // * Buscando issues
     const response = await gitHubRepository.getOrganizationRepos(
       organization,
-      page
+      page,
+      accessToken
     );
 
     // * Se ocorrer erro, salve o erro e prossiga pro próximo repositório
@@ -34,7 +35,7 @@ async function getOrganizationRepos(organization) {
       break;
     }
 
-    // * Se houver issues, filtra-las
+    // * Se houver repositorios, filtra-los
     reposResponse = formatReposToStringArray(response.data);
 
     // * Se após a filtragem, não houver repositorios, retornar

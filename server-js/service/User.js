@@ -340,22 +340,35 @@ class User {
   }
 
   /**
-   * Updates the InstallationID and GitHubUser.
+   * Retrieves the GitHub user and installation ID.
    * @param {uuidv4} id - The ID of the user.
-   * @param {string} githubUser - The GitHub user.
-   * @param {string} installationId - The GitHub installation ID.
-   * @returns {boolean|-1} - Returns true if the update was successful, false if the user was not found, or -1 if occurred a server error.
+   * @returns {Object|-1} - Returns an object containing the GitHub user and installation ID if the user was found, or -1 if occurred a server error.
    */
-  static async updateGitHubUserAndInstallationId(
+
+  static async getGitHubInstallations(id) {
+    try {
+      return await UserRepository.getGitHubInstallations(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+  }
+
+  /**
+   * Retrieves Installation ID by UserId and GitHubUserOrOrganization.
+   * @param {uuidv4} id - The ID of the user.
+   * @param {String} github_user_or_organization - The name of the user or organization.
+   * @returns {Object} - Returns the  Installation ID.
+   */
+
+  static async getInstallationIdByUserIdAndGitHubUserOrOrganization(
     id,
-    githubUser,
-    installationId
+    github_user_or_organization
   ) {
     try {
-      return await UserRepository.updateGitHubUserAndInstallationId(
+      return await UserRepository.getInstallationIdByUserIdAndGitHubUserOrOrganization(
         id,
-        githubUser,
-        installationId
+        github_user_or_organization
       );
     } catch (e) {
       console.log(e);
@@ -364,14 +377,47 @@ class User {
   }
 
   /**
-   * Retrieves the GitHub user and installation ID.
-   * @param {uuidv4} id - The ID of the user.
-   * @returns {Object|-1} - Returns an object containing the GitHub user and installation ID if the user was found, or -1 if occurred a server error.
+   * Updates GitHub Installation by GitHub User.
+   * @param {string} github_user - The GitHub User.
+   * @param {string} installation_id - The GitHub Installation ID.
+   * @returns {boolean|-1} - Returns true if the update was successful, false if the user was not found, or -1 if occurred a server error.
    */
-
-  static async getGitHubUserAndInstallationId(id) {
+  static async setGitHubInstallationByGitHubUser(
+    github_user,
+    github_userOrOrganization,
+    installation_id
+  ) {
     try {
-      return await UserRepository.getGitHubUserAndInstallationId(id);
+      const user = await UserRepository.getByGitHubUser(github_user);
+      if (!user) {
+        return false;
+      }
+
+      return await UserRepository.setGitHubUserAndInstallationId(
+        user.id,
+        github_userOrOrganization,
+        installation_id
+      );
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+  }
+
+  /**
+   * Cleans GitHub Installation by GitHub User.
+   * @param {string} github_user_or_organization - The GitHub User.
+   * @returns {boolean|-1} - Returns true if the clean was successful, false if the user was not found
+   */
+  static async cleanGitHubInstallationByGitHubUser(
+    github_user_or_organization,
+    installation_id
+  ) {
+    try {
+      return await UserRepository.cleanGitHubInstallationByGitHubUser(
+        github_user_or_organization,
+        installation_id
+      );
     } catch (e) {
       console.log(e);
       return -1;
@@ -386,43 +432,6 @@ class User {
   static async getByGitHubUser(github_user) {
     try {
       return await UserRepository.getByGitHubUser(github_user);
-    } catch (e) {
-      console.log(e);
-      return -1;
-    }
-  }
-
-  /**
-   * Updates GitHub Installation by GitHub User.
-   * @param {string} github_user - The GitHub User.
-   * @param {string} installation_id - The GitHub Installation ID.
-   * @returns {boolean|-1} - Returns true if the update was successful, false if the user was not found, or -1 if occurred a server error.
-   */
-  static async updateGitHubInstallationByGitHubUser(
-    github_user,
-    installation_id
-  ) {
-    try {
-      return await UserRepository.updateGitHubInstallationByGitHubUser(
-        github_user,
-        installation_id
-      );
-    } catch (e) {
-      console.log(e);
-      return -1;
-    }
-  }
-
-  /**
-   * Cleans GitHub Installation by GitHub User.
-   * @param {string} github_user - The GitHub User.
-   * @returns {boolean|-1} - Returns true if the clean was successful, false if the user was not found
-   */
-  static async cleanGitHubInstallationByGitHubUser(github_user) {
-    try {
-      return await UserRepository.cleanGitHubInstallationByGitHubUser(
-        github_user
-      );
     } catch (e) {
       console.log(e);
       return -1;

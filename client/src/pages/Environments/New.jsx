@@ -38,6 +38,7 @@ import {
   getOrganizationRepos,
   getRCRKeywords,
 } from "../../api/GitHub.jsx";
+import { getGitHubUserAndInstallationId } from "../../api/User.jsx";
 
 const NewEnvironment = () => {
   // ! Instanciando o useNavigate para redirecionar o usuário pra alguma página
@@ -58,7 +59,14 @@ const NewEnvironment = () => {
 
       setRCRKeywords(res);
     };
-
+    /*
+    const getGitHubData = async (userId, token) => {
+      const res = await getGitHubUserAndInstallationId(userId, token);
+      if (res.error) return;
+      console.log(res);
+      setGithubUserData(res);
+    };
+*/
     // . Verificando se o usuário está logado e obtendo seus dados
     const checkUser = async () => {
       const verifyUser = await verifyLoggedUser();
@@ -69,6 +77,7 @@ const NewEnvironment = () => {
         return;
       }
       setLoggedUser(verifyUser);
+      //await getGitHubData(verifyUser.userId, verifyUser.userToken);
       await getKeywords();
       setIsLoading(false);
     };
@@ -127,7 +136,7 @@ const NewEnvironment = () => {
     if (org === "") return;
 
     setIsLoadingSearch(true);
-    const res = await getOrganizationRepos(org);
+    const res = await getOrganizationRepos(org, loggedUser.userId);
 
     if (res === false) {
       setSearchError({
@@ -190,7 +199,7 @@ const NewEnvironment = () => {
     }
 
     setIsLoadingSearch(true);
-    const res = await doesRepoExist(repo);
+    const res = await doesRepoExist(repo, loggedUser.userId);
     if (res.error) {
       setSearchError({ title: res.error.code, message: res.error.message });
       setHasSearchError(true);

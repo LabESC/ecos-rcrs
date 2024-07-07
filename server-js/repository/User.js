@@ -1,5 +1,7 @@
 const { v4: uuidv4 } = require("uuid");
+const sequelize = require("../database/db").sequelize;
 const UserModel = require("../database/db").User;
+const GitHubInstallations = require("../database/db").GitHubInstallations;
 const UserValidation = require("../validations/User");
 
 const basicFields = ["id", "name", "email", "status", "github_user"];
@@ -38,11 +40,31 @@ class UserRepository {
    * @returns {UserModel} A promise that resolves to the user object.
    */
   static async getById(id) {
-    return await UserModel.findOne({
+    const user = await UserModel.findOne({
       attributes: basicFields,
       where: { id: id },
       raw: true,
     });
+
+    if (user === null) {
+      return user;
+    }
+
+    const installations = await GitHubInstallations.findAll({
+      attributes: [
+        "github_user",
+        [
+          sequelize.literal(`to_char("createdAt", 'DD/MM/YYYY'::text)`),
+          "dtVinculacao",
+        ],
+      ],
+      where: { user_id: id },
+      raw: true,
+    });
+
+    user.installations = installations;
+
+    return user;
   }
 
   /**
@@ -247,23 +269,18 @@ class UserRepository {
    * @param {uuidv4} id - The ID of the user.
    * @returns {boolean} - Returns true if update, false if not found.
    */
-  static async updateGitHubUserAndInstallationId(
+  static async setGitHubUserAndInstallationId(
     id,
     github_user,
     installation_id
   ) {
-    const user = await UserModel.findByPk(id);
+    const installation = await GitHubInstallations.create({
+      github_user: github_user,
+      github_installation_id: installation_id,
+      user_id: id,
+    });
 
-    if (user === null) {
-      return false;
-    }
-
-    user.github_user = github_user;
-    user.github_installation_id = installation_id;
-
-    await user.save();
-
-    return true;
+    return installation;
   }
 
   /**
@@ -271,17 +288,31 @@ class UserRepository {
    * @param {uuidv4} id - The ID of the user.
    * @returns {Object} - Returns the GitHub User and Installation ID.
    */
-  static async getGitHubUserAndInstallationId(id) {
-    const user = await UserModel.findByPk(id);
+  static async getGitHubInstallations(id) {
+    const installation = await GitHubInstallations.findAll({
+      attributes: ["github_user", "github_installation_id"],
+      where: { user_id: id },
+    });
 
-    if (user === null) {
-      return false;
-    }
+    return installation;
+  }
 
-    return {
-      github_user: user.github_user,
-      github_installation_id: user.github_installation_id,
-    };
+  /**
+   * Get Installation ID by UserId and GitHubUserOrOrganization.
+   * @param {uuidv4} id - The ID of the user.
+   * @param {String} github_user_or_organization - The name of the user or organization.
+   * @returns {Object} - Returns the  Installation ID.
+   */
+  static async getInstallationIdByUserIdAndGitHubUserOrOrganization(
+    id,
+    github_user_or_organization
+  ) {
+    const installation = await GitHubInstallations.findOne({
+      attributes: ["github_installation_id"],
+      where: { user_id: id, github_user: github_user_or_organization },
+    });
+
+    return installation;
   }
 
   /**
@@ -323,18 +354,22 @@ class UserRepository {
    * @param {string} github_user - The GitHub User.
    * @returns {boolean|-1} - Returns true if the clean was successful, false if the user was not found
    */
-  static async cleanGitHubInstallationByGitHubUser(github_user) {
-    const user = await UserModel.findOne({
-      where: { github_user: github_user },
+  static async cleanGitHubInstallationByGitHubUser(
+    github_user,
+    installation_id
+  ) {
+    const installation = await GitHubInstallations.findOne({
+      where: {
+        github_user: github_user,
+        github_installation_id: installation_id,
+      },
     });
 
-    if (user === null) {
+    if (installation === null) {
       return false;
     }
 
-    user.github_installation_id = null;
-
-    await user.save();
+    await installation.destroy();
 
     return true;
   }

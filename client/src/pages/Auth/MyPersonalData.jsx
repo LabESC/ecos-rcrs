@@ -7,7 +7,7 @@ import {
   AlertTitle,
   IconButton,
   Typography,
-  Tooltip,
+  Chip,
   TextField,
 } from "@mui/material";
 import { useState, useEffect } from "react";
@@ -31,7 +31,11 @@ import {
   forceEndVote,
 } from "../../api/Environments.jsx";
 
-import { getUserById, updateUser } from "../../api/User.jsx";
+import {
+  getUserById,
+  updateUser,
+  updateGitHubInstallationByGitHubUser,
+} from "../../api/User.jsx";
 
 const MyPersonalData = () => {
   // ! Instanciando o useNavigate para redirecionar o usuário pra alguma página
@@ -48,6 +52,7 @@ const MyPersonalData = () => {
       // . Obtendo os ambientes do usuário
       const response = await getUserById(userId, userToken);
 
+      console.log(response);
       // . Verificando se ocorreu algum erro
       if (response.error) {
         setIsLoading(false);
@@ -59,14 +64,55 @@ const MyPersonalData = () => {
         return;
       }
 
+      /* // . Atualizando o id do GitHub, se for recebido
+      await updateInstallationGitHub(userId, userToken, response.github_user);
+*/
       // . Armazenando os dados do usuario
       setMyData(response);
+      if (response.installations) setInstallations(response.installations); // . Armazenando as instalações do usuário
       setName(response.name);
       setEmail(response.email);
       setGithubUser(response.github_user ? response.github_user : "");
       setIsLoading(false);
     };
+    /*
+    // . Função para atualizar installationId do Github se for recebido na url
+    const updateInstallationGitHub = async (userId, userToken, githubUser) => {
+      // ! Recebe o link atual
+      const location = window.location.href;
 
+      // ! Transformando localização em url e buscando parametros;
+      let url = new URL(location);
+      let params = new URLSearchParams(url.search);
+
+      // * Printa o params
+      console.log(params.get("installation_id"));
+
+      // ! Tem o parâmetro acesso? Se sim, defina a variável de acesso negado como verdadeira
+      if (params.has("installation_id")) {
+        const installationId = params.get("installation_id");
+        // . Obtendo os ambientes do usuário
+        const response = await updateGitHubInstallationByGitHubUser(
+          userId,
+          userToken,
+          githubUser,
+          installationId
+        );
+
+        console.log(response);
+        // . Verificando se ocorreu algum erro
+        if (response.error) {
+          setIsLoading(false);
+          activeErrorDialog(
+            `${response.error.code}: Registering GitHub App Installation ID`,
+            response.error.message,
+            response.status
+          );
+          return;
+        }
+      }
+    };
+*/
     // . Verificando se o usuário está logado e obtendo seus dados
     const checkUser = async () => {
       const verifyUser = await verifyLoggedUser();
@@ -118,6 +164,7 @@ const MyPersonalData = () => {
   // ! Funções para manipulação de dados na página
   const [loggedUser, setLoggedUser] = useState({ userId: "", userToken: "" });
   const [myData, setMyData] = useState([]); // . Armazena os dados do usuário
+  const [installations, setInstallations] = useState([]); // . Armazena as instalações do usuário
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [githubUser, setGithubUser] = useState("");
@@ -230,18 +277,47 @@ const MyPersonalData = () => {
             <TextField
               id="txt-name"
               variant="outlined"
-              style={{ width: "52%", marginRight: "1em" }}
+              //style={{ width: "52%", marginRight: "1em" }}
               placeholder="Insert your GitHub user"
               value={githubUser}
               onChange={(e) => setGithubUser(e.target.value)}
             />
+          </Box>
+          <Box
+            className="ButtonArea"
+            sx={{
+              alignItems: "center !important",
+              display: installations.length > 0 ? "flex" : "none !important",
+            }}
+          >
+            <Typography className="TextFieldLabel">
+              {"Installations: (Org/user - Created date)"}
+            </Typography>
             <GitHubButton
               visibility={myData.github_user ? "visible" : "hidden"}
+              marginTop="0.5em"
+              marginBottom="0.5em"
               action={openGitHubAuth}
-              message="Sign In with Your GitHub Account"
+              message="Vinculate a GitHub Account or Organization to mine private repositories data"
               marginLeft="0"
               marginRight="0"
             />
+            {installations.map((installation) => (
+              <Chip
+                key={"INT_CHIP_" + installation.github_user}
+                label={
+                  installation.github_user + " - " + installation.dtVinculacao
+                }
+                sx={{
+                  justifyContent: "left",
+                  paddingBottom: "0.2em",
+                  margin: "0.2em",
+                  "&:hover": {
+                    backgroundColor: "rgba(0, 0, 0, 0.2)",
+                  },
+                }}
+              />
+            ))}
           </Box>
         </Box>
         <SuccessButton

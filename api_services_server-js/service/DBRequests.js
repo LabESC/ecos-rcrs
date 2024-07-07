@@ -90,6 +90,7 @@ async function getEnvironmentRepos(environmentId, userId, userToken) {
 
 async function updateGitHubInstallationByGitHubUser(
   githubUser,
+  githubUserOrOrganization,
   installationId
 ) {
   // * Definindo url
@@ -97,10 +98,11 @@ async function updateGitHubInstallationByGitHubUser(
 
   // * Fazendo requisição
   try {
-    const req = await axios.post(
+    await axios.post(
       url,
       {
         github_user: githubUser,
+        github_user_or_organization: githubUserOrOrganization,
         installation_id: installationId,
       },
       {
@@ -117,9 +119,12 @@ async function updateGitHubInstallationByGitHubUser(
   }
 }
 
-async function cleanGitHubInstallationByGitHubUser(githubUser) {
+async function cleanGitHubInstallationByGitHubUser(
+  githubUserOrOrganization,
+  installationId
+) {
   // * Definindo url
-  const url = `${DB_MICROSERVICE_BASE}/user/github/installation/${githubUser}`;
+  const url = `${DB_MICROSERVICE_BASE}/user/github/installation`;
 
   // * Fazendo requisição
   try {
@@ -128,12 +133,66 @@ async function cleanGitHubInstallationByGitHubUser(githubUser) {
         "service-login": USER_LOGIN,
         "service-pwd": USER_PWD,
       },
+      data: {
+        github_user_or_organization: githubUserOrOrganization,
+        installation_id: installationId,
+      },
     });
     return true;
   } catch (e) {
+    try {
+      console.log(e.response.data ? e.response.data : e);
+    } catch (e) {}
+
     return false;
   }
 }
+
+async function getInstallationIdByUserIdAndGitHubUserOrOrganization(
+  userId,
+  githubUserOrOrganization
+) {
+  // * Definindo url
+  const url = `${DB_MICROSERVICE_BASE}/user/${userId}/github/${githubUserOrOrganization}`;
+
+  // * Fazendo requisição
+  try {
+    const req = await axios.get(url, {
+      headers: {
+        "service-login": USER_LOGIN,
+        "service-pwd": USER_PWD,
+      },
+    });
+
+    if (req.data !== null) return req.data.github_installation_id;
+
+    return req.data;
+  } catch (e) {
+    console.log(e.response.data);
+    return null;
+  }
+}
+
+async function getInstallationsIdByUserId(userId) {
+  // * Definindo url
+  const url = `${DB_MICROSERVICE_BASE}/user/${userId}/github/installations`;
+
+  // * Fazendo requisição
+  try {
+    const req = await axios.get(url, {
+      headers: {
+        "service-login": USER_LOGIN,
+        "service-pwd": USER_PWD,
+      },
+    });
+
+    return req.data;
+  } catch (e) {
+    console.log(e);
+    return null;
+  }
+}
+
 module.exports = {
   updateEnvironmentStatus,
   updateEnvironmentMiningData,
@@ -141,4 +200,6 @@ module.exports = {
   getEnvironmentRepos,
   updateGitHubInstallationByGitHubUser,
   cleanGitHubInstallationByGitHubUser,
+  getInstallationIdByUserIdAndGitHubUserOrOrganization,
+  getInstallationsIdByUserId,
 };

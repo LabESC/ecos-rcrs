@@ -165,7 +165,8 @@ module.exports = {
       newEnvironment.id,
       newEnvironment.repos,
       newEnvironment.filter_type,
-      newEnvironment.keywords
+      newEnvironment.keywords,
+      newEnvironment.user_id
     );
 
     if (!miningRequest) {

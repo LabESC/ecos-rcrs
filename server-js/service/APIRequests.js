@@ -35,9 +35,18 @@ class APIRequests {
    * Makes a request to the mining API endpoint.
    * @param {string} environmentId - The environment ID.
    * @param {Array<string>} repos - The list of repositories.
+   * @param {string} filter_type - The filter type that will be applied.
+   * @param {Array<string>} keywords - The list of keywords.
+   * @param {uuidv4} user_id - The user_id of the environment.
    * @returns {boolean} - True if the request is successful, or false otherwise.
    */
-  static async requestMining(environmentId, repos, filter_type, keywords) {
+  static async requestMining(
+    environmentId,
+    repos,
+    filter_type,
+    keywords,
+    user_id
+  ) {
     // * Defining url
     const url = `${config.apiMicroserviceBase}/github/mining/repos`;
 
@@ -50,6 +59,7 @@ class APIRequests {
           repos: repos,
           filter_type: filter_type,
           keywords: keywords,
+          user_id: user_id,
         },
         {
           headers: {

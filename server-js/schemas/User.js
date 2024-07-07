@@ -46,8 +46,14 @@ const UserUpdate = Joi.object({
   github_user: Joi.string(),
 });
 
-const GitHubRequest = Joi.object({
+const GitHubRequestCreate = Joi.object({
+  github_user_or_organization: Joi.string().required(),
   github_user: Joi.string().required(),
+  installation_id: Joi.number().required(),
+});
+
+const GitHubRequestDelete = Joi.object({
+  github_user_or_organization: Joi.string().required(),
   installation_id: Joi.number().required(),
 });
 
@@ -60,5 +66,6 @@ module.exports = {
   AuthResponse,
   PasswordRequest,
   UserUpdate,
-  GitHubRequest,
+  GitHubRequestCreate,
+  GitHubRequestDelete,
 };

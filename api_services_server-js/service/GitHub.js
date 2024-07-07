@@ -5,7 +5,7 @@ const {
   hasNextLinkString,
 } = require("./Words");
 
-async function getRepos(repos) {
+async function getRepos(repos, installationIds) {
   // * Instanciando json de issues
   const issues = {};
   const errors = {};
@@ -30,11 +30,40 @@ async function getRepos(repos) {
 
     // * Iniciando variáveis reutilizaveis
     let issuesResponse = null;
+    let installationIdAccessToken = null;
+
+    // * Verificando se o owner do repositorio (organização ou usuario) possui installationId, se tiver, gerar
+    try {
+      const orgOrUser = repo.split("/")[0];
+      if (installationIds) {
+        // Buscando em installationIds o objeto cujo atributo "github_user" seja igual a orgOrUser
+        const installationIdObj = installationIds.find(
+          (obj) => obj.github_user === orgOrUser
+        );
+
+        if (installationIdObj) {
+          // Gerando um access_token para o installationId
+          installationIdAccessToken =
+            await gitHubRepository.generateAccessTokenForInstallationID(
+              installationIdObj.github_installation_id
+            );
+        }
+      }
+    } catch (e) {}
 
     // * Enquanto houver issues, buscar
     while (true) {
       // * Buscando issues
-      const response = await gitHubRepository.getRepositoriesIssues(repo, page);
+      let response = null;
+      try {
+        response = await gitHubRepository.getRepositoriesIssues(
+          repo,
+          page,
+          installationIdAccessToken
+        );
+      } catch (e) {
+        response = { error: "Error obtaining issues" };
+      }
 
       // * Se ocorrer erro, salve o erro e prossiga pro próximo repositório
       if ("error" in response) {
@@ -49,8 +78,8 @@ async function getRepos(repos) {
 
       // * Se houver issues, filtra-las
       issuesResponse = await filtraArrayRequestGit(response.data, sysId);
-
       sysId = issuesResponse.sysIdUpdated;
+
       // * Se após a filtragem, não houver issues, retornar
       if (issuesResponse.result.length !== 0) {
         // * Iterando sobre as issues obtidas
@@ -66,6 +95,7 @@ async function getRepos(repos) {
       page++;
     }
   }
+
   return { issues, errors };
 }
 
