@@ -122,6 +122,8 @@ router.post("/api/request/mining", async (req, res) => {
       environment_id: environment_id,
       repos: environmentData.repos,
       filter_type: environmentData.filter_type,
+      user_id: environmentData.user_id,
+      keywords: environmentData.keywords,
     },
     {
       headers: {

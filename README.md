@@ -11,9 +11,25 @@
 - Token para API do GitHub;
 - E-mail para envio de notificações.
 
-### O projeto:
+### Primeira execução:
 
-Ferramenta para auxiliar a identificação de mudanças de requisitos em ecossistemas de software (ECOS).
+É necessária a instalação das dependências necessárias para cada módulo da ferramenta.
+
+- Módulos Mineração, Cliente, Servidor:
+
+  - Para cada um destes módulos, acessar a pasta do módulo e executar o comando `npm install`.
+  - Exemplo no Módulo Mineração:
+
+    ```
+    cd api_services_server-js
+    npm install
+    ```
+
+- Módulo Tópicos:
+
+  ```
+  pip install -r requirements.txt
+  ```
 
 ### Execução:
 

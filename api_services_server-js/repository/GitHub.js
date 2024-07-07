@@ -53,16 +53,26 @@ class GitHub {
   }
 
   // ! Função para buscar issues de um repositório
-  async getRepositoriesIssues(repo, page) {
+  async getRepositoriesIssues(repo, page, access_token = null) {
     // * Fazendo requisição
-    let response = await this.requests.get(
-      // ! - DEV:
-      `repos/${repo}/issues?page=${page}&per_page=100?&state=open`,
-      // ! - PROD: `repos/${repo}/issues?page=${page}&per_page=100?&state=all`,
-      {
-        headers: this.#request_headers,
-      }
-    );
+    let response;
+
+    if (access_token)
+      response = await this.requests.get(
+        `repos/${repo}/issues?page=${page}&per_page=100?&state=open`,
+        {
+          headers: {
+            Authorization: `Bearer ${access_token}`, //`token ${GITHUB_TOKEN}`
+          },
+        }
+      );
+    else
+      response = await this.requests.get(
+        `repos/${repo}/issues?page=${page}&per_page=100?&state=open`,
+        {
+          headers: this.#request_headers,
+        }
+      );
 
     // * Verificando se o limite de requisições foi excedido
     let checkExpiredLimit = await this.checkExpiredLimit(
@@ -109,18 +119,28 @@ class GitHub {
   }
 
   // ! Função para buscar repositorios de uma organização
-  async getOrganizationRepos(organization, page) {
+  async getOrganizationRepos(organization, page, access_token = null) {
     // * Fazendo requisição
     let response = null;
     try {
-      response = await this.requests.get(
-        `orgs/${organization}/repos?page=${page}&per_page=100`,
-        {
-          headers: this.#request_headers,
-        }
-      );
+      if (access_token)
+        response = await this.requests.get(
+          `orgs/${organization}/repos?page=${page}&per_page=100`,
+          {
+            headers: {
+              Authorization: `Bearer ${access_token}`, //`token ${GITHUB_TOKEN}`
+            },
+          }
+        );
+      else
+        response = await this.requests.get(
+          `orgs/${organization}/repos?page=${page}&per_page=100`,
+          {
+            headers: this.#request_headers,
+          }
+        );
     } catch (e) {
-      if (e.response.status === 404)
+      if (e.response.status === 404 || e.status === 404)
         return { error: "Organization not found." };
       else return { error: "It was not possible" };
     }
@@ -170,19 +190,52 @@ class GitHub {
   }
 
   // ! Função para buscar repositório
-  async getRepo(repo) {
+  async getRepo(repo, access_token = null) {
     // * Fazendo requisição
     let response = null;
     try {
-      response = await this.requests.get(`repos/${repo}`, {
-        headers: this.#request_headers,
-      });
+      if (access_token)
+        response = await this.requests.get(`repos/${repo}`, {
+          headers: {
+            Authorization: `Bearer ${access_token}`, //`token ${GITHUB_TOKEN}`
+          },
+        });
+      else
+        response = await this.requests.get(`repos/${repo}`, {
+          headers: this.#request_headers,
+        });
     } catch (e) {
-      if (e.response.status === 404) return false;
+      if (e.response.status === 404 || e.status === 404) return false;
       else return { error: "It was not possible" };
     }
 
     return response.status === 200;
+  }
+
+  // ! Função para gerar access token de um installationID
+  async generateAccessTokenForInstallationID(installation_id) {
+    // . Instanciando token JWT
+    const token = require("../service/Octikit");
+
+    // . Obtendo access token
+    let access_token = null;
+
+    await axios({
+      method: "post",
+      url: `https://api.github.com/app/installations/${installation_id}/access_tokens`,
+      headers: {
+        accept: "application/json",
+        Authorization: "Bearer " + token,
+      },
+    })
+      .then(async (response) => {
+        access_token = response.data.token;
+      })
+      .catch((error) => {
+        console.log(error.response);
+      });
+
+    return access_token;
   }
 }
 

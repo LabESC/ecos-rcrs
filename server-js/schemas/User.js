@@ -40,6 +40,23 @@ const PasswordRequest = Joi.object({
   token: Joi.string().required(),
 });
 
+const UserUpdate = Joi.object({
+  name: Joi.string(),
+  email: Joi.string().email(),
+  github_user: Joi.string(),
+});
+
+const GitHubRequestCreate = Joi.object({
+  github_user_or_organization: Joi.string().required(),
+  github_user: Joi.string().required(),
+  installation_id: Joi.number().required(),
+});
+
+const GitHubRequestDelete = Joi.object({
+  github_user_or_organization: Joi.string().required(),
+  installation_id: Joi.number().required(),
+});
+
 module.exports = {
   UserBase,
   UserRequest,
@@ -48,4 +65,7 @@ module.exports = {
   AuthRequest,
   AuthResponse,
   PasswordRequest,
+  UserUpdate,
+  GitHubRequestCreate,
+  GitHubRequestDelete,
 };

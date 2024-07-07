@@ -127,18 +127,11 @@ class User {
     // * Checking if new e-mail is valid (format and domain)
     if (user.email !== undefined && user.email !== null) {
       const email = user.email;
-      const emailValidation = EmailValidation.validate(email);
+      const emailValidation = await EmailValidation.validate(email);
 
       if (!emailValidation) {
         return -2;
       }
-    }
-
-    // * Hashing password if a new one was provided
-    let newPassword = null;
-    if (user.password !== undefined && user.password !== null) {
-      const salt = await bcrypt.genSalt(10);
-      newPassword = await bcrypt.hash(user.password, salt);
     }
 
     // * Updating user
@@ -147,7 +140,7 @@ class User {
         id,
         user.name || null,
         user.email || null,
-        newPassword
+        user.github_user || null
       );
 
       if (update === null) return update;
@@ -160,6 +153,7 @@ class User {
     let emailText = `${user.name}, your personal data was updated with success!\n`;
     emailText += `<br/>Name: ${user.name}\n`;
     emailText += `<br/>E-mail: ${user.email}\n`;
+    emailText += `<br/>GitHub User: ${user.github_user}\n`;
 
     try {
       await APIRequests.sendEmail(
@@ -171,7 +165,17 @@ class User {
       console.log(e);
     }
 
-    return true;
+    // Obtendo o usuario atualizado
+    let updatedUser = null;
+
+    try {
+      updatedUser = await UserRepository.getById(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    return updatedUser;
   }
 
   /**
@@ -332,6 +336,105 @@ class User {
       );
     } catch (e) {
       console.log(e);
+    }
+  }
+
+  /**
+   * Retrieves the GitHub user and installation ID.
+   * @param {uuidv4} id - The ID of the user.
+   * @returns {Object|-1} - Returns an object containing the GitHub user and installation ID if the user was found, or -1 if occurred a server error.
+   */
+
+  static async getGitHubInstallations(id) {
+    try {
+      return await UserRepository.getGitHubInstallations(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+  }
+
+  /**
+   * Retrieves Installation ID by UserId and GitHubUserOrOrganization.
+   * @param {uuidv4} id - The ID of the user.
+   * @param {String} github_user_or_organization - The name of the user or organization.
+   * @returns {Object} - Returns the  Installation ID.
+   */
+
+  static async getInstallationIdByUserIdAndGitHubUserOrOrganization(
+    id,
+    github_user_or_organization
+  ) {
+    try {
+      return await UserRepository.getInstallationIdByUserIdAndGitHubUserOrOrganization(
+        id,
+        github_user_or_organization
+      );
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+  }
+
+  /**
+   * Updates GitHub Installation by GitHub User.
+   * @param {string} github_user - The GitHub User.
+   * @param {string} installation_id - The GitHub Installation ID.
+   * @returns {boolean|-1} - Returns true if the update was successful, false if the user was not found, or -1 if occurred a server error.
+   */
+  static async setGitHubInstallationByGitHubUser(
+    github_user,
+    github_userOrOrganization,
+    installation_id
+  ) {
+    try {
+      const user = await UserRepository.getByGitHubUser(github_user);
+      if (!user) {
+        return false;
+      }
+
+      return await UserRepository.setGitHubUserAndInstallationId(
+        user.id,
+        github_userOrOrganization,
+        installation_id
+      );
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+  }
+
+  /**
+   * Cleans GitHub Installation by GitHub User.
+   * @param {string} github_user_or_organization - The GitHub User.
+   * @returns {boolean|-1} - Returns true if the clean was successful, false if the user was not found
+   */
+  static async cleanGitHubInstallationByGitHubUser(
+    github_user_or_organization,
+    installation_id
+  ) {
+    try {
+      return await UserRepository.cleanGitHubInstallationByGitHubUser(
+        github_user_or_organization,
+        installation_id
+      );
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+  }
+
+  /**
+   * Retrieves User by GitHub User.
+   * @param {string} github_user - The GitHub User.
+   * @returns {Object} - Returns the User.
+   */
+  static async getByGitHubUser(github_user) {
+    try {
+      return await UserRepository.getByGitHubUser(github_user);
+    } catch (e) {
+      console.log(e);
+      return -1;
     }
   }
 }

@@ -34,7 +34,6 @@ class DBRequests:
         # * Definindo url
         url = f"{URLBASE}/environment/{environment_id}/topicdata"
 
-        print(url)
         # * Fazendo requisição
         try:
             resposta = requests.post(
@@ -43,7 +42,6 @@ class DBRequests:
                 json={"topic_data": topic_data, "status": status},
             )
         except Exception as e:
-            print(e)
             print("error sending to bd")
             return False
 

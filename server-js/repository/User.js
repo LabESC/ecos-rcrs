@@ -1,8 +1,10 @@
 const { v4: uuidv4 } = require("uuid");
+const sequelize = require("../database/db").sequelize;
 const UserModel = require("../database/db").User;
+const GitHubInstallations = require("../database/db").GitHubInstallations;
 const UserValidation = require("../validations/User");
 
-const basicFields = ["id", "name", "email", "status"];
+const basicFields = ["id", "name", "email", "status", "github_user"];
 
 class UserRepository {
   /**
@@ -38,10 +40,31 @@ class UserRepository {
    * @returns {UserModel} A promise that resolves to the user object.
    */
   static async getById(id) {
-    return await UserModel.findOne({
+    const user = await UserModel.findOne({
       attributes: basicFields,
       where: { id: id },
+      raw: true,
     });
+
+    if (user === null) {
+      return user;
+    }
+
+    const installations = await GitHubInstallations.findAll({
+      attributes: [
+        "github_user",
+        [
+          sequelize.literal(`to_char("createdAt", 'DD/MM/YYYY'::text)`),
+          "dtVinculacao",
+        ],
+      ],
+      where: { user_id: id },
+      raw: true,
+    });
+
+    user.installations = installations;
+
+    return user;
   }
 
   /**
@@ -75,14 +98,14 @@ class UserRepository {
    * @param {string|null} password - The new password for the user. Pass null to keep the current password.
    * @returns {null|UserModel} - A promise that resolves to the updated user object, or null if the user does not exist.
    */
-  static async updateById(id, name = null, email = null, password = null) {
+  static async updateById(id, name = null, email = null, github_user = null) {
     const userDB = await UserModel.findByPk(id);
 
     if (userDB === null) return userDB;
 
     if (name !== null) userDB.name = name;
     if (email !== null) userDB.email = email;
-    if (password !== null) userDB.password = password;
+    if (github_user !== null) userDB.github_user = github_user;
 
     await userDB.save();
 
@@ -239,6 +262,116 @@ class UserRepository {
     await user.save();
 
     return { name: user.name, email: user.email };
+  }
+
+  /**
+   * Update InstallationID and GitHubUser.
+   * @param {uuidv4} id - The ID of the user.
+   * @returns {boolean} - Returns true if update, false if not found.
+   */
+  static async setGitHubUserAndInstallationId(
+    id,
+    github_user,
+    installation_id
+  ) {
+    const installation = await GitHubInstallations.create({
+      github_user: github_user,
+      github_installation_id: installation_id,
+      user_id: id,
+    });
+
+    return installation;
+  }
+
+  /**
+   * Get GitHub User and Installation ID.
+   * @param {uuidv4} id - The ID of the user.
+   * @returns {Object} - Returns the GitHub User and Installation ID.
+   */
+  static async getGitHubInstallations(id) {
+    const installation = await GitHubInstallations.findAll({
+      attributes: ["github_user", "github_installation_id"],
+      where: { user_id: id },
+    });
+
+    return installation;
+  }
+
+  /**
+   * Get Installation ID by UserId and GitHubUserOrOrganization.
+   * @param {uuidv4} id - The ID of the user.
+   * @param {String} github_user_or_organization - The name of the user or organization.
+   * @returns {Object} - Returns the  Installation ID.
+   */
+  static async getInstallationIdByUserIdAndGitHubUserOrOrganization(
+    id,
+    github_user_or_organization
+  ) {
+    const installation = await GitHubInstallations.findOne({
+      attributes: ["github_installation_id"],
+      where: { user_id: id, github_user: github_user_or_organization },
+    });
+
+    return installation;
+  }
+
+  /**
+   * Get User by GitHub User.
+   * @param {string} github_user - The GitHub User.
+   * @returns {Object} - Returns the User.
+   */
+  static async getByGitHubUser(github_user) {
+    return await UserModel.findOne({ where: { github_user: github_user } });
+  }
+
+  /**
+   * Updates GitHub Installation by GitHub User.
+   * @param {string} github_user - The GitHub User.
+   * @param {string} installation_id - The GitHub Installation ID.
+   * @returns {boolean|-1} - Returns true if the update was successful, false if the user was not found, or -1 if occurred a server error.
+   */
+  static async updateGitHubInstallationByGitHubUser(
+    github_user,
+    installation_id
+  ) {
+    const user = await UserModel.findOne({
+      where: { github_user: github_user },
+    });
+
+    if (user === null) {
+      return false;
+    }
+
+    user.github_installation_id = installation_id;
+
+    await user.save();
+
+    return true;
+  }
+
+  /**
+   * Cleans GitHub Installation by GitHub User.
+   * @param {string} github_user - The GitHub User.
+   * @returns {boolean|-1} - Returns true if the clean was successful, false if the user was not found
+   */
+  static async cleanGitHubInstallationByGitHubUser(
+    github_user,
+    installation_id
+  ) {
+    const installation = await GitHubInstallations.findOne({
+      where: {
+        github_user: github_user,
+        github_installation_id: installation_id,
+      },
+    });
+
+    if (installation === null) {
+      return false;
+    }
+
+    await installation.destroy();
+
+    return true;
   }
 }
 

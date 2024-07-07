@@ -17,4 +17,19 @@ router.get(
 );
 router.put("/:email/update-password", UserController.updatePassword);
 
+// ! GitHub - 29/06/24
+router.post(
+  "/github/installation",
+  UserController.setGitHubInstallationByGitHubUser
+);
+router.delete(
+  "/github/installation",
+  UserController.cleanGitHubInstallationByGitHubUser
+);
+router.get("/:id/github/installations", UserController.getGitHubInstallations);
+router.get(
+  "/:id/github/:githubUserOrOrg",
+  UserController.getInstallationIdByUserIdAndGitHubUserOrOrganization
+);
+
 module.exports = router;

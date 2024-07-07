@@ -70,6 +70,11 @@ module.exports = {
       return res.status(400).json(ErrorSchema(400, "Id not provided!"));
     }
 
+    // * Checking if id is the same of the authenticated user
+    if (req.params.id !== header["user-id"]) {
+      return res.status(401).json(ErrorSchema("Auth", "Unauthorized!"));
+    }
+
     // * Getting user by id
     const user = await UserService.getById(req.params.id);
 
@@ -234,7 +239,7 @@ module.exports = {
     }
 
     // * Validating body schema
-    const { error, value } = UserSchemas.UserRequest.validate(req.body);
+    const { error, value } = UserSchemas.UserUpdate.validate(req.body);
 
     if (error) {
       return res.status(400).json(ErrorSchema(400, error.details[0].message));
@@ -348,6 +353,166 @@ module.exports = {
       case false:
         return res.status(401).json(ErrorSchema("token", "Token invalid"));
       case null:
+        return res.status(404).json(ErrorSchema("user", "User not found"));
+      default:
+        return res.status(200).json(user);
+    }
+  },
+
+  /**
+   * Retrieves the GitHub user and installation ID.
+   * @param {Object} req - The request object.
+   * @param {Object} res - The response object.
+   * @returns {Object|{code, error}} - The response object with the appropriate status and data.
+   */
+
+  async getGitHubInstallations(req, res) {
+    // * Check if id was provided
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(422).json(ErrorSchema(422, "Id not provided!"));
+    }
+
+    // * Getting GitHub user and installation ID
+    const user = await UserService.getGitHubInstallations(id);
+
+    switch (user) {
+      case -1:
+        return res.status(500).json(ErrorSchema(500, msg_500));
+      default:
+        return res.status(200).json(user);
+    }
+  },
+
+  /**
+   * Retrieves Installation ID by UserId and GitHubUserOrOrganization.
+   * @param {Object} req - The request object.
+   * @param {Object} res - The response object.
+   * @returns {Object|{code, error}} - The response object with the appropriate status and data.
+   */
+
+  async getInstallationIdByUserIdAndGitHubUserOrOrganization(req, res) {
+    // * Checking authentication
+    const header = req.headers;
+    const auth = await AuthValidator.validateService(header);
+
+    if (!auth) {
+      return res.status(401).json(ErrorSchema("Auth", "Unauthorized!"));
+    }
+
+    // * Check if id was provided
+    const { id, githubUserOrOrg } = req.params;
+
+    if (!id || !githubUserOrOrg) {
+      return res
+        .status(422)
+        .json(ErrorSchema(422, "Id or GitHub User/Organization not provided!"));
+    }
+
+    // * Getting GitHub user and installation ID
+    const user =
+      await UserService.getInstallationIdByUserIdAndGitHubUserOrOrganization(
+        id,
+        githubUserOrOrg
+      );
+
+    switch (user) {
+      case -1:
+        return res.status(500).json(ErrorSchema(500, msg_500));
+      default:
+        return res.status(200).json(user);
+    }
+  },
+
+  /**
+   * Updates the GitHub installation by GitHub user.
+   *
+   * @param {Object} req - The request object.
+   * @param {Object} res - The response object.
+   * @returns {Object|{code, error}} The response object with the appropriate status and data.
+   */
+  async setGitHubInstallationByGitHubUser(req, res) {
+    // * Control access variable
+    let grantAccess = false;
+
+    // * Checking if the user is authorized
+    if ((await AuthValidator.validateUser(req.headers)) === true) {
+      grantAccess = true;
+    }
+
+    // * Checking if the service is authorized
+    if ((await AuthValidator.validateService(req.headers)) === true) {
+      grantAccess = true;
+    }
+
+    // * if none of them granted access, refuse
+    if (grantAccess === false) {
+      return res.status(401).json(ErrorSchema("Auth", "Unauthorized!"));
+    }
+
+    // * Validating body schema
+    const { error, value } = UserSchemas.GitHubRequestCreate.validate(req.body);
+
+    if (error) {
+      return res.status(400).json(ErrorSchema(400, error.details[0].message));
+    }
+
+    // * Updating GitHub installation by GitHub user
+    const { github_user, github_user_or_organization, installation_id } =
+      req.body;
+
+    const user = await UserService.setGitHubInstallationByGitHubUser(
+      github_user,
+      github_user_or_organization,
+      installation_id
+    );
+
+    switch (user) {
+      case -1:
+        return res.status(500).json(ErrorSchema(500, msg_500));
+      case false:
+        return res.status(404).json(ErrorSchema("user", "User not found"));
+      default:
+        return res.status(200).json(user);
+    }
+  },
+
+  /**
+   * Cleans GitHub Installation by GitHub User.
+   * @param {Object} req - The request object.
+   * @param {Object} res - The response object.
+   * @returns {Object|{code, error}} The response object with the appropriate status and data.
+   */
+  async cleanGitHubInstallationByGitHubUser(req, res) {
+    // * Validating service auth
+    const header = req.headers;
+    const auth = await AuthValidator.validateService(header);
+
+    if (!auth) {
+      return res.status(401).json(ErrorSchema("Auth", "Unauthorized!"));
+    }
+
+    // * Validating body schema
+    const { error, value } = UserSchemas.GitHubRequestDelete.validate(req.body);
+
+    if (error) {
+      return res.status(400).json(ErrorSchema(400, error.details[0].message));
+    }
+
+    // * Getting variables
+    const { github_user_or_organization, installation_id } = req.body;
+
+    // * Cleaning GitHub installation by GitHub user
+    const user = await UserService.cleanGitHubInstallationByGitHubUser(
+      github_user_or_organization,
+      installation_id
+    );
+
+    switch (user) {
+      case -1:
+        return res.status(500).json(ErrorSchema(500, msg_500));
+      case false:
         return res.status(404).json(ErrorSchema("user", "User not found"));
       default:
         return res.status(200).json(user);

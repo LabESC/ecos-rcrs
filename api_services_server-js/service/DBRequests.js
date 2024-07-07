@@ -83,6 +83,112 @@ async function getEnvironmentRepos(environmentId, userId, userToken) {
     });
     return req.data;
   } catch (e) {
+    console.log(e.response.data);
+    return null;
+  }
+}
+
+async function updateGitHubInstallationByGitHubUser(
+  githubUser,
+  githubUserOrOrganization,
+  installationId
+) {
+  // * Definindo url
+  const url = `${DB_MICROSERVICE_BASE}/user/github/installation`;
+
+  // * Fazendo requisição
+  try {
+    await axios.post(
+      url,
+      {
+        github_user: githubUser,
+        github_user_or_organization: githubUserOrOrganization,
+        installation_id: installationId,
+      },
+      {
+        headers: {
+          "service-login": USER_LOGIN,
+          "service-pwd": USER_PWD,
+        },
+      }
+    );
+    return true;
+  } catch (e) {
+    console.log(e.response.data);
+    return false;
+  }
+}
+
+async function cleanGitHubInstallationByGitHubUser(
+  githubUserOrOrganization,
+  installationId
+) {
+  // * Definindo url
+  const url = `${DB_MICROSERVICE_BASE}/user/github/installation`;
+
+  // * Fazendo requisição
+  try {
+    await axios.delete(url, {
+      headers: {
+        "service-login": USER_LOGIN,
+        "service-pwd": USER_PWD,
+      },
+      data: {
+        github_user_or_organization: githubUserOrOrganization,
+        installation_id: installationId,
+      },
+    });
+    return true;
+  } catch (e) {
+    try {
+      console.log(e.response.data ? e.response.data : e);
+    } catch (e) {}
+
+    return false;
+  }
+}
+
+async function getInstallationIdByUserIdAndGitHubUserOrOrganization(
+  userId,
+  githubUserOrOrganization
+) {
+  // * Definindo url
+  const url = `${DB_MICROSERVICE_BASE}/user/${userId}/github/${githubUserOrOrganization}`;
+
+  // * Fazendo requisição
+  try {
+    const req = await axios.get(url, {
+      headers: {
+        "service-login": USER_LOGIN,
+        "service-pwd": USER_PWD,
+      },
+    });
+
+    if (req.data !== null) return req.data.github_installation_id;
+
+    return req.data;
+  } catch (e) {
+    console.log(e.response.data);
+    return null;
+  }
+}
+
+async function getInstallationsIdByUserId(userId) {
+  // * Definindo url
+  const url = `${DB_MICROSERVICE_BASE}/user/${userId}/github/installations`;
+
+  // * Fazendo requisição
+  try {
+    const req = await axios.get(url, {
+      headers: {
+        "service-login": USER_LOGIN,
+        "service-pwd": USER_PWD,
+      },
+    });
+
+    return req.data;
+  } catch (e) {
+    console.log(e);
     return null;
   }
 }
@@ -92,4 +198,8 @@ module.exports = {
   updateEnvironmentMiningData,
   getEnvironmentMiningData,
   getEnvironmentRepos,
+  updateGitHubInstallationByGitHubUser,
+  cleanGitHubInstallationByGitHubUser,
+  getInstallationIdByUserIdAndGitHubUserOrOrganization,
+  getInstallationsIdByUserId,
 };

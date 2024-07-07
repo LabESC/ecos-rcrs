@@ -1,9 +1,9 @@
 import Axios from "axios";
 const baseUrl = import.meta.env.VITE_API_MICROSERVICE_BASE;
-const regexGithubRepository = /^([a-zA-Z0-9-_]+)\/([a-zA-Z0-9-_]+)$/;
+const regexGithubRepository = /^[a-zA-Z0-9](-?[a-zA-Z0-9])*\/[a-zA-Z0-9._-]+$/;
 import getServerError from "./ServerError.jsx";
 
-export const getOrganizationRepos = async (organization) => {
+export const getOrganizationRepos = async (organization, user_id = null) => {
   if (!organization) {
     return {
       error: {
@@ -15,7 +15,8 @@ export const getOrganizationRepos = async (organization) => {
   }
 
   const result = await Axios.get(
-    `${baseUrl}/github/organization/${organization}/repos`
+    `${baseUrl}/github/organization/${organization}/repos`,
+    { headers: { "ecos-user-id": user_id } }
   )
     .then((res) => {
       return res.data;
@@ -31,7 +32,7 @@ export const getOrganizationRepos = async (organization) => {
   return result;
 };
 
-export const doesRepoExist = async (repository) => {
+export const doesRepoExist = async (repository, user_id = null) => {
   if (!repository) {
     return {
       error: {
@@ -51,8 +52,11 @@ export const doesRepoExist = async (repository) => {
       status: 400,
     };
   }
-  console.log(`${baseUrl}/github/repo/${repository}/exists`);
-  const result = await Axios.get(`${baseUrl}/github/repo/${repository}/exists`)
+
+  const result = await Axios.get(
+    `${baseUrl}/github/repo/${repository}/exists`,
+    { headers: { "ecos-user-id": user_id } }
+  )
     .then((res) => {
       return res.data;
     })

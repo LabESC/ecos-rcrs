@@ -29,6 +29,10 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: "pending",
       },
+      github_user: {
+        type: DataTypes.STRING(255),
+        unique: true,
+      },
     },
     {
       tableName: "users",

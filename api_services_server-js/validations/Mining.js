@@ -3,6 +3,7 @@ async function checkVariables(requestHeaders, requestBody) {
   if (!requestBody.repos) return false;
   if (!requestBody.environment_id) return false;
   if (!requestBody.filter_type) return false;
+  if (!requestBody.user_id) return false;
   if (!requestHeaders["service-login"]) return false;
   if (!requestHeaders["service-pwd"]) return false;
 
@@ -10,6 +11,7 @@ async function checkVariables(requestHeaders, requestBody) {
   if (!Array.isArray(requestBody.repos)) return false;
   if (typeof requestBody.environment_id != "string") return false;
   if (typeof requestBody.filter_type != "string") return false;
+  if (typeof requestBody.user_id != "string") return false;
   if (requestBody.keywords !== null) {
     if (!Array.isArray(requestBody.keywords)) return false;
   }
@@ -20,6 +22,7 @@ async function checkVariables(requestHeaders, requestBody) {
   if (requestBody.repos.length == 0) return false;
   if (requestBody.environment_id.length == 0) return false;
   if (requestBody.filter_type.length == 0) return false;
+  if (requestBody.user_id.length == 0) return false;
   if (requestHeaders["service-login"].length == 0) return false;
   return requestHeaders["service-pwd"].length != 0;
 }

@@ -24,6 +24,10 @@ const sequelize = new Sequelize(
 
 // . Modelos
 db.User = require("../models/User")(sequelize, Sequelize.DataTypes);
+db.GitHubInstallations = require("../models/GitHubInstallations")(
+  sequelize,
+  Sequelize.DataTypes
+);
 db.Environment = require("../models/Environment")(
   sequelize,
   Sequelize.DataTypes
@@ -39,6 +43,16 @@ db.VotingUserEnvironment = require("../models/VotingUserEnvironment")(
 );
 
 // ! Relacionamentos
+// . User x GitHubInstallations (1 x N)
+db.User.hasMany(db.GitHubInstallations, {
+  foreignKey: "user_id",
+  sourceKey: "id",
+});
+db.GitHubInstallations.belongsTo(db.User, {
+  foreignKey: "user_id",
+  targetKey: "id",
+});
+
 // . User x Environment (1 x N)
 db.User.hasMany(db.Environment, {
   foreignKey: "user_id",

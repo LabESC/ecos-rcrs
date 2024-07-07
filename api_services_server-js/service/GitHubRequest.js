@@ -1,6 +1,7 @@
 const getRepos = require("./GitHub");
 const getOrganizationRepositories = require("./GitHubOrg");
 const doesRepoExist = require("./GitHubRepo");
+const generateAccessTokenForInstallationID = require("./GitHubTokens");
 const { updateEnvironmentMiningData } = require("./DBRequests");
 const { formatIssuesToArray } = require("./Words");
 const { getSCRFilter } = require("./ModelRequests");
@@ -22,13 +23,13 @@ class GitHubRequest {
    * @param {Array} repos Array de repositórios (strings).
    * @param {string} environment_id O id do ambiente (BD) que solicitou a mineração.
    **/
-  async run(repos, environment_id, filter_type, keywords) {
+  async run(repos, environment_id, filter_type, keywords, installationIds) {
     // * Iniciando serviço
     this.#isRunning = true;
     let result = null;
     try {
       // * Executando requisições
-      result = await getRepos(repos);
+      result = await getRepos(repos, installationIds);
 
       // * Finalizando serviço
       this.#isRunning = false;
@@ -162,7 +163,8 @@ class GitHubRequest {
         nextRequest.repos,
         nextRequest.environment_id,
         nextRequest.filter_type,
-        nextRequest.keywords
+        nextRequest.keywords,
+        nextRequest.installationIds
       );
     }
   }
@@ -174,13 +176,20 @@ class GitHubRequest {
    * @param {string} environment_id Id do ambiente (BD) que solicitou a mineração.
    * @param {string} filter_type Tipo de filtro a ser aplicado.
    **/
-  async addQueue(repos, environment_id, filter_type, keywords) {
+  async addQueue(
+    repos,
+    environment_id,
+    filter_type,
+    keywords,
+    installationIds
+  ) {
     // * Adicionando requisição na fila
     this.#requestsQueue.push({
       repos: repos,
       environment_id: environment_id,
       filter_type: filter_type,
       keywords: keywords,
+      installationIds: installationIds,
     });
 
     console.log("this.#isRunning: ", this.#isRunning);
@@ -193,8 +202,8 @@ class GitHubRequest {
    * @param {string} organization - O nome da organização.
    * @return {object} Retorna um objeto com os repositorios da organização.
    **/
-  async searchOrganizationRepos(organization) {
-    const result = await getOrganizationRepositories(organization);
+  async searchOrganizationRepos(organization, accessToken = null) {
+    const result = await getOrganizationRepositories(organization, accessToken);
 
     return result;
   }
@@ -204,9 +213,18 @@ class GitHubRequest {
    * @param {Array} repo - Array com 2 elementos: organização e repositório.
    * @return {boolean} Retorna true se o repositório for encontrado e false se não.
    **/
-  async doesRepoExist(repo) {
+  async doesRepoExist(repo, accessToken = null) {
     // * Buscando se existe e retornando
-    const response = await doesRepoExist(repo);
+    const response = await doesRepoExist(repo, accessToken);
+
+    return response;
+  }
+
+  async generateAccessTokenForInstallationID(installation_id) {
+    // * Buscando se existe e retornando
+    const response = await generateAccessTokenForInstallationID(
+      installation_id
+    );
 
     return response;
   }
