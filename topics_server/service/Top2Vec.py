@@ -1,6 +1,7 @@
 from top2vec import Top2Vec
 import pandas as pd
-from service.Embeddings import gera_embedding
+
+# from service.Embeddings import gera_embedding
 
 
 class Top2VecImpl:
