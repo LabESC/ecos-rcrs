@@ -159,6 +159,9 @@ const EnvironmentDetail = () => {
         return;
       }
 
+      // . Armazenando os dados do usuário
+      setLoggedUser(verifyUser);
+
       // . Obtendo os ambientes do usuário
       await getDetails(verifyUser.userId, verifyUser.userToken);
     };
@@ -188,13 +191,14 @@ const EnvironmentDetail = () => {
   };
 
   // ! Funções para manipulação de dados na página
+  const [loggedUser, setLoggedUser] = useState({}); // . Armazena os dados do usuário logado
   const [environmentId, setEnvironmentId] = useState(""); // . Armazena o id do ambiente [UUID]
   const [environmentName, setEnvironmentName] = useState(""); // . Armazena o nome do ambiente
   const [topics, setTopics] = useState([
     { id: null, issues: "", name: "", topic: "" },
   ]); // . Armazena os ambientes do usuário
   const [actualTopic, setActualTopic] = useState(0); // . Armazena o ambiente atual
-  const [definitionRCRs, setDefinitionRCRs] = useState([]); // . Armazena as RCRs prioritarias [Array
+  const [definitionRCRs, setDefinitionRCRs] = useState([]); // . Armazena as RCRs prioritarias [Array]
 
   // . Função para mudar o topico atual (SELECT)
   const changeTopic = (event) => {
@@ -283,20 +287,6 @@ const EnvironmentDetail = () => {
             {environmentName}
           </Typography>
 
-          <SuccessButton
-            icon={<PeopleIcon size={18} />}
-            message={"Start RCR Definition Voting"}
-            width={"220px"}
-            height={"30px"}
-            uppercase={false}
-            marginLeft="0"
-            marginRight="4em"
-            backgroundColor={"#9fff64"}
-            action={() => {
-              openDefinitionRCRVoteModal();
-            }}
-            visibility={definitionRCRs.length !== 0 ? "visible" : "hidden"}
-          />
           <SuccessButton
             icon={<RepoIcon size={18} />}
             message={"List RCR"}
@@ -389,7 +379,13 @@ const EnvironmentDetail = () => {
       <ListAssociatedRCRsEnvPopUp
         open={priorityRCRListModalOpen}
         close={closePriorityListRcrModal}
+        environmentId={environmentId}
+        environmentName={environmentName}
         rcrs={definitionRCRs}
+        setDefinitionRCRs={setDefinitionRCRs}
+        loggedUser={loggedUser}
+        setIsLoading={setIsLoading}
+        openVotingModal={openDefinitionRCRVoteModal}
       />
       <OpenRCRDefinitionVotePopUp
         open={startRCRDefinitionVoteModalOpen}

@@ -455,3 +455,11 @@ color-legend {
 color-legend div.cle-container {
   border-radius: 5px !important;
 }
+
+[id^="CHP_UFC_GitHub"] svg {
+  display: none !important;
+}
+
+[aria-labelledby="dialog_update_after_topics"] {
+  width: 100%;
+}

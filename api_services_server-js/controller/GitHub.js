@@ -38,7 +38,7 @@ router.post("/api/github/mining/repos", async (req, res) => {
   }
 
   // * Obtendo repos e environment_id
-  const { environment_id, filter_type, keywords, user_id } = body;
+  const { environment_id, filter_type, keywords, user_id, rcr_keywords } = body;
   let repos = body.repos;
 
   // * Se não houver repositórios, retorne erro
@@ -62,7 +62,8 @@ router.post("/api/github/mining/repos", async (req, res) => {
     environment_id,
     filter_type,
     keywords,
-    installationIds
+    installationIds,
+    rcr_keywords
   );
 
   return res.status(200).json({ message: "Mining request received." });

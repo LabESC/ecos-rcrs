@@ -32,6 +32,11 @@ db.Environment = require("../models/Environment")(
   sequelize,
   Sequelize.DataTypes
 );
+db.EnvironmentUserFeedbackChannels =
+  require("../models/EnvironmentUserFeedbackChannels")(
+    sequelize,
+    Sequelize.DataTypes
+  );
 db.EnvironmentShare = require("../models/EnvironmentShare")(
   sequelize,
   Sequelize.DataTypes
@@ -105,6 +110,16 @@ db.VotingUserEnvironment.belongsTo(db.VotingUser, {
 });
 
 db.VotingUserEnvironment.belongsTo(db.Environment, {
+  foreignKey: "environment_id",
+  targetKey: "id",
+});
+
+// . Environment x EnvironmentUserFeedbackChannels (1 x N)
+db.Environment.hasMany(db.EnvironmentUserFeedbackChannels, {
+  foreignKey: "environment_id",
+  sourceKey: "id",
+});
+db.EnvironmentUserFeedbackChannels.belongsTo(db.Environment, {
   foreignKey: "environment_id",
   targetKey: "id",
 });

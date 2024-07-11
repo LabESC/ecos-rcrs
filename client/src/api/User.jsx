@@ -242,3 +242,17 @@ export const getGitHubUserAndInstallationId = async (userId, token) => {
 
   return result;
 };
+
+export const activate = (id) => {
+  return Axios.post(`${baseUrl}/user/${id}/activate`)
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+};

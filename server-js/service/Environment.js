@@ -3,7 +3,7 @@ const UserRepository = require("../repository/User");
 const APIRequests = require("./APIRequests");
 const EnvironmentUtils = require("../utils/Environment");
 const VotingUserRepository = require("../repository/VotingUser");
-
+require("dotenv").config(); // Para obter a variável do endereço do serviço Cliente
 class Environment {
   static async getAll() {
     try {
@@ -65,7 +65,7 @@ class Environment {
     return environments;
   }
 
-  static async create(environment) {
+  static async create(environment, environment_user_feedback_channels) {
     // * Check if user exists and is active
     const user = await UserRepository.getById(environment.user_id);
 
@@ -95,6 +95,14 @@ class Environment {
 
     if (!newEnvironment) {
       return newEnvironment;
+    }
+
+    // * Creating the environment_user_feedback_channels
+    if (environment_user_feedback_channels) {
+      await EnvironmentRepository.createManyEnvironmentUserFeedbackChannel(
+        environment_user_feedback_channels,
+        newEnvironment.id
+      );
     }
 
     // * Sending e-mail to the user
@@ -228,6 +236,7 @@ class Environment {
     if (definitionData === false) return false;
 
     // * If definition data does not exists, create it
+    let priorityNum = 1;
     if (!definitionData) {
       definitionData = { rcrs: [], status: "elaborating", closing_date: null };
     }
@@ -235,12 +244,105 @@ class Environment {
     // * Updating definition data
     // . Check if there is an id at the rcrs array
     let newId = 1;
+    let priorityAdd = 0;
     for (const rcr of definitionData.rcrs) {
       newId = rcr.id + 1;
+      priorityAdd += 1;
     }
 
+    priorityNum += priorityAdd;
+
     newDefinitionData["id"] = newId;
+    newDefinitionData["priority"] = priorityNum;
     definitionData.rcrs.push(newDefinitionData);
+
+    // * Updating the environment
+    try {
+      await EnvironmentRepository.updateDefinition(id, definitionData);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    return true;
+  }
+
+  static async updateRCRAtDefinitionData(id, definitionDataChanged) {
+    // * Obtaining definition data if exists
+    let definitionData = null;
+    try {
+      definitionData = await EnvironmentRepository.getDefinitionData(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    if (definitionData === false) return false;
+    // * Find the rcr to be updated, and change it
+    for (let rcr of definitionData.rcrs) {
+      if (rcr.id === definitionDataChanged.id) {
+        rcr = definitionDataChanged;
+        break;
+      }
+    }
+
+    // * Updating the environment
+    try {
+      await EnvironmentRepository.updateDefinition(id, definitionData);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    return true;
+  }
+
+  static async deleteRCRAtDefinitionData(id, definitionDataChanged) {
+    // * Obtaining definition data if exists
+    let definitionData = null;
+    try {
+      definitionData = await EnvironmentRepository.getDefinitionData(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    if (definitionData === false) return false;
+    // * Delete the rcr from the definition data
+    definitionData.rcrs = definitionData.rcrs.filter((rcr) => {
+      return rcr.id !== definitionDataChanged.id;
+    });
+
+    // * Updating the environment
+    try {
+      await EnvironmentRepository.updateDefinition(id, definitionData);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    return true;
+  }
+
+  static async updateRCRPrioritiesAtDefinitionData(id, rcrsRepriorized) {
+    // * Obtaining definition data if exists
+    let definitionData = null;
+    try {
+      definitionData = await EnvironmentRepository.getDefinitionData(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    if (definitionData === false) return false;
+    // * Find all the rcr to be re-prioritized, and change it
+    for (let rcr of definitionData.rcrs) {
+      for (let rcrRepriorized of rcrsRepriorized) {
+        if (rcr.id === rcrRepriorized.id) {
+          rcr.priority = rcrRepriorized.priority;
+        }
+      }
+    }
 
     // * Updating the environment
     try {
@@ -366,6 +468,27 @@ class Environment {
     } catch (e) {
       console.log(e);
       return -1;
+    }
+
+    // * Sending e-mail to the voting users of the environment
+    const votingUsers = await EnvironmentRepository.getVotingUsers(id);
+    const environmentName = await EnvironmentRepository.getEnvironmentName(id);
+
+    for (const votingUserEnvironment of votingUsers) {
+      const subject = `SECO - RCR: ${environmentName.name} (priority RCR voting started)`;
+      let emailText = `The priority RCR voting for the environment ${environmentName.name} started!\n`;
+      emailText += `As you voted on the definition of this environment, this is an invitation for you to collaborate in the priority voting of this environment.\n`;
+      emailText += `To vote, please, access this link: <a>${process.env.CLIENT_URL_BASE}environment/${id}/priorityvote</a>\n`;
+
+      try {
+        await APIRequests.sendEmail(
+          votingUserEnvironment.VotingUser.email,
+          subject,
+          emailText
+        );
+      } catch (e) {
+        console.log(e);
+      }
     }
 
     return true;

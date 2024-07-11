@@ -87,7 +87,7 @@ class User {
     let emailText = `${user.name}, your account was created with success!\n`;
     emailText += `<br/>Name: ${user.name}\n`;
     emailText += `<br/>E-mail: ${user.email}\n`;
-    emailText += `<br/>To activate your account, visit: ${config.clientUrlBase}/activate?id=${newUser.id}\n`;
+    emailText += `<br/>To activate your account, visit: ${config.clientUrlBase}activate?id=${newUser.id}\n`;
 
     try {
       await APIRequests.sendEmail(

@@ -11,6 +11,18 @@ router.put("/:id/status/:status", EnvironmentController.updateStatus);
 router.post("/:id/miningdata", EnvironmentController.updateMiningData);
 router.post("/:id/topicdata", EnvironmentController.updateTopicData);
 router.post("/:id/definitiondata", EnvironmentController.updateDefinitionData);
+router.put(
+  "/:id/definitiondata/rcr",
+  EnvironmentController.updateRCRAtDefinitionData
+);
+router.delete(
+  "/:id/definitiondata/rcr",
+  EnvironmentController.deleteRCRAtDefinitionData
+);
+router.put(
+  "/:id/definitiondata/rcr/priorities",
+  EnvironmentController.updateRCRPrioritiesAtDefinitionData
+);
 router.patch(
   "/:id/definitiondata",
   EnvironmentController.updateDefinitionDataWithStatus

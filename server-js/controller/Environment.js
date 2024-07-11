@@ -139,11 +139,15 @@ module.exports = {
     const { error } = EnvironmentSchemas.EnvironmentRequest.validate(req.body);
 
     if (error) {
+      console.log(error);
       return res.status(422).json(ErrorSchema(422, error.details[0].message));
     }
 
     // * Creating the environment
-    const newEnvironment = await EnvironmentService.create(req.body);
+    const newEnvironment = await EnvironmentService.create(
+      req.body.environment,
+      req.body.userFeedbackChannels
+    );
 
     switch (newEnvironment) {
       case -1:
@@ -348,6 +352,129 @@ module.exports = {
       req.params.id,
       req.body
     );
+
+    switch (updatedEnvironments) {
+      case -1:
+        return res.status(500).send(ErrorSchema("server", msg_500));
+      case null:
+        return res.status(404).send(ErrorSchema(entity_name, msg_404));
+      case true:
+        return res.status(200).send(true);
+      default:
+        return res.status(500).send(ErrorSchema("server", msg_500));
+    }
+  },
+
+  async updateRCRAtDefinitionData(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
+    // * Checking if the user is authorized
+    const auth = await AuthValidator.validateUser(req.headers);
+
+    if (!auth) {
+      return res.status(401).json(ErrorSchema("Auth", "Unauthorized!"));
+    }
+
+    // * Validating body
+    const { error } =
+      EnvironmentSchemas.EnvironmentUpdateRCRAtDefinitionDataRequest.validate(
+        req.body,
+        { allowUnknown: true }
+      );
+
+    if (error) {
+      return res.status(422).json(ErrorSchema(422, error.details[0].message));
+    }
+
+    // * Updating definition data
+    const updatedEnvironments =
+      await EnvironmentService.updateRCRAtDefinitionData(
+        req.params.id,
+        req.body
+      );
+
+    switch (updatedEnvironments) {
+      case -1:
+        return res.status(500).send(ErrorSchema("server", msg_500));
+      case null:
+        return res.status(404).send(ErrorSchema(entity_name, msg_404));
+      case true:
+        return res.status(200).send(true);
+      default:
+        return res.status(500).send(ErrorSchema("server", msg_500));
+    }
+  },
+
+  async deleteRCRAtDefinitionData(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
+    // * Checking if the user is authorized
+    const auth = await AuthValidator.validateUser(req.headers);
+
+    if (!auth) {
+      return res.status(401).json(ErrorSchema("Auth", "Unauthorized!"));
+    }
+
+    // * Validating body
+    const { error } =
+      EnvironmentSchemas.EnvironmentUpdateRCRAtDefinitionDataRequest.validate(
+        req.body,
+        { allowUnknown: true }
+      );
+
+    if (error) {
+      return res.status(422).json(ErrorSchema(422, error.details[0].message));
+    }
+
+    // * Updating definition data
+    const updatedEnvironments =
+      await EnvironmentService.deleteRCRAtDefinitionData(
+        req.params.id,
+        req.body
+      );
+
+    switch (updatedEnvironments) {
+      case -1:
+        return res.status(500).send(ErrorSchema("server", msg_500));
+      case null:
+        return res.status(404).send(ErrorSchema(entity_name, msg_404));
+      case true:
+        return res.status(200).send(true);
+      default:
+        return res.status(500).send(ErrorSchema("server", msg_500));
+    }
+  },
+
+  async updateRCRPrioritiesAtDefinitionData(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
+    // * Checking if the user is authorized
+    const auth = await AuthValidator.validateUser(req.headers);
+
+    if (!auth) {
+      return res.status(401).json(ErrorSchema("Auth", "Unauthorized!"));
+    }
+
+    // * Validating body
+    const { error } =
+      EnvironmentSchemas.EnvironmentUpdateRCRPrioritiesAtDefinitionDataRequest.validate(
+        req.body,
+        { allowUnknown: true }
+      );
+
+    if (error) {
+      return res.status(422).json(ErrorSchema(422, error.details[0].message));
+    }
+
+    // * Updating definition data
+    const updatedEnvironments =
+      await EnvironmentService.updateRCRPrioritiesAtDefinitionData(
+        req.params.id,
+        req.body
+      );
 
     switch (updatedEnvironments) {
       case -1:

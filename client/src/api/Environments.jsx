@@ -268,6 +268,31 @@ export const getIssueDetailsFromTopicDataLocalStorage = (issueId) => {
   return issueData;
 };
 
+export const getIssueDetailsFromTopicByTopicNumDataLocalStorage = async (
+  issueId,
+  topicNum
+) => {
+  let topicData = getAllTopicsDataFromLocalStorage();
+  if (!topicData) {
+    return null;
+  }
+
+  let issueData = null;
+  for (const topic of topicData) {
+    console.log("topicData", typeof topicNum, typeof topic.id);
+    if (parseInt(topic.id) === topicNum) {
+      issueData = topic.issues.find((issue) => issue.id === parseInt(issueId));
+    }
+  }
+
+  if (!issueData) {
+    return null;
+  }
+
+  delete issueData.relatedTo;
+  return issueData;
+};
+
 export const setPriorityRCRLToLocalStorage = (priorityRCRs) => {
   if (!priorityRCRs) {
     return;
@@ -357,24 +382,30 @@ export const createEnvironment = async (
   miningType,
   filterType,
   organizationName,
-  keywords
+  keywords,
+  rcrKeywords,
+  userFeedbackChannels
 ) => {
   const result = await Axios.post(
     `${baseUrl}/environment`,
     {
-      user_id: userId,
-      name: name,
-      details: details,
-      repos: repos,
-      mining_type: miningType,
-      filter_type: filterType,
-      organization_name: organizationName,
-      mining_data: null,
-      topic_data: null,
-      definition_data: null,
-      priority_data: null,
-      final_rcr: null,
-      keywords: keywords,
+      environment: {
+        user_id: userId,
+        name: name,
+        details: details,
+        repos: repos,
+        mining_type: miningType,
+        filter_type: filterType,
+        organization_name: organizationName,
+        mining_data: null,
+        topic_data: null,
+        definition_data: null,
+        priority_data: null,
+        final_rcr: null,
+        keywords: keywords,
+        rcr_keywords: rcrKeywords,
+      },
+      userFeedbackChannels: userFeedbackChannels,
     },
     { headers: { "user-id": userId, "user-token": userToken } }
   )
@@ -708,6 +739,7 @@ export const getIssueDataWithRelatedScoreFromTopicDataAtLocalStorage = (
   issueId,
   mainIssueId
 ) => {
+  console.log("topicNum, issueId, mainIssueId", topicNum, issueId, mainIssueId);
   const topicData = getAllTopicsDataFromLocalStorage();
   if (!topicData) {
     return null;
@@ -927,6 +959,94 @@ export const cloneEnvironment = async (
   const result = await Axios.post(
     `${baseUrl}/environment/${environmentId}/clone`,
     { name: newName },
+    { headers: { "user-id": userId, "user-token": userToken } }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      console.log("err", err);
+      try {
+        return {
+          error: err.response.data.message["en-US"],
+          status: err.response.status,
+        };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+  return result;
+};
+
+// RCRs na definição
+export const updateRCRAtDefinitionData = async (
+  userId,
+  userToken,
+  environmentId,
+  rcr
+) => {
+  const result = await Axios.put(
+    `${baseUrl}/environment/${environmentId}/definitiondata/rcr`,
+    rcr,
+    { headers: { "user-id": userId, "user-token": userToken } }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      console.log("err", err);
+      try {
+        return {
+          error: err.response.data.message["en-US"],
+          status: err.response.status,
+        };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+  return result;
+};
+
+export const deleteRCRAtDefinitionData = async (
+  userId,
+  userToken,
+  environmentId,
+  rcr
+) => {
+  const result = await Axios.delete(
+    `${baseUrl}/environment/${environmentId}/definitiondata/rcr`,
+    { data: rcr, headers: { "user-id": userId, "user-token": userToken } }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      console.log("err", err);
+      try {
+        return {
+          error: err.response.data.message["en-US"],
+          status: err.response.status,
+        };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+  return result;
+};
+
+export const updateRCRPrioritiesAtDefinitionData = async (
+  userId,
+  userToken,
+  environmentId,
+  rcrsReprioritized
+) => {
+  console.log(rcrsReprioritized);
+  if (rcrsReprioritized.length === 0)
+    return { error: "No RCRs to update", status: 422 };
+
+  const result = await Axios.put(
+    `${baseUrl}/environment/${environmentId}/definitiondata/rcr/priorities`,
+    rcrsReprioritized,
     { headers: { "user-id": userId, "user-token": userToken } }
   )
     .then((res) => {

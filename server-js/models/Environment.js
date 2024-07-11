@@ -32,6 +32,9 @@ module.exports = (sequelize, DataTypes) => {
       keywords: {
         type: DataTypes.ARRAY(DataTypes.STRING),
       },
+      rcr_keywords: {
+        type: DataTypes.ARRAY(DataTypes.STRING),
+      },
       organization_name: {
         type: DataTypes.STRING(255),
       },

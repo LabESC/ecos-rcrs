@@ -18,10 +18,7 @@ import { PopUpError } from "../../components/PopUp.jsx";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowUpIcon,
-  XCircleFillIcon,
-  FeedPlusIcon,
   FeedIssueDraftIcon,
-  PeopleIcon,
   CheckCircleFillIcon,
 } from "@primer/octicons-react";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";

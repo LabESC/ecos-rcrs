@@ -16,23 +16,36 @@ const EnvironmentStatus = Joi.string().valid(
 );
 
 const EnvironmentBase = Joi.object({
-  user_id: Joi.string()
-    .guid({
-      version: "uuidv4",
-    })
-    .required(),
-  name: Joi.string().required(),
-  details: Joi.string().required(),
-  mining_type: Joi.string().required(),
-  filter_type: Joi.string().required(),
-  repos: Joi.array().items(Joi.string()).required(),
-  organization_name: Joi.string().allow("").required(),
-  mining_data: Joi.object().allow(null).required(),
-  topic_data: Joi.object().allow(null).required(),
-  definition_data: Joi.object().allow(null).required(),
-  priority_data: Joi.object().allow(null).required(),
-  final_rcr: Joi.object().allow(null).required(),
-  keywords: Joi.array().items(Joi.string()).required().allow(null),
+  environment: Joi.object({
+    user_id: Joi.string()
+      .guid({
+        version: "uuidv4",
+      })
+      .required(),
+    name: Joi.string().required(),
+    details: Joi.string().required(),
+    mining_type: Joi.string().required(),
+    filter_type: Joi.string().required(),
+    repos: Joi.array().items(Joi.string()).required(),
+    organization_name: Joi.string().allow("").required(),
+    mining_data: Joi.object().allow(null).required(),
+    topic_data: Joi.object().allow(null).required(),
+    definition_data: Joi.object().allow(null).required(),
+    priority_data: Joi.object().allow(null).required(),
+    final_rcr: Joi.object().allow(null).required(),
+    keywords: Joi.array().items(Joi.string()).allow(null),
+    rcr_keywords: Joi.array().items(Joi.string()).allow(null),
+  }),
+  userFeedbackChannels: Joi.array()
+    .items(
+      Joi.object({
+        name: Joi.string().required(),
+        type: Joi.string().required(),
+        details: Joi.string().allow(""),
+        url: Joi.string().allow(""),
+      })
+    )
+    .allow(null),
 });
 
 const EnvironmentRequest = EnvironmentBase;
@@ -104,6 +117,22 @@ const EnvironmentUpdateDefinitionDataRequest = Joi.object({
   mainIssue: Joi.number().required(),
 });
 
+const EnvironmentUpdateRCRAtDefinitionDataRequest = Joi.object({
+  id: Joi.number().required(),
+  name: Joi.string().required(),
+  details: Joi.string().required(),
+  relatedToIssues: Joi.array().items(Joi.number()).required(),
+  topicNum: Joi.number().required(),
+  mainIssue: Joi.number().required(),
+});
+
+const EnvironmentUpdateRCRPrioritiesAtDefinitionDataRequest = Joi.array().items(
+  Joi.object({
+    id: Joi.number().required(),
+    priority: Joi.number().required(),
+  })
+);
+
 const EnvironmentUpdatePriorityDataRequest = Joi.object({
   exclude: Joi.array().items(Joi.number().allow(null)).required(),
   order: Joi.array()
@@ -152,6 +181,8 @@ module.exports = {
   EnvironmentUpdateTopicDataRequest,
   EnvironmentUpdatePriorityDataRequest,
   EnvironmentUpdateDefinitionDataRequest,
+  EnvironmentUpdateRCRAtDefinitionDataRequest,
+  EnvironmentUpdateRCRPrioritiesAtDefinitionDataRequest,
   EnvironmentUpdateDefinitionOrPriorityDateWithStatusRequest,
   EnvironmentUpdateFinalDataRequest,
   EnvironmentVotingUsers,

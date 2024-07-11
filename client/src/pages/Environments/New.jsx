@@ -29,6 +29,8 @@ import {
 // ! Importações de componentes criados
 import theme from "../../components/MuiTheme.jsx";
 import SideBar from "../../components/SideBar.jsx";
+import { RequestUFCPopUp } from "./UserFeedbackChannel/RequestPopUp.jsx";
+import { DetailUFCPopUp } from "./UserFeedbackChannel/DetailPopUp.jsx";
 
 // ! Importações de códigos
 import { verifyLoggedUser } from "../../api/Auth.jsx";
@@ -38,7 +40,6 @@ import {
   getOrganizationRepos,
   getRCRKeywords,
 } from "../../api/GitHub.jsx";
-import { getGitHubUserAndInstallationId } from "../../api/User.jsx";
 
 const NewEnvironment = () => {
   // ! Instanciando o useNavigate para redirecionar o usuário pra alguma página
@@ -59,14 +60,7 @@ const NewEnvironment = () => {
 
       setRCRKeywords(res);
     };
-    /*
-    const getGitHubData = async (userId, token) => {
-      const res = await getGitHubUserAndInstallationId(userId, token);
-      if (res.error) return;
-      console.log(res);
-      setGithubUserData(res);
-    };
-*/
+
     // . Verificando se o usuário está logado e obtendo seus dados
     const checkUser = async () => {
       const verifyUser = await verifyLoggedUser();
@@ -126,6 +120,23 @@ const NewEnvironment = () => {
   const [addButtonKeywordColor, setAddButtonKeywordColor] = useState("#0084fe");
   const [rcrKeywords, setRCRKeywords] = useState([]);
   const [keywords, setKeywords] = useState([]);
+  const [userFeedbackChannels, setUserFeedbackChannels] = useState([
+    {
+      type: "Software repository",
+      name: "GitHub",
+      details: "",
+      url: "https://github.com/",
+    },
+  ]);
+  const [openRequestUFC, setOpenRequestUFC] = useState(false);
+  const [addButtonUFC, setAddButtonUFC] = useState("#0084fe");
+  const [ufcForDialog, setUfcForDialog] = useState({
+    type: "",
+    name: "",
+    details: "",
+    url: "",
+  });
+  const [openDetailsUFC, setOpenDetailsUFC] = useState(false);
 
   const closeSearchErrorDialog = () => {
     setHasSearchError(false);
@@ -288,7 +299,9 @@ const NewEnvironment = () => {
       miningType,
       filterType,
       organizationName,
-      keywords
+      keywords,
+      rcrKeywords,
+      userFeedbackChannels
     );
     setIsLoading(false);
 
@@ -314,6 +327,127 @@ const NewEnvironment = () => {
   const removeKeyword = (keyword) => {
     const newKeywords = keywords.filter((k) => k !== keyword);
     setKeywords(newKeywords);
+  };
+
+  const removeRCRKeyword = (keyword) => {
+    const newRCRKeywords = rcrKeywords.filter((k) => k !== keyword);
+    setRCRKeywords(newRCRKeywords);
+  };
+
+  // * Registrando um novo User Feedback Channel localmente
+  const createNewUFC = async () => {
+    // . Obtendo dados do RCR
+    const name = document.getElementById("txt-ufc-name").value;
+    const type = document.getElementById("txt-ufc-type").value;
+    const details = document.getElementById("txt-ufc-details").value;
+    const url = document.getElementById("txt-ufc-url").value;
+
+    setIsLoading(true);
+    closeRequestUFCDialog();
+
+    if (name === "") {
+      setIsLoading(false);
+      setSearchError({
+        title: "Empty name for User Feedback Channel",
+        message: "Name is required",
+      });
+      setHasSearchError(true);
+      return;
+    }
+    if (type === "") {
+      setIsLoading(false);
+      setSearchError({
+        title: "Empty type for User Feedback Channel",
+        message: "Type is required",
+      });
+      setHasSearchError(true);
+      return;
+    }
+
+    const data = {
+      name,
+      type,
+      details,
+      url,
+    };
+
+    setUserFeedbackChannels([...userFeedbackChannels, data]);
+    setIsLoading(false);
+  };
+
+  // * Atualizando um User Feedback Channel localmente
+  const updateUFC = async () => {
+    // . Obtendo dados do RCR
+    const name = document.getElementById("txt-ufc-name-upd").value;
+    const type = document.getElementById("txt-ufc-type-upd").value;
+    const details = document.getElementById("txt-ufc-details-upd").value;
+    const url = document.getElementById("txt-ufc-url-upd").value;
+
+    setIsLoading(true);
+    closeDetailsUFCDialog();
+
+    if (name === "") {
+      setIsLoading(false);
+      setSearchError({
+        title: "Empty name for User Feedback Channel",
+        message: "Name is required",
+      });
+
+      setHasSearchError(true);
+      return;
+    }
+
+    if (type === "") {
+      setIsLoading(false);
+      setSearchError({
+        title: "Empty type for User Feedback Channel",
+        message: "Type is required",
+      });
+
+      setHasSearchError(true);
+      return;
+    }
+
+    const data = {
+      name,
+      type,
+      details,
+      url,
+    };
+
+    // . Removendo o UFC antigo
+    setUserFeedbackChannels([
+      ...userFeedbackChannels.filter(
+        (ufc) =>
+          ufc.name !== ufcForDialog.name && ufc.type !== ufcForDialog.type
+      ),
+      data,
+    ]);
+
+    //setUserFeedbackChannels([...userFeedbackChannels, data]);
+    setIsLoading(false);
+  };
+
+  // ! Funções para manipulação do PopUp de solicitação de UFC
+  const openRequestUFCDialog = () => {
+    setOpenRequestUFC(true);
+  };
+
+  const closeRequestUFCDialog = () => {
+    setOpenRequestUFC(false);
+  };
+
+  // ! Funções para manipulação do PopUp de detalhe da UFC
+  const openDetailsUFCDialog = () => {
+    setOpenDetailsUFC(true);
+  };
+
+  const closeDetailsUFCDialog = () => {
+    setOpenDetailsUFC(false);
+  };
+
+  const checkIfHasGitHubUFC = () => {
+    return userFeedbackChannels.filter((ufc) => ufc.name === "GitHub").length;
   };
 
   // . Declarando elementos da página
@@ -377,42 +511,11 @@ const NewEnvironment = () => {
                     maxRows={4}
                   />
                 </Box>
-                <FormControl className="ButtonArea">
-                  <FormLabel
-                    id="radio-button-mining_type"
-                    className="TextFieldLabel"
-                  >
-                    Mining Type*
-                  </FormLabel>
-                  <RadioGroup
-                    row
-                    aria-labelledby="radio-button-mining_type"
-                    name="radioButton-miningType"
-                    value={miningType}
-                    onChange={(e) => setMiningType(e.target.value)}
-                  >
-                    <FormControlLabel
-                      value="organization"
-                      control={<Radio />}
-                      label="Organization"
-                    />
-                    <FormControlLabel
-                      value="repos"
-                      control={<Radio />}
-                      label="Many Repos"
-                    />
-                  </RadioGroup>
-                </FormControl>
-                <Box
-                  className="ButtonArea"
-                  style={{
-                    visibility:
-                      miningType === "organization" ? "visible" : "collapse",
-                  }}
-                >
+                <Box className="ButtonArea">
                   <Typography className="TextFieldLabel">
-                    GitHub Organization
+                    User Feedback Channels
                   </Typography>
+
                   <Box
                     style={{
                       display: "flex",
@@ -420,65 +523,161 @@ const NewEnvironment = () => {
                       width: "100%",
                     }}
                   >
-                    <TextField
-                      id="txt-organization"
-                      fullWidth
-                      variant="outlined"
-                      placeholder="Insert the disered GitHub organization"
-                    />
-                    <Button
-                      onClick={getOrganizationRepositories}
-                      style={{ marginLeft: "0.5em" }}
-                      id="btn-add-repository"
-                      onMouseOver={() => {
-                        setAddButtonRepoColor("#7da7fa");
-                      }}
-                      onMouseOut={() => {
-                        setAddButtonRepoColor("#0084fe");
-                      }}
-                    >
-                      <CodescanCheckmarkIcon
-                        size={24}
-                        fill={addButtonRepoColor}
-                      />
-                    </Button>
+                    {userFeedbackChannels.length > 0
+                      ? userFeedbackChannels.map((ufc, index) => {
+                          return (
+                            <Chip
+                              label={ufc.name}
+                              id={`CHP_UFC_${ufc.name}_${index}`}
+                              key={`CHP_UFC_${name}_${index}`}
+                              style={{ margin: "0.25em" }}
+                              onClick={() => {
+                                setUfcForDialog(ufc);
+                                openDetailsUFCDialog();
+                              }}
+                              onDelete={() => {
+                                setUserFeedbackChannels(
+                                  userFeedbackChannels.filter(
+                                    (ufc, i) => i !== index
+                                  )
+                                );
+                              }}
+                            />
+                          );
+                        })
+                      : ""}
+
+                    <Tooltip title="Add a new User Feedback Channel (this is only for documentation purposes)">
+                      <Button
+                        onClick={openRequestUFCDialog}
+                        style={{ marginLeft: "0.5em" }}
+                        id="btn-add-ufc"
+                        onMouseOver={() => {
+                          setAddButtonUFC("#7da7fa");
+                        }}
+                        onMouseOut={() => {
+                          setAddButtonUFC("#0084fe");
+                        }}
+                      >
+                        <FeedPlusIcon size={24} fill={addButtonUFC} />
+                      </Button>
+                    </Tooltip>
                   </Box>
                 </Box>
                 <Box
-                  className="ButtonArea"
+                  id="box-github-mining"
                   style={{
-                    visibility: miningType === "repos" ? "visible" : "collapse",
+                    visibility:
+                      checkIfHasGitHubUFC() > 0
+                        ? "visible !important"
+                        : "hidden !important",
                   }}
                 >
-                  <Typography className="TextFieldLabel">
-                    GitHub Repository
-                  </Typography>
+                  <FormControl className="ButtonArea">
+                    <FormLabel
+                      id="radio-button-mining_type"
+                      className="TextFieldLabel"
+                    >
+                      GitHub Mining Type*
+                    </FormLabel>
+                    <RadioGroup
+                      row
+                      aria-labelledby="radio-button-mining_type"
+                      name="radioButton-miningType"
+                      value={miningType}
+                      onChange={(e) => setMiningType(e.target.value)}
+                    >
+                      <FormControlLabel
+                        value="organization"
+                        control={<Radio />}
+                        label="Organization"
+                      />
+                      <FormControlLabel
+                        value="repos"
+                        control={<Radio />}
+                        label="Many Repos"
+                      />
+                    </RadioGroup>
+                  </FormControl>
+
                   <Box
+                    className="ButtonArea"
                     style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      width: "100%",
+                      visibility:
+                        miningType === "organization" ? "visible" : "collapse",
                     }}
                   >
-                    <TextField
-                      id="txt-add-repository"
-                      fullWidth
-                      variant="outlined"
-                      placeholder="Insert the disered GitHub repository"
-                    />
-                    <Button
-                      onClick={checkRepoAvailable}
-                      style={{ marginLeft: "0.5em" }}
-                      id="btn-add-repository"
-                      onMouseOver={() => {
-                        setAddButtonRepoColor("#7da7fa");
-                      }}
-                      onMouseOut={() => {
-                        setAddButtonRepoColor("#0084fe");
+                    <Typography className="TextFieldLabel">
+                      GitHub Organization
+                    </Typography>
+                    <Box
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        width: "100%",
                       }}
                     >
-                      <FeedPlusIcon size={24} fill={addButtonRepoColor} />
-                    </Button>
+                      <TextField
+                        id="txt-organization"
+                        fullWidth
+                        variant="outlined"
+                        placeholder="Insert the disered GitHub organization"
+                      />
+                      <Button
+                        onClick={getOrganizationRepositories}
+                        style={{ marginLeft: "0.5em" }}
+                        id="btn-add-repository"
+                        onMouseOver={() => {
+                          setAddButtonRepoColor("#7da7fa");
+                        }}
+                        onMouseOut={() => {
+                          setAddButtonRepoColor("#0084fe");
+                        }}
+                      >
+                        <CodescanCheckmarkIcon
+                          size={24}
+                          fill={addButtonRepoColor}
+                        />
+                      </Button>
+                    </Box>
+                  </Box>
+                  <Box
+                    className="ButtonArea"
+                    style={{
+                      visibility:
+                        miningType === "repos" ? "visible" : "collapse",
+                    }}
+                  >
+                    <Typography className="TextFieldLabel">
+                      GitHub Repository
+                    </Typography>
+                    <Box
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        width: "100%",
+                      }}
+                    >
+                      <TextField
+                        id="txt-add-repository"
+                        fullWidth
+                        variant="outlined"
+                        placeholder="Insert the disered GitHub repository"
+                      />
+                      <Button
+                        onClick={checkRepoAvailable}
+                        style={{ marginLeft: "0.5em" }}
+                        id="btn-add-repository"
+                        onMouseOver={() => {
+                          setAddButtonRepoColor("#7da7fa");
+                        }}
+                        onMouseOut={() => {
+                          setAddButtonRepoColor("#0084fe");
+                        }}
+                      >
+                        <FeedPlusIcon size={24} fill={addButtonRepoColor} />
+                      </Button>
+                    </Box>
                   </Box>
                 </Box>
               </Box>
@@ -646,6 +845,9 @@ const NewEnvironment = () => {
                         label={keyword}
                         key={`CHP-RCRKEY_${index}`}
                         style={{ margin: "0.25em" }}
+                        onDelete={() => {
+                          removeRCRKeyword(keyword);
+                        }}
                       />
                     );
                   })}
@@ -717,6 +919,17 @@ const NewEnvironment = () => {
           {searchError.message}
         </Alert>
       </Snackbar>
+      <RequestUFCPopUp
+        open={openRequestUFC}
+        close={closeRequestUFCDialog}
+        createNewUFC={createNewUFC}
+      />
+      <DetailUFCPopUp
+        open={openDetailsUFC}
+        close={closeDetailsUFCDialog}
+        ufc={ufcForDialog}
+        updateUFC={updateUFC}
+      />
       <Backdrop
         sx={{
           background: "rgba(0,0,0,0.5)",

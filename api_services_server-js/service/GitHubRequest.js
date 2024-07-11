@@ -23,7 +23,14 @@ class GitHubRequest {
    * @param {Array} repos Array de repositórios (strings).
    * @param {string} environment_id O id do ambiente (BD) que solicitou a mineração.
    **/
-  async run(repos, environment_id, filter_type, keywords, installationIds) {
+  async run(
+    repos,
+    environment_id,
+    filter_type,
+    keywords,
+    installationIds,
+    rcr_keywords
+  ) {
     // * Iniciando serviço
     this.#isRunning = true;
     let result = null;
@@ -98,11 +105,16 @@ class GitHubRequest {
     }
     if (filter_type === "keywords") {
       console.log("Keyword filter applied."); // !! LOG
-      if (!keywords) keywords = [];
       // . Lemmatizando palavras chaves do contexto do ambiente
+      if (!keywords) keywords = [];
       keywords = keywords.map((word) => lemmatize(word));
+
+      // . Lemmatizando palavras chaves do contexto do change requests
+      if (!rcr_keywords) rcr_keywords = [];
+      rcr_keywords = rcr_keywords.map((word) => lemmatize(word));
+
       // . Unindo palavras-chave do contexto do ambiente com as palavras-chave lemmatizadas do sistema
-      let allKeywords = [...new Set([...allWordsWithLemma, ...keywords])];
+      let allKeywords = [...new Set([...rcr_keywords, ...keywords])];
 
       let newResultsIssueArr = [];
       for (const issue of result.issues) {
@@ -164,7 +176,8 @@ class GitHubRequest {
         nextRequest.environment_id,
         nextRequest.filter_type,
         nextRequest.keywords,
-        nextRequest.installationIds
+        nextRequest.installationIds,
+        nextRequest.rcr_keywords
       );
     }
   }
@@ -181,7 +194,8 @@ class GitHubRequest {
     environment_id,
     filter_type,
     keywords,
-    installationIds
+    installationIds,
+    rcr_keywords
   ) {
     // * Adicionando requisição na fila
     this.#requestsQueue.push({
@@ -190,6 +204,7 @@ class GitHubRequest {
       filter_type: filter_type,
       keywords: keywords,
       installationIds: installationIds,
+      rcr_keywords: rcr_keywords,
     });
 
     console.log("this.#isRunning: ", this.#isRunning);

@@ -4,6 +4,8 @@ const { Op, literal } = require("sequelize");
 
 // ! Importando modelos
 const EnvironmentModel = require("../database/db").Environment;
+const EnvironmentUserFeedbackChannels =
+  require("../database/db").EnvironmentUserFeedbackChannels;
 const UserModel = require("../database/db").User;
 const VotingUserModel = require("../database/db").VotingUser;
 const VotingUserEnvironment = require("../database/db").VotingUserEnvironment;
@@ -17,6 +19,7 @@ const basicFields = [
   "mining_type",
   "filter_type",
   "keywords",
+  "rcr_keywords",
   "organization_name",
   "status",
   "repos",
@@ -464,6 +467,35 @@ class Environment {
       ],
       where: { id: environmentId },
     });*/
+  }
+
+  static async getEnvironmentName(id) {
+    return await EnvironmentModel.findOne({
+      attributes: ["name"],
+      where: { id: id },
+    });
+  }
+
+  // ! EnvironmentUserFeedbackChannels
+  /**
+   * Create many environment user feedback channels.
+   * @param {Array<Object>} environmentUserFeedbackChannels - The ID of the environment.
+   * @returns {Array<Object>} - An array of user feedback channels.
+   */
+  static async createManyEnvironmentUserFeedbackChannel(
+    environmentUserFeedbackChannels,
+    environment_id
+  ) {
+    // Create an ID for each environment user feedback channel and associate it with the environment ID.
+    for (let environmentUserFeedbackChannel of environmentUserFeedbackChannels) {
+      environmentUserFeedbackChannel.id = uuidv4();
+      environmentUserFeedbackChannel.environment_id = environment_id;
+    }
+
+    // Create the environment user feedback channels.
+    return await EnvironmentUserFeedbackChannels.bulkCreate(
+      environmentUserFeedbackChannels
+    );
   }
 }
 

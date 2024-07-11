@@ -59,7 +59,7 @@ class GitHub {
 
     if (access_token)
       response = await this.requests.get(
-        `repos/${repo}/issues?page=${page}&per_page=100?&state=open`,
+        `repos/${repo}/issues?page=${page}&per_page=100?&state=all`,
         {
           headers: {
             Authorization: `Bearer ${access_token}`, //`token ${GITHUB_TOKEN}`
@@ -68,7 +68,7 @@ class GitHub {
       );
     else
       response = await this.requests.get(
-        `repos/${repo}/issues?page=${page}&per_page=100?&state=open`,
+        `repos/${repo}/issues?page=${page}&per_page=100?&state=all`,
         {
           headers: this.#request_headers,
         }
