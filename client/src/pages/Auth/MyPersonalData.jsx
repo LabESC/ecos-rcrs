@@ -163,7 +163,7 @@ const MyPersonalData = () => {
 
   // ! Funções para manipulação de dados na página
   const [loggedUser, setLoggedUser] = useState({ userId: "", userToken: "" });
-  const [myData, setMyData] = useState([]); // . Armazena os dados do usuário
+  const [myData, setMyData] = useState({}); // . Armazena os dados do usuário
   const [installations, setInstallations] = useState([]); // . Armazena as instalações do usuário
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -194,7 +194,6 @@ const MyPersonalData = () => {
     }
 
     // . Atualizando os dados do usuário
-    console.log(response);
     setMyData(response);
     setIsLoading(false);
 
@@ -287,12 +286,13 @@ const MyPersonalData = () => {
             className="ButtonArea"
             sx={{
               alignItems: "center !important",
-              display: installations.length > 0 ? "flex" : "none !important",
+              display: myData.github_user ? "flex" : "none !important",
             }}
           >
             <Typography className="TextFieldLabel">
               {"Installations: (Org/user - Created date)"}
             </Typography>
+
             <GitHubButton
               visibility={myData.github_user ? "visible" : "hidden"}
               marginTop="0.5em"

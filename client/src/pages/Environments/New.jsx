@@ -57,7 +57,7 @@ const NewEnvironment = () => {
         activeErrorDialog(res.error.code, res.error.message, res.status);
         return;
       }
-
+      console.log(res.join(","));
       setRCRKeywords(res);
     };
 
