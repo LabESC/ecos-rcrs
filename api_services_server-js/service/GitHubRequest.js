@@ -29,14 +29,23 @@ class GitHubRequest {
     filter_type,
     keywords,
     installationIds,
-    rcr_keywords
+    rcr_keywords,
+    created_at_since_filter,
+    created_at_until_filter,
+    status
   ) {
     // * Iniciando serviço
     this.#isRunning = true;
     let result = null;
     try {
       // * Executando requisições
-      result = await getRepos(repos, installationIds);
+      result = await getRepos(
+        repos,
+        installationIds,
+        created_at_since_filter,
+        created_at_until_filter,
+        status
+      );
 
       // * Finalizando serviço
       this.#isRunning = false;
@@ -177,7 +186,10 @@ class GitHubRequest {
         nextRequest.filter_type,
         nextRequest.keywords,
         nextRequest.installationIds,
-        nextRequest.rcr_keywords
+        nextRequest.rcr_keywords,
+        nextRequest.created_at_since_filter,
+        nextRequest.created_at_until_filter,
+        nextRequest.status
       );
     }
   }
@@ -195,7 +207,10 @@ class GitHubRequest {
     filter_type,
     keywords,
     installationIds,
-    rcr_keywords
+    rcr_keywords,
+    created_at_since_filter,
+    created_at_until_filter,
+    status
   ) {
     // * Adicionando requisição na fila
     this.#requestsQueue.push({
@@ -205,6 +220,9 @@ class GitHubRequest {
       keywords: keywords,
       installationIds: installationIds,
       rcr_keywords: rcr_keywords,
+      created_at_since_filter: created_at_since_filter,
+      created_at_until_filter: created_at_until_filter,
+      status: status,
     });
 
     console.log("this.#isRunning: ", this.#isRunning);

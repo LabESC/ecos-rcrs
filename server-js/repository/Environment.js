@@ -23,6 +23,9 @@ const basicFields = [
   "organization_name",
   "status",
   "repos",
+  "mining_filter_date_since",
+  "mining_filter_date_until",
+  "mining_issues_status",
 ];
 
 class Environment {

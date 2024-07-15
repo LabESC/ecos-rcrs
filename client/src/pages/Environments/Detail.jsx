@@ -288,6 +288,21 @@ const EnvironmentDetail = () => {
           </Typography>
 
           <SuccessButton
+            icon={<PeopleIcon size={18} />}
+            message={"Start RCR Definition Voting"}
+            width={"220px"}
+            height={"30px"}
+            uppercase={false}
+            marginLeft="0"
+            marginRight="4em"
+            backgroundColor={"#9fff64"}
+            action={() => {
+              openDefinitionRCRVoteModal();
+            }}
+            visibility={definitionRCRs.length !== 0 ? "visible" : "hidden"}
+          />
+
+          <SuccessButton
             icon={<RepoIcon size={18} />}
             message={"List RCR"}
             width={"200px"}

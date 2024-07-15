@@ -384,7 +384,10 @@ export const createEnvironment = async (
   organizationName,
   keywords,
   rcrKeywords,
-  userFeedbackChannels
+  userFeedbackChannels,
+  createdAtSince,
+  createdAtUntil,
+  status
 ) => {
   const result = await Axios.post(
     `${baseUrl}/environment`,
@@ -404,6 +407,9 @@ export const createEnvironment = async (
         final_rcr: null,
         keywords: keywords,
         rcr_keywords: rcrKeywords,
+        mining_filter_date_since: createdAtSince,
+        mining_filter_date_until: createdAtUntil,
+        mining_issues_status: status,
       },
       userFeedbackChannels: userFeedbackChannels,
     },

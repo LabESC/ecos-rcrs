@@ -73,6 +73,19 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: "mining",
       },
+      mining_filter_date_since: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+      mining_filter_date_until: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
+      mining_issues_status: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "open",
+      },
     },
     {
       tableName: "environments",

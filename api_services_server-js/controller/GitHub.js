@@ -38,7 +38,16 @@ router.post("/api/github/mining/repos", async (req, res) => {
   }
 
   // * Obtendo repos e environment_id
-  const { environment_id, filter_type, keywords, user_id, rcr_keywords } = body;
+  const {
+    environment_id,
+    filter_type,
+    keywords,
+    user_id,
+    rcr_keywords,
+    mining_filter_date_since,
+    mining_filter_date_until,
+    mining_issues_status,
+  } = body;
   let repos = body.repos;
 
   // * Se não houver repositórios, retorne erro
@@ -63,7 +72,10 @@ router.post("/api/github/mining/repos", async (req, res) => {
     filter_type,
     keywords,
     installationIds,
-    rcr_keywords
+    rcr_keywords,
+    mining_filter_date_since,
+    mining_filter_date_until,
+    mining_issues_status
   );
 
   return res.status(200).json({ message: "Mining request received." });

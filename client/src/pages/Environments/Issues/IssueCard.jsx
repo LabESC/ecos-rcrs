@@ -1,7 +1,7 @@
 import { Badge, Box, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { setIssueDataToLocalStorage } from "../../../api/Environments";
-import { IssueOpenedIcon, CheckIcon } from "@primer/octicons-react";
+import { IssueOpenedIcon, CheckCircleIcon } from "@primer/octicons-react";
 
 export function IssueCard(props) {
   // ! Instanciando o useNavigate para redirecionar o usuário pra alguma página
@@ -52,9 +52,9 @@ export function IssueCard(props) {
               </>
             ) : (
               <>
-                <CheckIcon size={10} style={{ marginRight: "0.5em" }} />
+                <CheckCircleIcon size={10} style={{ marginRight: "0.5em" }} />
                 <Typography style={{ fontSize: 10, marginLeft: "0.4em" }}>
-                  Solved
+                  Closed
                 </Typography>
               </>
             )

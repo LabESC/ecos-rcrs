@@ -1,6 +1,6 @@
-const cheerio = require("cheerio");
-
-const { removeStopwords } = require("stopword");
+const cheerio = require("cheerio"); // * Importando cheerio (biblioteca de parse de HTML)
+const { DateTime } = require("luxon"); // * Importando luxon (biblioteca de datas)
+const { removeStopwords } = require("stopword"); // * Importando stopword (biblioteca de remoção de stopwords)
 
 // * Palavras poluentes ao texto
 const wordsToRemove = ["\n", "\r", "\r\n", "\r\n\r\n", "[x]", "[X]", "[ ]"];
@@ -18,16 +18,37 @@ const regexCode = /```[\s\S]*?```/;
  * @param {number} sysId - Um array de objetos do tipo issue (vindo do GitHub).
  * @return {array} Um array com o body das issues.
  **/
-async function filtraArrayRequestGit(array, sysId) {
+async function filtraArrayRequestGit(
+  array,
+  sysId,
+  createdAtSince,
+  createdAtUntil
+) {
   // * Inicializando variáveis
   let arrayFiltrado = [];
   let issueId = false;
   let issueBody = null;
   let issueTags = null;
+  let endMining = false;
 
   // * Para cada issue, limpar o texto
   for (const issue of array) {
     if (issue.body != null) {
+      // * Se a data de criação da issue for maior que a data de criação desde, continue
+      if (createdAtSince) {
+        const createdAt = DateTime.fromISO(issue.created_at);
+        if (createdAt < createdAtSince) continue; // . Se a data de criação da issue for menor que a data de criação desde, continue
+      }
+
+      // * Se a data de criação da issue for menor que a data de criação final, continue
+      if (createdAtUntil) {
+        const createdAt = DateTime.fromISO(issue.created_at);
+        if (createdAt > createdAtUntil) {
+          endMining = true;
+          break;
+        } // . Se a data de criação da issue for maior que a data de criação final, saia do loop, pois acabaram as issues a ser mineradas
+      }
+
       // . Obtendo id da issue
       issueId = issue.number;
 
@@ -85,7 +106,7 @@ async function filtraArrayRequestGit(array, sysId) {
   }
 
   // * Retorne o array filtrado e o id do sistema atualizado
-  return { result: arrayFiltrado, sysIdUpdated: sysId };
+  return { result: arrayFiltrado, sysIdUpdated: sysId, endMining: endMining };
 }
 
 /***

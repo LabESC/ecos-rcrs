@@ -53,13 +53,13 @@ class GitHub {
   }
 
   // ! Função para buscar issues de um repositório
-  async getRepositoriesIssues(repo, page, access_token = null) {
+  async getRepositoriesIssues(repo, page, status, access_token = null) {
     // * Fazendo requisição
     let response;
 
     if (access_token)
       response = await this.requests.get(
-        `repos/${repo}/issues?page=${page}&per_page=100?&state=all`,
+        `repos/${repo}/issues?page=${page}&per_page=100?&state=${status}&sort=created&direction=asc`, // Per page (para cada pagina) = 100, State (estado) -= all (todos) / open (abertas) / closed (fechadas), sort (ordenar) = created (criado em), direction (direção) = asc (ascendente)
         {
           headers: {
             Authorization: `Bearer ${access_token}`, //`token ${GITHUB_TOKEN}`
@@ -68,7 +68,7 @@ class GitHub {
       );
     else
       response = await this.requests.get(
-        `repos/${repo}/issues?page=${page}&per_page=100?&state=all`,
+        `repos/${repo}/issues?page=${page}&per_page=100?&state=${status}&sort=created&direction=asc`,
         {
           headers: this.#request_headers,
         }
@@ -91,7 +91,7 @@ class GitHub {
     // * Enquanto ele não for refeito, aguarde, refaça e valide novamente
     while (checkExpiredLimit != 0) {
       response = await this.requests.get(
-        `repos/${repo}/issues?page=${page}&per_page=100?&state=all`,
+        `repos/${repo}/issues?page=${page}&per_page=100?&state=${status}&sort=created&direction=asc`,
         {
           headers: this.#request_headers,
         }

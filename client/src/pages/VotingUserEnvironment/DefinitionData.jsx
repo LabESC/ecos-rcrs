@@ -408,7 +408,7 @@ const DefinitionDataPage = () => {
                           openIssueOnModal(defData.mainIssue);
                         }}
                       >
-                        {defData.mainIssue.id}
+                        {defData.mainIssue}
                       </Button>
                     </Box>
 
@@ -428,7 +428,7 @@ const DefinitionDataPage = () => {
                               openIssueOnModal(issue);
                             }}
                           >
-                            {issue.id}
+                            {issue}
                           </Button>
                         );
                       })}

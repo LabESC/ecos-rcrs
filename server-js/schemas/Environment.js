@@ -35,6 +35,9 @@ const EnvironmentBase = Joi.object({
     final_rcr: Joi.object().allow(null).required(),
     keywords: Joi.array().items(Joi.string()).allow(null),
     rcr_keywords: Joi.array().items(Joi.string()).allow(null),
+    mining_filter_date_since: Joi.date().iso().allow(null),
+    mining_filter_date_until: Joi.date().iso().allow(null),
+    mining_issues_status: Joi.string().required(),
   }),
   userFeedbackChannels: Joi.array()
     .items(

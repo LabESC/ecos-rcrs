@@ -1,3 +1,4 @@
+const { DateTime } = require("luxon"); // * Importando luxon (biblioteca de datas)
 const GitHubRepository = require("../repository/GitHub");
 const {
   filtraArrayRequestGit,
@@ -5,7 +6,19 @@ const {
   hasNextLinkString,
 } = require("./Words");
 
-async function getRepos(repos, installationIds) {
+async function getRepos(
+  repos,
+  installationIds,
+  created_at_since,
+  created_at_until,
+  status
+) {
+  // * Instanciando datas de string para objeto (erro, verificar...)
+  let createdAtSince = null,
+    createdAtUntil = null;
+  if (created_at_since) createdAtSince = DateTime.fromISO(created_at_since);
+  if (created_at_until) createdAtUntil = DateTime.fromISO(created_at_until);
+
   // * Instanciando json de issues
   const issues = {};
   const errors = {};
@@ -59,6 +72,7 @@ async function getRepos(repos, installationIds) {
         response = await gitHubRepository.getRepositoriesIssues(
           repo,
           page,
+          status,
           installationIdAccessToken
         );
       } catch (e) {
@@ -77,16 +91,27 @@ async function getRepos(repos, installationIds) {
       }
 
       // * Se houver issues, filtra-las
-      issuesResponse = await filtraArrayRequestGit(response.data, sysId);
+      issuesResponse = await filtraArrayRequestGit(
+        response.data,
+        sysId,
+        createdAtSince,
+        createdAtUntil
+      );
       sysId = issuesResponse.sysIdUpdated;
+      endMining = issuesResponse.endMining;
 
-      // * Se após a filtragem, não houver issues, retornar
+      // * Se houver issues pós-filtragem, adicione no array de issues para o repositorio indicado
       if (issuesResponse.result.length !== 0) {
         // * Iterando sobre as issues obtidas
         issues[repo] = issues[repo].concat(issuesResponse.result);
-      } else {
+      }
+      // * Se não houver issues, retornar
+      else {
         break;
       }
+
+      // * Se a mineração foi finalizada (data final do periodo excedeu), ir para o proximo repositorio
+      if (endMining === true) break;
 
       // * Verificando se há uma próxima página
       if (!hasNextLinkString(response.links)) break;
