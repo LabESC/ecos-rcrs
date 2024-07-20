@@ -170,6 +170,10 @@ module.exports = {
       newEnvironment.repos,
       newEnvironment.filter_type,
       newEnvironment.keywords,
+      newEnvironment.rcr_keywords,
+      newEnvironment.mining_filter_date_since,
+      newEnvironment.mining_filter_date_until,
+      newEnvironment.mining_issues_status,
       newEnvironment.user_id
     );
 

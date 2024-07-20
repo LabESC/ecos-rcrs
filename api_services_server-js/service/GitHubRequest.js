@@ -157,6 +157,12 @@ class GitHubRequest {
       newResultsIssueArr = null; // Limpando memória
     }
 
+    // * Atualizando id de cada issue contida no result.issues
+    result.issues = result.issues.map((issue, index) => {
+      issue.id = index;
+      return issue;
+    });
+
     // * Enviando resultado para o banco de dados
     const sendToDB = await updateEnvironmentMiningData(
       environment_id,

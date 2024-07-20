@@ -170,10 +170,10 @@ class Environment {
     let emailText = "";
     if (!requestTopic) {
       emailText = `<br/>The mining data for your environment ${environmentUser.name} is done!\n`;
-      emailText += `<br/>You need to log on the system to request the topics generation.\n`;
+      emailText += `<br/>You need to log on the system to request the topic generation.\n`;
     } else {
       emailText = `<br/>The mining data for your environment ${environmentUser.name} is done!\n`;
-      emailText += `<br/>The topics generation is being processed, when finished, you'll be notified.\n`;
+      emailText += `<br/>The topic generation is being processed, when finished, you'll be notified.\n`;
     }
 
     try {
@@ -205,7 +205,7 @@ class Environment {
     const environmentUser =
       await EnvironmentRepository.getCreatedUserEmailByEnvironmentId(id);
 
-    const subject = `SECO - RCR: ${environmentUser.name} topics generation done`;
+    const subject = `SECO - RCR: ${environmentUser.name} topic generation done`;
     let emailText = `<br/>The topics for your environment ${environmentUser.name} were generated!\n`;
     emailText += `<br/>You can log on the system to read them.\n`;
 
@@ -652,10 +652,19 @@ class Environment {
 
     let definitionData = null;
     let miningData = null;
+    let topicData = null;
 
     // * Obtaining mining data if exists
     try {
       miningData = await EnvironmentRepository.getMiningData(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    // * Obtaining topic data if exists
+    try {
+      topicData = await EnvironmentRepository.getTopicData(id);
     } catch (e) {
       console.log(e);
       return -1;
@@ -671,6 +680,7 @@ class Environment {
 
     if (!miningData) return miningData;
     if (!definitionData) return definitionData;
+    if (!topicData) return topicData;
 
     // * Filtering the rcrs who are going to vote
     definitionData.rcrs = definitionData.rcrs.filter((rcr) => {

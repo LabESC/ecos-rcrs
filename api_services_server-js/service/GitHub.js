@@ -105,10 +105,10 @@ async function getRepos(
         // * Iterando sobre as issues obtidas
         issues[repo] = issues[repo].concat(issuesResponse.result);
       }
-      // * Se não houver issues, retornar
+      /*// * Se não houver issues, retornar
       else {
         break;
-      }
+      }*/
 
       // * Se a mineração foi finalizada (data final do periodo excedeu), ir para o proximo repositorio
       if (endMining === true) break;
