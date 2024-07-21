@@ -181,7 +181,6 @@ const EnvironmentDetailNew = () => {
 
   // . Função para ir a pagina da issue
   const goToissueDetail = (issue) => {
-    console.log(issue);
     // . Obtendo o nome do topico da issue
     issue.topicName = topics[issue.topicNum].name;
     setIssueToLocalStorage(issue);
@@ -225,10 +224,8 @@ const EnvironmentDetailNew = () => {
 
   // ! Funçao pra mudar de topico
   const changeActualTopic = async (e) => {
-    console.log(e.target.value);
     setActualTopic(e.target.value);
     setPage(1);
-    console.log(topics[e.target.value], topics[e.target.value].length);
     setMaxPage(Math.ceil(topics[e.target.value].length / 24));
     setIsLoading(true);
 

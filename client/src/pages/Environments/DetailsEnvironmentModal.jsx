@@ -58,7 +58,7 @@ export function DetailsEnvironmentModal(props) {
           ""
         )}
         <Typography gutterBottom>
-          <strong> Topics quantity: </strong>
+          <strong> Topics generated: </strong>
           {topicsLength}
         </Typography>
         {environment.mining_type !== "repos" ? (
