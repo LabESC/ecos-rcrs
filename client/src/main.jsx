@@ -15,6 +15,7 @@ import Activate from "./pages/Auth/Activate.jsx";
 // . Environments
 import MyEnvironment from "./pages/Environments/My.jsx";
 import EnvironmentDetail from "./pages/Environments/Detail.jsx";
+import EnvironmentDetailNew from "./pages/Environments/DetailsNew.jsx";
 import NewEnvironment from "./pages/Environments/New.jsx";
 import EnvironmentDetailDefinition from "./pages/Environments/DetailDefinition.jsx";
 import EnvironmentDetailPriority from "./pages/Environments/DetailPriority.jsx";
@@ -22,10 +23,12 @@ import EnvironmentFinalReport from "./pages/Environments/DetailFinal.jsx";
 
 // . Environments -> Issues
 import IssueDetail from "./pages/Environments/Issues/Detail.jsx";
+import IssueDetailNew from "./pages/Environments/Issues/DetailNew.jsx";
 
 // . Environment for VotingUsers
 import DefinitionDataPage from "./pages/VotingUserEnvironment/DefinitionData.jsx";
 import PriorityDataPage from "./pages/VotingUserEnvironment/PriorityData.jsx";
+import PriorityDataPageNew from "./pages/VotingUserEnvironment/PriorityDataNew.jsx";
 
 // ! Criando rotas
 import { Routes, BrowserRouter, Route } from "react-router-dom";
@@ -40,10 +43,18 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <Route path="/forgot-password" element={<ForgotPassword />}></Route>
         <Route path="/my-data" element={<MyPersonalData />}></Route>
         <Route path="/my-environments" element={<MyEnvironment />}></Route>
-        <Route path="/environment/:id" element={<EnvironmentDetail />}></Route>
+        <Route
+          path="/environment/:id"
+          element={
+            <EnvironmentDetailNew /> // <EnvironmentDetail />
+          }
+        ></Route>
         <Route
           path="/environment/:enviroment-id/issue/:id"
-          element={<IssueDetail />}
+          element={
+            <IssueDetailNew />
+            //<IssueDetail />
+          }
         ></Route>
         <Route path="/new-environment" element={<NewEnvironment />}></Route>
         <Route
@@ -56,7 +67,11 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         />
         <Route
           path="/environment/:id/priorityvote"
-          element={<PriorityDataPage />}
+          element={
+            <PriorityDataPageNew
+            // PriorityDataPage
+            />
+          }
         />
         <Route
           path="/environment/:id/priority"

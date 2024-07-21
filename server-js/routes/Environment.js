@@ -43,7 +43,17 @@ router.get(
 router.post("/:id/finaldata", EnvironmentController.updateFinalData);
 router.get("/:id/miningdata", EnvironmentController.getMiningData);
 router.get("/:id/topicdata", EnvironmentController.getTopicData);
+router.get("/:id/topicinfo", EnvironmentController.getTopicsInfo);
+router.get(
+  "/:id/topicdata/:topicNum/:page",
+  EnvironmentController.getTopicDataByTopicAndPage
+);
+router.get("/:id/hasrcrdefinitiondata", EnvironmentController.hasDefinitionRCR);
 router.get("/:id/definitiondata", EnvironmentController.getDefinitionData);
+router.get(
+  "/:id/definitiondatanew",
+  EnvironmentController.getDefinitionDataNew
+);
 router.get("/:id/prioritydata", EnvironmentController.getPriorityData);
 router.get("/:id/finaldata", EnvironmentController.getFinalData);
 router.get(
@@ -67,6 +77,10 @@ router.put("/:id/endvoting/priority", EnvironmentController.endPriorityVoting);
 router.put(
   "/:id/endvoting/definition",
   EnvironmentController.endDefinitionVoting
+);
+router.post(
+  "/:id/endrcr/definition",
+  EnvironmentController.endDefinitionRCRAndGoToPriorityRCR
 );
 router.post(
   "/:id/end",

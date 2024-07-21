@@ -547,6 +547,80 @@ const NewEnvironment = () => {
                     maxRows={4}
                   />
                 </Box>
+                <FormControl className="ButtonArea">
+                  <FormLabel
+                    id="radio-button-mining_type"
+                    className="TextFieldLabel"
+                  >
+                    Filter Type*
+                  </FormLabel>
+                  <RadioGroup
+                    row
+                    aria-labelledby="radio-button-filter_type"
+                    name="radioButton-filterType"
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                  >
+                    <FormControlLabel
+                      value="none"
+                      control={<Radio />}
+                      label="No Filter"
+                    />
+
+                    <FormControlLabel
+                      value="keywords"
+                      control={<Radio />}
+                      label={
+                        <Tooltip title="This will applly a filter of requirement change keywords (RCR) and allow you to add specific project keywords that refers to RCR at the issues mined">
+                          <Box>
+                            {"By keywords     "}
+                            <InfoIcon size={16} />
+                          </Box>
+                        </Tooltip>
+                      }
+                    ></FormControlLabel>
+                  </RadioGroup>
+                </FormControl>
+
+                <Box
+                  className="ButtonArea"
+                  style={{
+                    visibility:
+                      filterType === "keywords" ? "visible" : "collapse",
+                  }}
+                >
+                  <Typography className="TextFieldLabel">
+                    Environment keywords
+                  </Typography>
+                  <Box
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      width: "100%",
+                    }}
+                  >
+                    <TextField
+                      id="txt-repository"
+                      fullWidth
+                      variant="outlined"
+                      placeholder="Insert the disered keyword for the filter"
+                    />
+                    <Button
+                      onClick={addKeyword}
+                      style={{ marginLeft: "0.5em" }}
+                      id="btn-add-keyword"
+                      onMouseOver={() => {
+                        setAddButtonKeywordColor("#7da7fa");
+                      }}
+                      onMouseOut={() => {
+                        setAddButtonKeywordColor("#0084fe");
+                      }}
+                    >
+                      <FeedPlusIcon size={24} fill={addButtonKeywordColor} />
+                    </Button>
+                  </Box>
+                </Box>
+
                 <Box className="ButtonArea">
                   <Typography className="TextFieldLabel">
                     User Feedback Channels
@@ -566,7 +640,10 @@ const NewEnvironment = () => {
                               label={ufc.name}
                               id={`CHP_UFC_${ufc.name}_${index}`}
                               key={`CHP_UFC_${name}_${index}`}
-                              style={{ margin: "0.25em" }}
+                              style={{
+                                margin: "0.25em",
+                                backgroundColor: "#b3def5",
+                              }}
                               onClick={() => {
                                 setUfcForDialog(ufc);
                                 openDetailsUFCDialog();
@@ -844,79 +921,6 @@ const NewEnvironment = () => {
                   </Box>
                 </Box>
               </Box>
-              <FormControl className="ButtonArea">
-                <FormLabel
-                  id="radio-button-mining_type"
-                  className="TextFieldLabel"
-                >
-                  Filter Type*
-                </FormLabel>
-                <RadioGroup
-                  row
-                  aria-labelledby="radio-button-filter_type"
-                  name="radioButton-filterType"
-                  value={filterType}
-                  onChange={(e) => setFilterType(e.target.value)}
-                >
-                  <FormControlLabel
-                    value="none"
-                    control={<Radio />}
-                    label="No Filter"
-                  />
-
-                  <FormControlLabel
-                    value="keywords"
-                    control={<Radio />}
-                    label={
-                      <Tooltip title="This will applly a filter of requirement change keywords (RCR) and allow you to add specific project keywords that refers to RCR at the issues mined">
-                        <Box>
-                          {"By keywords     "}
-                          <InfoIcon size={16} />
-                        </Box>
-                      </Tooltip>
-                    }
-                  ></FormControlLabel>
-                </RadioGroup>
-              </FormControl>
-              <Box
-                className="ButtonArea"
-                style={{
-                  visibility:
-                    filterType === "keywords" ? "visible" : "collapse",
-                }}
-              >
-                <Typography className="TextFieldLabel">
-                  Environment keywords
-                </Typography>
-                <Box
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    width: "100%",
-                  }}
-                >
-                  <TextField
-                    id="txt-repository"
-                    fullWidth
-                    variant="outlined"
-                    placeholder="Insert the disered keyword for the filter"
-                  />
-                  <Button
-                    onClick={addKeyword}
-                    style={{ marginLeft: "0.5em" }}
-                    id="btn-add-keyword"
-                    onMouseOver={() => {
-                      setAddButtonKeywordColor("#7da7fa");
-                    }}
-                    onMouseOut={() => {
-                      setAddButtonKeywordColor("#0084fe");
-                    }}
-                  >
-                    <FeedPlusIcon size={24} fill={addButtonKeywordColor} />
-                  </Button>
-                </Box>
-              </Box>
-
               <Button className="LoginBtnSignUp" onClick={createNewEnvironment}>
                 {isLoading ? "REQUESTING..." : "REQUEST"}
               </Button>

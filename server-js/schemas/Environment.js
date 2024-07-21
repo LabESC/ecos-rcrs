@@ -171,6 +171,10 @@ const EnvironmentVotingUsers = Joi.object({
   voting_users: Joi.array().items(Joi.string()).required(),
 });
 
+const EnvironmentDefinitionRCREndToPriority = Joi.object({
+  rcrs_selected: Joi.array().items(Joi.number()).required(),
+});
+
 module.exports = {
   EnvironmentBase,
   EnvironmentRequest,
@@ -192,4 +196,5 @@ module.exports = {
   EnvironmentUpdatePriorityDateWithStatusRequest,
   EnvironmentStatus,
   EnvironmentUpdateFinalDataWithStatusRequest,
+  EnvironmentDefinitionRCREndToPriority,
 };

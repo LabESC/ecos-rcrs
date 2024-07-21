@@ -25,6 +25,7 @@ import { useNavigate } from "react-router-dom";
 import {
   createVotingUser,
   generateAccessCode,
+  registerAllVotes,
   registerPriorityVotes,
 } from "../../../api/VotingUser";
 
@@ -42,16 +43,16 @@ function getSteps() {
   ];
 }
 
-export function OpenRCRPriorityVotePopUp(props) {
+export function OpenRCRPriorityVotePopUpNew(props) {
   // ! Instanciando o useNavigate para redirecionar o usuário pra alguma página
   const redirect = useNavigate();
 
   // ! Imports para o popUp
   const theme = useTheme();
-  const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
+  const fullScreen = useMediaQuery(theme.breakpoints.down("lg"));
 
   // ! Imports do props (recebidos do componente pai)
-  const { open, close, vote, environmentId } = props;
+  const { open, close, definitionVote, priorityVote, environmentId } = props;
 
   // ! Variavies para os steps
   const [email, setEmail] = useState("");
@@ -126,7 +127,6 @@ export function OpenRCRPriorityVotePopUp(props) {
   };
 
   const registeringVote = async () => {
-    console.log(vote);
     setIsLoading(true);
 
     if (email === "") {
@@ -151,10 +151,19 @@ export function OpenRCRPriorityVotePopUp(props) {
       return;
     }
 
-    const request = await registerPriorityVotes(
+    // . Filtrando os votos de prioridade (mantendo apenas o id e priority)
+    const priorityVoteFiltered = priorityVote.map((vote) => {
+      return {
+        id: vote.id,
+        position: vote.priority,
+      };
+    });
+
+    const request = await registerAllVotes(
       votingUserId,
       environmentId,
-      vote,
+      definitionVote,
+      priorityVoteFiltered,
       accessCode
     );
 

@@ -51,7 +51,7 @@ export function EnvironmentCard(props) {
           <Box style={{ display: "flex", alignItems: "center" }}>
             <BeakerIcon size={16} />
             <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
-              Mining repositories
+              Retrieving issues
             </Typography>
           </Box>
         );
@@ -81,7 +81,7 @@ export function EnvironmentCard(props) {
           <Box style={{ display: "flex", alignItems: "center" }}>
             <AlertFillIcon size={16} />
             <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
-              Topics error
+              Topic generation error
             </Typography>
           </Box>
         );
@@ -91,7 +91,7 @@ export function EnvironmentCard(props) {
           <Box style={{ display: "flex", alignItems: "center" }}>
             <StackIcon size={16} />
             <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
-              Waiting for topics generation
+              Waiting for topic generation
             </Typography>
           </Box>
         );
@@ -101,7 +101,7 @@ export function EnvironmentCard(props) {
           <Box style={{ display: "flex", alignItems: "center" }}>
             <PeopleIcon size={16} />
             <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
-              {`Waiting for RCR definition voting (${votingCount} votes)`}
+              {`Waiting for RCR voting (${votingCount} votes)`}
             </Typography>
           </Box>
         );
@@ -111,7 +111,7 @@ export function EnvironmentCard(props) {
           <Box style={{ display: "flex", alignItems: "center" }}>
             <PeopleIcon size={16} />
             <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
-              {`Waiting for RCR priority voting (${votingCount} votes)`}
+              {`Waiting for RCR voting (${votingCount} votes)`}
             </Typography>
           </Box>
         );
@@ -131,7 +131,7 @@ export function EnvironmentCard(props) {
           <Box style={{ display: "flex", alignItems: "center" }}>
             <ListOrderedIcon size={16} />
             <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
-              RCR definition voting done
+              RCR voting done
             </Typography>
           </Box>
         );
@@ -141,7 +141,7 @@ export function EnvironmentCard(props) {
           <Box style={{ display: "flex", alignItems: "center" }}>
             <TasklistIcon size={16} />
             <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
-              RCR priority voting done
+              RCR voting done
             </Typography>
           </Box>
         );

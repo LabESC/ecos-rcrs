@@ -29,6 +29,7 @@ import SideBar from "../../components/SideBar.jsx";
 import { IssueModalDetail } from "./Issues/IssueModalDetail.jsx";
 import { SuccessButton } from "../../components/Buttons.jsx";
 import { OpenEndEnvironmentPopUp } from "./OpenEndEnvironmentPopUp.jsx";
+import EditIcon from "@mui/icons-material/Edit";
 
 // ! Importações de códigos
 import { verifyLoggedUser } from "../../api/Auth.jsx";

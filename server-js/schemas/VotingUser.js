@@ -22,10 +22,17 @@ const VotingUserVote = Joi.object({
   accessCode: Joi.string().required(),
 });
 
+const VotingUserAllVote = Joi.object({
+  definition_vote: Joi.array().items(Joi.object()).required(),
+  priority_vote: Joi.array().items(Joi.object()).required(),
+  accessCode: Joi.string().required(),
+});
+
 module.exports = {
   VotingUserBase,
   VotingUserRequest,
   VotingUserResponse,
   ManyVotingUserResponse,
   VotingUserVote,
+  VotingUserAllVote,
 };

@@ -21,11 +21,18 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { PeopleIcon } from "@primer/octicons-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Papa from "papaparse";
 import { ArrowUpIcon, FeedIssueDraftIcon } from "@primer/octicons-react";
 
 // ! Importações de componentes criados
+import { IssueModalDetail } from "./IssueModalDetail.jsx";
+import { DeleteRCRConfirm } from "./DeleteRCR.jsx";
+import { UpdateRCRAfterTopicPopUp } from "./UpdateRCRAfterTopicPopUp.jsx";
+import { SuccessButton } from "../../../components/Buttons.jsx";
+
+// ! Importações de funções criadas
+import { verifyLoggedUser } from "../../../api/Auth.jsx";
 import {
   updateRCRPrioritiesAtDefinitionData,
   getIssueDetailsWithRelatedScoreFromTopicDataLocalStorage,
@@ -34,11 +41,12 @@ import {
   getIssueDataWithRelatedScoreFromTopicDataAtLocalStorage,
   getIssueDataFromTopicDataAtLocalStorage,
   getIssueDetailsFromTopicByTopicNumDataLocalStorage,
+  getDefinitionRCRs,
+  getDefinitionDataForVoting,
+  getDefinitionRCRsNew,
+  getEnvironmentIdFromUrl2,
+  getEnvironmentNameFromLocalStorage,
 } from "../../../api/Environments";
-import { IssueModalDetail } from "./IssueModalDetail.jsx";
-import { DeleteRCRConfirm } from "./DeleteRCR.jsx";
-import { UpdateRCRAfterTopicPopUp } from "./UpdateRCRAfterTopicPopUp.jsx";
-import { SuccessButton } from "../../../components/Buttons.jsx";
 
 export function ListAssociatedRCRsEnvPopUp(props) {
   // ! Imports para o popUp
@@ -48,17 +56,84 @@ export function ListAssociatedRCRsEnvPopUp(props) {
   const {
     open,
     close,
-    environmentId,
-    environmentName,
-    rcrs,
-    setDefinitionRCRs,
-    loggedUser,
+    //rcrs,
+    //setDefinitionRCRs,
+    //loggedUser,
     setIsLoading,
-    openVotingModal,
   } = props;
 
   // . Definindo o regex para caracteres inválidos para nome de arquivo
   const invalidFileNameCharsRegex = /[\\/:\*\?"<>\|]/g;
+
+  // . Variáveis de estado
+  const [loggedUser, setLoggedUser] = useState({});
+  const [environmentId, setEnvironmentId] = useState();
+  const [environmentName, setEnvironmentName] = useState();
+  const [rcrs, setDefinitionRCRs] = useState([]);
+
+  // ! Executado ao iniciar o componente
+  useEffect(() => {
+    // . Mudando nome da página
+    document.body.style.background = "white";
+
+    // . Função para obter os rcrs
+    const getRCRs = async (userId, userToken) => {
+      // . Obtendo o id do ambiente e armazenando-o no estado
+      const environmentId = getEnvironmentIdFromUrl2();
+      setEnvironmentId(environmentId);
+
+      // . Obtendo o nome do ambiente e armazenando-o no estado
+      const environmentName = getEnvironmentNameFromLocalStorage();
+      setEnvironmentName(environmentName);
+
+      // . Obtendo os RCRs do ambiente
+      const definitionRCRs = await getDefinitionRCRsNew(
+        userId,
+        userToken,
+        environmentId
+      );
+
+      if (definitionRCRs.error) {
+        setIsLoading(false);
+        if (definitionRCRs.status === 404) {
+          return;
+        }
+
+        activeErrorDialog(
+          `${definitionRCRs.error.code}: Getting definition RCRs`,
+          definitionRCRs.error.message,
+          definitionRCRs.status
+        );
+        return;
+      }
+
+      // . Setando as rcrs prioritarias
+      setDefinitionRCRs(definitionRCRs.rcrs);
+
+      // . Finalizando o carregamento
+      setIsLoading(false);
+    };
+
+    // . Verificando se o usuário está logado e obtendo seus dados
+    const checkUser = async () => {
+      const verifyUser = await verifyLoggedUser();
+
+      // . Se não houver usuário logado, redireciona para a página de login
+      if (verifyUser === null) {
+        redirect("/");
+        return;
+      }
+
+      // . Armazenando os dados do usuário
+      setLoggedUser(verifyUser);
+
+      // . Obtendo os ambientes do usuário
+      await getRCRs(verifyUser.userId, verifyUser.userToken);
+    };
+
+    // . Executando a função
+    checkUser();
+  }, []);
 
   // ! Funções para exportacao da rcrs para csv
   const generateCSVPapaparse = () => {
@@ -72,10 +147,13 @@ export function ListAssociatedRCRsEnvPopUp(props) {
         id: rcr.id,
         name: rcr.name,
         details: rcr.details,
-        mainIssue: rcr.mainIssue.url,
+        mainIssue: `https://github.com/${rcr.mainIssue.repo}/issues/${rcr.mainIssue.issueId}`,
         relatedToIssues: rcr.relatedToIssues
-          .map((issue) => issue.url)
-          .toString(),
+          .map(
+            (issue) =>
+              `https://github.com/${issue.repo}/issues/${issue.issueId}`
+          )
+          .join("; "),
       });
     });
 
@@ -109,51 +187,8 @@ export function ListAssociatedRCRsEnvPopUp(props) {
   });
   const [issueModalOpen, setIssueModalOpen] = useState(false);
 
-  const openIssueDetailModal = (topicNum, issueId, mainIssueId = null) => {
-    // . Obtendo os dados do tópico
-    let issue;
-    if (mainIssueId) {
-      issue = getIssueDataWithRelatedScoreFromTopicDataAtLocalStorage(
-        topicNum,
-        issueId,
-        mainIssueId
-      );
-    } else {
-      issue = getIssueDataFromTopicDataAtLocalStorage(topicNum, issueId);
-    }
-
-    // . Verificando se ocorreu algum erro
-    if (!issue) {
-      activeErrorDialog(
-        "Getting issue data",
-        "There was an error getting the issue data",
-        500
-      );
-      return;
-    }
-
-    // . Armazenando os dados da issue
+  const openIssueOnModal = (issue) => {
     setIssueModal(issue);
-    setIssueModalOpen(true);
-  };
-
-  const openMainIssueOnModal = async (issue, topic) => {
-    const issueData = await getIssueDetailsFromTopicByTopicNumDataLocalStorage(
-      issue,
-      topic
-    );
-    if (!issueData) return;
-    setIssueModal(issueData);
-    setIssueModalOpen(true);
-  };
-
-  const openRelatedIssueOnModal = (issueId, mainIssueId, topicNum) => {
-    const issueData = getIssueDetailsWithRelatedScoreFromTopicDataLocalStorage(
-      parseInt(issueId),
-      parseInt(mainIssueId),
-      parseInt(topicNum)
-    );
-    setIssueModal(issueData);
     setIssueModalOpen(true);
   };
 
@@ -291,7 +326,7 @@ export function ListAssociatedRCRsEnvPopUp(props) {
 
   // ! Funções para mudança na RCR
   const updatedRCR = async () => {
-    const rcrUpdt = editRCR;
+    const rcrUpdt = { ...editRCR };
 
     setIsLoading(true);
     if (!rcrUpdt.id) {
@@ -344,7 +379,7 @@ export function ListAssociatedRCRsEnvPopUp(props) {
         return rcrMap;
       });
 
-      setDefinitionRCRs([...newRCRs]);
+      setDefinitionRCRs(newRCRs);
     }
 
     setEditRCROpen(false);
@@ -542,10 +577,10 @@ export function ListAssociatedRCRsEnvPopUp(props) {
                           variant="outlined"
                           style={{ padding: "0em", marginLeft: "0.4em" }}
                           onClick={() => {
-                            openMainIssueOnModal(rcr.mainIssue, rcr.topicNum);
+                            openIssueOnModal(rcr.mainIssue);
                           }}
                         >
-                          {rcr.mainIssue}
+                          {rcr.mainIssue.id}
                         </Button>
                       </Box>
 
@@ -554,7 +589,7 @@ export function ListAssociatedRCRsEnvPopUp(props) {
                         {rcr.relatedToIssues.map((issue) => {
                           return (
                             <Button
-                              key={`RelIssue-${issue}`}
+                              key={`RelIssue-${issue.id}`}
                               variant="outlined"
                               style={{
                                 padding: "0em",
@@ -562,14 +597,10 @@ export function ListAssociatedRCRsEnvPopUp(props) {
                                 marginTop: "0.8em",
                               }}
                               onClick={() => {
-                                openRelatedIssueOnModal(
-                                  issue,
-                                  rcr.mainIssue,
-                                  rcr.topicNum
-                                );
+                                openIssueOnModal(issue);
                               }}
                             >
-                              {issue}
+                              {issue.id}
                             </Button>
                           );
                         })}
@@ -644,8 +675,8 @@ export function ListAssociatedRCRsEnvPopUp(props) {
         open={editRCROpen}
         close={closeEditRCR}
         rcr={editRCR}
-        openMainIssue={openMainIssueOnModal}
-        openRelatedIssue={openRelatedIssueOnModal}
+        openMainIssue={openIssueOnModal}
+        openRelatedIssue={openIssueOnModal}
         action={updatedRCR}
         issuesRcr={editRCRRelatedIssues}
         setIssuesRcr={setEditRCRRelatedIssues}

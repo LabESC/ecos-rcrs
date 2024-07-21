@@ -54,6 +54,7 @@ import {
   getIssueDataFromTopicDataAtLocalStorage,
   getIssueDataWithRelatedScoreFromTopicDataAtLocalStorage,
   setPriorityData,
+  endDefinitionRCRAndGoToPriorityRCR,
 } from "../../api/Environments.jsx";
 
 const EnvironmentDetailDefinition = () => {
@@ -115,7 +116,7 @@ const EnvironmentDetailDefinition = () => {
       }
 
       // . Armazenando os topicos
-      setAllTopicsDataToLocalStorage(topicRequest);
+      //setAllTopicsDataToLocalStorage(topicRequest);
 
       // . Obtendo as rcrs prioritarias do usuário
       const response = await getPriorityRCRs(userId, userToken, environmentId);
@@ -625,6 +626,66 @@ const EnvironmentDetailDefinition = () => {
 
   const scoresAcceptedForVoteDetails = ["1", "2", "3", "4", "5"];
 
+  // ! Função para forçar o fim da votação
+  const forceEndPriorityVoting = async () => {
+    setIsLoading(true);
+    let newRCRs = [...rcrs];
+
+    // Ordenando as rcrs
+    newRCRs = newRCRs.sort((a, b) => {
+      if (a.exclude_to_priority === true) return 1; // Se a rcr foi excluida, ela deve ser a ultima
+      if (b.exclude_to_priority === true) {
+        let aVotes = 0;
+        let bVotes = 0;
+        aVotes = a.definition_votes[a.final_vote] / a.definition_votes.counts;
+        bVotes = b.definition_votes[b.final_vote] / b.definition_votes.counts;
+
+        // Após obter o coeficiente de votos, pondere a partir do coefifiente de votos e se o voto final é maior ou menor
+        // a posição do voto final é mais importante que a quantidade de votos
+        if (a.final_vote > b.final_vote) return -1;
+        if (a.final_vote <= b.final_vote) {
+          if (aVotes > bVotes) return -1;
+          else return 1;
+        }
+      }
+    });
+
+    // Gerando a nova posicao de "positions"
+    for (let i = 0, j = 1; i < newRCRs.length; i++) {
+      if (newRCRs[i].exclude_to_priority === false) {
+        newRCRs[i].position = j;
+        j++;
+      }
+    }
+
+    const request = await endDefinitionRCRAndGoToPriorityRCR(
+      loggedUser.userId,
+      loggedUser.userToken,
+      environmentId,
+      newRCRs
+    );
+    if (request.error) {
+      setAlertContent({
+        title: "Error",
+        message:
+          "An error occurred while ending the definition RCR! Try again later!",
+        severity: "error",
+      });
+      setIsLoading(false);
+      setAlertOpen(true);
+    } else {
+      setAlertContent({
+        title: "Success",
+        message: "Definition RCR saved successfully!",
+        severity: "success",
+      });
+      setIsLoading(false);
+      setAlertOpen(true);
+
+      closeVotingStartPopUp();
+    }
+  };
+
   // . Declarando elementos da página
   const pageContent = () => {
     return (
@@ -661,8 +722,8 @@ const EnvironmentDetailDefinition = () => {
             </Typography>
 
             <SuccessButton
-              icon={<PeopleIcon size={18} />}
-              message={"Start priority voting"}
+              icon={<CircleCheckedFilled size={18} />}
+              message={"Prioritize RCR"}
               width={"150px"}
               height={"35px"}
               uppercase={false}
@@ -670,7 +731,8 @@ const EnvironmentDetailDefinition = () => {
               marginRight="4em"
               backgroundColor={"#9fff64"}
               action={() => {
-                openVotingStartPopUp();
+                forceEndPriorityVoting();
+                //openVotingStartPopUp();
               }}
               visibility={rcrs.length !== 0 ? "visible" : "hidden"}
             />

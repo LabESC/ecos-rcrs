@@ -28,9 +28,13 @@ export function IssueModalDetail(props) {
         <Typography gutterBottom>
           <strong> Repo: </strong> {issue.repo}
         </Typography>
-        <Typography gutterBottom>
-          <strong> Topic Score: </strong> {parseFloat(issue.score).toFixed(5)}
-        </Typography>
+        {issue.score ? (
+          <Typography gutterBottom>
+            <strong> Topic Score: </strong> {parseFloat(issue.score).toFixed(5)}
+          </Typography>
+        ) : (
+          ""
+        )}
         <Typography gutterBottom>
           <strong> Github Issue Number: </strong>
           <a

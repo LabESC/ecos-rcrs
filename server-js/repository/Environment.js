@@ -197,6 +197,38 @@ class Environment {
   }
 
   /**
+   * Retrieves the mining data for a specific environment and a set of issuesID.
+   * @param {uuidv4} id - The ID of the environment.
+   * @param {number[]} issuesID - The ID of the environment.
+   * @returns {Object} - The mining data object.
+   */
+  static async getMiningDataByIssuesID(id, issuesID) {
+    // Converting the array of issuesID to a string to use in the query
+    const issuesIDString = issuesID.join(", ");
+
+    const data = await sequelize.query(
+      `SELECT issues
+          FROM (
+              SELECT id,
+                    issues--jsonb_build_object('issues', issues) AS filtered_attr
+              FROM ic.environments,
+              LATERAL (
+                  SELECT jsonb_agg(attr) AS issues
+                  FROM jsonb_array_elements(mining_data->'issues') AS attr
+                  WHERE (attr->>'id')::int IN (${issuesIDString})
+              ) AS filtered_data
+              WHERE id = '${id}'
+          ) AS result;`
+    );
+
+    if (data) {
+      return data[0][0];
+    } else {
+      return false;
+    }
+  }
+
+  /**
    * Retrieves the topic data for a given ID.
    * @param {uuidv4} id - The ID of the environment.
    * @returns {Object} - The topic data object.
@@ -499,6 +531,93 @@ class Environment {
     return await EnvironmentUserFeedbackChannels.bulkCreate(
       environmentUserFeedbackChannels
     );
+  }
+
+  static async getTopicDataByTopicAndPage(id, topicNum, page) {
+    let data = await sequelize.query(`SELECT topic
+              FROM ic.environments,
+                    LATERAL (
+                        SELECT topic
+                        FROM jsonb_array_elements(topic_data) AS topic
+                        WHERE (topic->>'id')::int = ${topicNum}
+                    ) AS filtered_data
+              WHERE id = '${id}'`);
+
+    if (data) {
+      // . Getting the topic data
+      data = data[0][0].topic;
+      // . Ordering the issues by relatedTo size
+      data.issues = data.issues.sort(
+        (a, b) => b.relatedTo.length - a.relatedTo.length
+      );
+      // . Returning the issues for the page
+      return data.issues.slice((page - 1) * 24, page * 24);
+    } else {
+      return false;
+    }
+  }
+
+  static async getTopicScoresByTopicAndIssuesID(id, topicNum, issuesID) {
+    const issuesIDString = issuesID.join(", ");
+
+    const data = await sequelize.query(
+      `SELECT jsonb_agg(jsonb_build_object('id', issues->>'id', 'topicScore', issues->>'score')) AS "issuesAndScore"
+        FROM (
+            SELECT id,
+                topic
+            FROM ic.environments,
+            LATERAL (
+                SELECT attr AS topic
+                FROM jsonb_array_elements(topic_data) AS attr
+                WHERE (attr->>'id')::int = ${topicNum}
+            ) AS filtered_data
+            WHERE id = '${id}'
+        ) a,
+        LATERAL (
+            SELECT attr2 AS issues
+            FROM jsonb_array_elements(topic->'issues') AS attr2
+            WHERE (attr2->>'id')::int IN (${issuesIDString})
+        ) AS filtered_data2
+      GROUP BY a.id`
+    );
+
+    if (data) {
+      return data[0][0];
+    } else {
+      return false;
+    }
+  }
+
+  static async getTopicsInfo(id) {
+    const data = await sequelize.query(
+      `SELECT jsonb_agg(jsonb_build_object('id', a.topic->>'id', 'name', a.topic->>'name', 'length',
+                          jsonb_array_length(a.topic->'issues') )) AS "topicsInfo"
+        FROM ic.environments,
+            LATERAL (
+                  SELECT attr AS topic
+                  FROM jsonb_array_elements(topic_data) AS attr
+              ) a
+        where id = '${id}'`
+    );
+
+    if (data) {
+      return data[0][0].topicsInfo;
+    } else {
+      return false;
+    }
+  }
+
+  static async hasDefinitionRCR(id) {
+    const data =
+      await sequelize.query(`SELECT jsonb_array_length(definition_data->'rcrs') AS "rcrLength"
+      FROM ic.environments
+      WHERE id = '${id}';`);
+
+    if (data) {
+      return data[0][0].rcrLength;
+    } else {
+      return false;
+    }
   }
 }
 

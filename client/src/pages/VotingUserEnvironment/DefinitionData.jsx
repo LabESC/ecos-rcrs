@@ -28,6 +28,7 @@ import { OpenRCRDefinitionVotePopUp } from "./OpenRCRDefinitionVotePopUp.jsx";
 import { IssueModalDetail } from "../Environments/Issues/IssueModalDetail.jsx";
 import LikertScale from "./LikertScale.jsx";
 import VotingScale from "./VotingScale.jsx";
+import { OpenRCRDefinitionVotePopUpNew } from "./OpenRCRDefinitionVoteNew.jsx";
 
 // ! Importações de códigos
 import {
@@ -289,7 +290,7 @@ const DefinitionDataPage = () => {
 
           <SuccessButton
             icon={<PeopleIcon size={18} />}
-            message={"Submit vote"}
+            message={"Prioritize RCR"}
             width={"180px"}
             height={"30px"}
             uppercase={false}
@@ -318,162 +319,162 @@ const DefinitionDataPage = () => {
             </ul>*/}
           </Box>
           {environment.definition_data.rcrs.map((defData) => {
-            return (
-              <Box
-                key={`box-${defData.id}`}
-                style={{
-                  display: "flex",
-                  minWidth: "100%",
-                  marginBottom: "0.3em",
-                }}
-              >
-                <Accordion
-                  key={`Acc-${defData.id}`}
-                  style={{ minWidth: "100%" }}
+            if (defData.id !== "")
+              return (
+                <Box
+                  key={`box-${defData.id}`}
+                  style={{
+                    display: "flex",
+                    minWidth: "100%",
+                    marginBottom: "0.3em",
+                  }}
                 >
-                  <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel1a-content"
-                    id={`ACC-Summ-${defData.id}`}
-                    style={{
-                      fontWeight: "bold",
-                      flexDirection: "row-reverse",
-                    }}
+                  <Accordion
+                    key={`Acc-${defData.id}`}
+                    style={{ minWidth: "100%" }}
                   >
-                    <Box
+                    <AccordionSummary
+                      expandIcon={<ExpandMoreIcon />}
+                      aria-controls="panel1a-content"
+                      id={`ACC-Summ-${defData.id}`}
                       style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        width: "100%",
+                        fontWeight: "bold",
+                        flexDirection: "row-reverse",
                       }}
                     >
                       <Box
                         style={{
                           display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
+                          justifyContent: "space-between",
+                          width: "100%",
                         }}
                       >
-                        {checkIssueHasVote(defData.id) ? (
-                          <span
-                            style={{
-                              color: "green",
-                              display: "flex",
-                              justifyContent: "center",
-                              marginLeft: "0.2em",
-                            }}
-                          >
-                            <CheckCircleFillIcon size={15} />
-                          </span>
-                        ) : (
-                          <span
-                            style={{
-                              color: "#ff8700",
-                              display: "flex",
-                              justifyContent: "center",
-                              marginLeft: "0.2em",
-                            }}
-                          >
-                            <AlertFillIcon size={15} />
-                          </span>
-                        )}
-                        <Box style={{ marginLeft: "0.4em" }}>
-                          {`#${defData.id} - ${defData.name.toUpperCase()}`}
+                        <Box
+                          style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                          }}
+                        >
+                          {checkIssueHasVote(defData.id) ? (
+                            <span
+                              style={{
+                                color: "green",
+                                display: "flex",
+                                justifyContent: "center",
+                                marginLeft: "0.2em",
+                              }}
+                            >
+                              <CheckCircleFillIcon size={15} />
+                            </span>
+                          ) : (
+                            <span
+                              style={{
+                                color: "#ff8700",
+                                display: "flex",
+                                justifyContent: "center",
+                                marginLeft: "0.2em",
+                              }}
+                            >
+                              <AlertFillIcon size={15} />
+                            </span>
+                          )}
+                          <Box style={{ marginLeft: "0.4em" }}>
+                            {`#${defData.id} - ${defData.name.toUpperCase()}`}
+                          </Box>
                         </Box>
+                        {
+                          <VotingScale
+                            onChangeLevel={handleScoreIssue}
+                            rcrId={defData.id}
+                          />
+                        }
                       </Box>
-                      {
-                        <VotingScale
-                          onChangeLevel={handleScoreIssue}
-                          rcrId={defData.id}
-                        />
-                      }
-                      {/*<LikertScale
-                          onChangeLevel={handleScoreIssue}
-                          rcrId={defData.id}
-                        />*/}
-                    </Box>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Typography>
-                      <strong>Details: </strong>
-                      {defData.details}
-                    </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Typography>
+                        <strong>Details: </strong>
+                        {defData.details}
+                      </Typography>
 
-                    <Box style={{ alignItems: "center !important" }}>
-                      <strong>Main Issue: </strong>
-                      <Button
+                      <Box style={{ alignItems: "center !important" }}>
+                        <strong>Main Issue: </strong>
+                        <Button
+                          variant="outlined"
+                          style={{ padding: "0em", marginLeft: "0.4em" }}
+                          onClick={() => {
+                            openIssueOnModal(defData.mainIssue);
+                          }}
+                        >
+                          {defData.mainIssue.id}
+                        </Button>
+                      </Box>
+
+                      <Box style={{ alignItems: "center !important" }}>
+                        <strong>Related To issues:</strong>
+                        {defData.relatedToIssues.map((issue) => {
+                          return (
+                            <Button
+                              key={`RelIssue-${issue.id}`}
+                              variant="outlined"
+                              style={{
+                                padding: "0em",
+                                marginLeft: "0.4em",
+                                marginTop: "0.8em",
+                              }}
+                              onClick={() => {
+                                openIssueOnModal(issue);
+                              }}
+                            >
+                              {issue.id}
+                            </Button>
+                          );
+                        })}
+                      </Box>
+                    </AccordionDetails>
+                    <AccordionActions
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <strong style={{ marginLeft: "8px" }}>
+                        Comment on the score:
+                      </strong>
+                      <TextField
+                        id={`txt-comment-${defData.id}`}
+                        placeholder="Comment on the RCR"
+                        required
                         variant="outlined"
-                        style={{ padding: "0em", marginLeft: "0.4em" }}
-                        onClick={() => {
-                          openIssueOnModal(defData.mainIssue);
-                        }}
-                      >
-                        {defData.mainIssue}
-                      </Button>
-                    </Box>
+                        style={{ marginRight: "0.5em", width: "80%" }}
+                        multiline
+                        rows={4}
+                      />
+                    </AccordionActions>
+                  </Accordion>
 
-                    <Box style={{ alignItems: "center !important" }}>
-                      <strong>Related To issues:</strong>
-                      {defData.relatedToIssues.map((issue) => {
-                        return (
-                          <Button
-                            key={`RelIssue-${issue.id}`}
-                            variant="outlined"
-                            style={{
-                              padding: "0em",
-                              marginLeft: "0.4em",
-                              marginTop: "0.8em",
-                            }}
-                            onClick={() => {
-                              openIssueOnModal(issue);
-                            }}
-                          >
-                            {issue}
-                          </Button>
-                        );
-                      })}
-                    </Box>
-                  </AccordionDetails>
-                  <AccordionActions
-                    style={{ display: "flex", justifyContent: "space-between" }}
-                  >
-                    <strong style={{ marginLeft: "8px" }}>
-                      Comment on the score:
-                    </strong>
-                    <TextField
-                      id={`txt-comment-${defData.id}`}
-                      placeholder="Comment on the RCR"
-                      required
-                      variant="outlined"
-                      style={{ marginRight: "0.5em", width: "80%" }}
-                      multiline
-                      rows={4}
-                    />
-                  </AccordionActions>
-                </Accordion>
-
-                <Button
-                  variant="filled"
-                  className="btn-vote-voting-user"
-                  onClick={() => {
-                    registerRCRVote(defData.id);
-                  }}
-                >
-                  <span
-                    style={{
-                      color: "#d2d2d2",
-                      display: "flex",
-                      justifyContent: "center",
+                  <Button
+                    variant="filled"
+                    className="btn-vote-voting-user"
+                    onClick={() => {
+                      registerRCRVote(defData.id);
                     }}
                   >
-                    <CheckCircleFillIcon size={15} />
-                  </span>
-                  {
-                    //<DiffAddedIcon />
-                  }
-                </Button>
-              </Box>
-            );
+                    <span
+                      style={{
+                        color: "#d2d2d2",
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <CheckCircleFillIcon size={15} />
+                    </span>
+                    {
+                      //<DiffAddedIcon />
+                    }
+                  </Button>
+                </Box>
+              );
           })}
         </Box>
       </Box>
@@ -498,12 +499,21 @@ const DefinitionDataPage = () => {
         title={errorCode}
         message={errorMessage}
       />
+      <OpenRCRDefinitionVotePopUpNew
+        open={startRCRDefinitionVoteModalOpen}
+        close={closeDefinitionRCRVoteModal}
+        vote={definitionDataVoted}
+        environmentId={environmentId}
+      />
+      {/*
+      // !! IMPLEMENTAR
       <OpenRCRDefinitionVotePopUp
         open={startRCRDefinitionVoteModalOpen}
         close={closeDefinitionRCRVoteModal}
         vote={definitionDataVoted}
         environmentId={environmentId}
       />
+      */}
       <IssueModalDetail
         open={issueModalOpen}
         close={closeIssueModal}

@@ -228,6 +228,52 @@ class VotingUser {
 
     return votingUserEnvironment.length;
   }
+
+  /**
+   * Registers the definition votes for a voting user in a specific environment.
+   * @param {uuidv4} id - The ID of the voting user.
+   * @param {uuidv4} environmentId - The ID of the environment.
+   * @param {Object} definitionVote - The object containing details of votes for the definition.
+   * @param {Object} priorityVote - The object containing details of votes for the priority.
+   * @returns {VotingUserEnvironment} The created VotingUserEnvironment object.
+   */
+  static async registerAllVotes(
+    id,
+    environmentId,
+    definitionVote,
+    priorityVote
+  ) {
+    let returnType = "new";
+    let votingUserEnvironment = await VotingUserEnvironment.findOne({
+      where: { voting_user_id: id, environment_id: environmentId },
+    });
+
+    // * If the relation does not exist, create a new one.
+    if (votingUserEnvironment === null) {
+      votingUserEnvironment = await VotingUserEnvironment.create({
+        voting_user_id: id,
+        environment_id: environmentId,
+      });
+    }
+
+    if (votingUserEnvironment.votes_rcr_definition !== null)
+      returnType = "update";
+
+    // * Update the votes.
+    votingUserEnvironment.votes_rcr_definition = definitionVote;
+    votingUserEnvironment.votes_rcr_priority = priorityVote;
+
+    await votingUserEnvironment.save();
+
+    // * Removing token from the votingUser
+    const votingUser = await VotingUserModel.findOne({
+      where: { id: id },
+    });
+
+    votingUser.access_code = null;
+    await votingUser.save();
+    return returnType;
+  }
 }
 
 module.exports = VotingUser;
