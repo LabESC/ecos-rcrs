@@ -107,3 +107,48 @@ export const registerPriorityVotes = async (
 
   return result;
 };
+
+export const registerAllVotes = async (
+  votingUserId,
+  environmentId,
+  definition_vote,
+  priority_vote,
+  accessCode
+) => {
+  const result = await Axios.post(
+    `${baseUrl}/votinguser/${votingUserId}/vote/${environmentId}`,
+    { definition_vote, priority_vote, accessCode }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      try {
+        return {
+          error: err.response.data.message["en-US"],
+          status: err.response.status,
+        };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+
+  return result;
+};
+
+export const setDefinitionVoteToLocalStorage = (definitionVote) => {
+  localStorage.setItem(
+    "SECO_24_voting-definition",
+    JSON.stringify(definitionVote)
+  );
+  return;
+};
+
+export const getDefinitionVoteFromLocalStorage = () => {
+  const definition = localStorage.getItem("SECO_24_voting-definition");
+
+  if (!definition) {
+    return null;
+  }
+  return JSON.parse(definition);
+};

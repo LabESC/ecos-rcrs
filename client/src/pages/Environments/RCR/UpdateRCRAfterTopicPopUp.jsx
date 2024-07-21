@@ -35,12 +35,20 @@ export function UpdateRCRAfterTopicPopUp(props) {
     details,
     setDetails,
   } = props;
+  // * Função que verifica se uma issue esta no array de issues relacionadas a RCR
+  const hasRelatedToIssue = (relatedToIssueId) => {
+    return issuesRcr.some((obj) => obj.id === relatedToIssueId);
+  };
 
   // * Atualizando issue relacionada a RCR (desassociando ou reassociando-a)
   const updateRelatedToIssueFromRcr = (relatedToIssue) => {
-    if (issuesRcr.includes(relatedToIssue)) {
+    const checkRelatedToIssue = hasRelatedToIssue(relatedToIssue.id);
+
+    if (checkRelatedToIssue) {
       // . Se a issue relacionada ja estiver relacionada, remova-a
-      const newRelatedToIssues = issuesRcr.filter((r) => r !== relatedToIssue);
+      const newRelatedToIssues = issuesRcr.filter((r) => {
+        return r.id !== relatedToIssue.id;
+      });
       console.log("newRelatedToIssues", newRelatedToIssues);
       setIssuesRcr(newRelatedToIssues);
     } else {
@@ -112,11 +120,13 @@ export function UpdateRCRAfterTopicPopUp(props) {
           <Box className="ButtonArea">
             <Typography className="TextFieldLabel">Main Issue*</Typography>
             <Chip
-              label={rcr.mainIssue}
-              key={`CHP_MAIN_${rcr.mainIssue}`}
+              label={rcr.mainIssue ? rcr.mainIssue.id : "No main issue"}
+              key={`CHP_MAIN_${
+                rcr.mainIssue ? rcr.mainIssue.id : "No main issue"
+              }`}
               style={{ margin: "0.25em" }}
               onClick={() => {
-                openMainIssue(rcr.mainIssue, rcr.topicNum);
+                openMainIssue(rcr.mainIssue);
               }}
             />
           </Box>
@@ -132,32 +142,30 @@ export function UpdateRCRAfterTopicPopUp(props) {
                 width: "inherit",
               }}
             >
-              {rcr.relatedToIssues.map((relatedToIssue, index) => {
-                return (
-                  <Chip
-                    label={relatedToIssue}
-                    key={`CHP_${relatedToIssue}`}
-                    style={{ margin: "0.25em" }}
-                    onClick={() => {
-                      openRelatedIssue(
-                        relatedToIssue,
-                        rcr.mainIssue,
-                        rcr.topicNum
-                      );
-                    }}
-                    onDelete={() => {
-                      updateRelatedToIssueFromRcr(relatedToIssue);
-                    }}
-                    deleteIcon={
-                      issuesRcr.includes(relatedToIssue) ? (
-                        <CancelIcon />
-                      ) : (
-                        <AddCircleOutlineIcon />
-                      )
-                    }
-                  />
-                );
-              })}
+              {rcr.relatedToIssues
+                ? rcr.relatedToIssues.map((relatedToIssue, index) => {
+                    return (
+                      <Chip
+                        label={relatedToIssue.id}
+                        key={`CHP_${index}`}
+                        style={{ margin: "0.25em" }}
+                        onClick={() => {
+                          openRelatedIssue(relatedToIssue);
+                        }}
+                        onDelete={() => {
+                          updateRelatedToIssueFromRcr(relatedToIssue);
+                        }}
+                        deleteIcon={
+                          hasRelatedToIssue(relatedToIssue.id) ? (
+                            <CancelIcon />
+                          ) : (
+                            <AddCircleOutlineIcon />
+                          )
+                        }
+                      />
+                    );
+                  })
+                : ""}
             </Box>
           </Box>
         </DialogContent>

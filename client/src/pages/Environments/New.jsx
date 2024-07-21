@@ -71,7 +71,6 @@ const NewEnvironment = () => {
         return;
       }
       setLoggedUser(verifyUser);
-      //await getGitHubData(verifyUser.userId, verifyUser.userToken);
       await getKeywords();
       setIsLoading(false);
     };
@@ -110,6 +109,10 @@ const NewEnvironment = () => {
   const [loggedUser, setLoggedUser] = useState({ userId: "", userToken: "" });
   const [miningType, setMiningType] = useState("organization");
   const [filterType, setFilterType] = useState("none");
+  const [statusOption, setStatusOption] = useState("all");
+  const [hasDateFilter, setHasDateFilter] = useState("false");
+  const [createdAtSince, setCreatedAtSince] = useState("");
+  const [createdAtUntil, setCreatedAtUntil] = useState("");
   const [repositories, setRepositories] = useState([]);
   const [organizationName, setOrganizationName] = useState("");
   const [orgRepositories, setOrgRepositories] = useState([]);
@@ -244,10 +247,19 @@ const NewEnvironment = () => {
   };
 
   const createNewEnvironment = async () => {
+    // . Obtendo dados do ambiente
     const name = document.getElementById("txt-name").value;
     const details = document.getElementById("txt-details").value;
+    let createdAtSince = document.getElementById("txt-created_at_since").value;
+    let createdAtUntil = document.getElementById("txt-created_at_until").value;
     const userId = loggedUser.userId;
     const userToken = loggedUser.userToken;
+
+    // . Formatando datas...
+    if (createdAtSince === "") createdAtSince = null;
+    else createdAtSince = createdAtSince + "T00:00:00.000Z";
+    if (createdAtUntil === "") createdAtUntil = null;
+    else createdAtUntil = createdAtUntil + "T23:59:59.999Z";
 
     if (name === "") {
       setSearchError({ title: "Name", message: "Name is required" });
@@ -259,6 +271,27 @@ const NewEnvironment = () => {
       setSearchError({ title: "Details", message: "Details is required" });
       setHasSearchError(true);
       return;
+    }
+
+    // . Se o filtro de data for aplicado e nenhuma das datas preenchidas, exibir erro
+    if (
+      hasDateFilter === "true" &&
+      createdAtSince === "" &&
+      createdAtUntil === ""
+    ) {
+      setSearchError({
+        title: "Date filter",
+        message:
+          "At least one date is required (Since or Until), if you want to filter by date",
+      });
+      setHasSearchError(true);
+      return;
+    }
+
+    // . Se o filtro de data nao foi aplicado, nular datas
+    if (hasDateFilter === "false") {
+      createdAtSince = null;
+      createdAtUntil = null;
     }
 
     if (miningType === "organization" && organizationName === "") {
@@ -301,7 +334,10 @@ const NewEnvironment = () => {
       organizationName,
       keywords,
       rcrKeywords,
-      userFeedbackChannels
+      userFeedbackChannels,
+      createdAtSince,
+      createdAtUntil,
+      statusOption
     );
     setIsLoading(false);
 
@@ -511,6 +547,80 @@ const NewEnvironment = () => {
                     maxRows={4}
                   />
                 </Box>
+                <FormControl className="ButtonArea">
+                  <FormLabel
+                    id="radio-button-mining_type"
+                    className="TextFieldLabel"
+                  >
+                    Filter Type*
+                  </FormLabel>
+                  <RadioGroup
+                    row
+                    aria-labelledby="radio-button-filter_type"
+                    name="radioButton-filterType"
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                  >
+                    <FormControlLabel
+                      value="none"
+                      control={<Radio />}
+                      label="No Filter"
+                    />
+
+                    <FormControlLabel
+                      value="keywords"
+                      control={<Radio />}
+                      label={
+                        <Tooltip title="This will applly a filter of requirement change keywords (RCR) and allow you to add specific project keywords that refers to RCR at the issues mined">
+                          <Box>
+                            {"By keywords     "}
+                            <InfoIcon size={16} />
+                          </Box>
+                        </Tooltip>
+                      }
+                    ></FormControlLabel>
+                  </RadioGroup>
+                </FormControl>
+
+                <Box
+                  className="ButtonArea"
+                  style={{
+                    visibility:
+                      filterType === "keywords" ? "visible" : "collapse",
+                  }}
+                >
+                  <Typography className="TextFieldLabel">
+                    Environment keywords
+                  </Typography>
+                  <Box
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      width: "100%",
+                    }}
+                  >
+                    <TextField
+                      id="txt-repository"
+                      fullWidth
+                      variant="outlined"
+                      placeholder="Insert the disered keyword for the filter"
+                    />
+                    <Button
+                      onClick={addKeyword}
+                      style={{ marginLeft: "0.5em" }}
+                      id="btn-add-keyword"
+                      onMouseOver={() => {
+                        setAddButtonKeywordColor("#7da7fa");
+                      }}
+                      onMouseOut={() => {
+                        setAddButtonKeywordColor("#0084fe");
+                      }}
+                    >
+                      <FeedPlusIcon size={24} fill={addButtonKeywordColor} />
+                    </Button>
+                  </Box>
+                </Box>
+
                 <Box className="ButtonArea">
                   <Typography className="TextFieldLabel">
                     User Feedback Channels
@@ -530,7 +640,10 @@ const NewEnvironment = () => {
                               label={ufc.name}
                               id={`CHP_UFC_${ufc.name}_${index}`}
                               key={`CHP_UFC_${name}_${index}`}
-                              style={{ margin: "0.25em" }}
+                              style={{
+                                margin: "0.25em",
+                                backgroundColor: "#b3def5",
+                              }}
                               onClick={() => {
                                 setUfcForDialog(ufc);
                                 openDetailsUFCDialog();
@@ -682,49 +795,65 @@ const NewEnvironment = () => {
                 </Box>
               </Box>
               <FormControl className="ButtonArea">
-                <FormLabel
-                  id="radio-button-mining_type"
-                  className="TextFieldLabel"
-                >
-                  Filter Type*
+                <FormLabel id="radio-button-status" className="TextFieldLabel">
+                  GitHub Issue Status*
                 </FormLabel>
                 <RadioGroup
                   row
-                  aria-labelledby="radio-button-filter_type"
-                  name="radioButton-filterType"
-                  value={filterType}
-                  onChange={(e) => setFilterType(e.target.value)}
+                  aria-labelledby="radio-button-status"
+                  name="radioButton-status"
+                  value={statusOption}
+                  onChange={(e) => setStatusOption(e.target.value)}
                 >
                   <FormControlLabel
-                    value="none"
+                    value="all"
                     control={<Radio />}
-                    label="No Filter"
+                    label="All (open and closed)"
                   />
 
                   <FormControlLabel
-                    value="keywords"
+                    value="open"
                     control={<Radio />}
-                    label={
-                      <Tooltip title="This will applly a filter of requirement change keywords (RCR) and allow you to add specific project keywords that refers to RCR at the issues mined">
-                        <Box>
-                          {"By keywords     "}
-                          <InfoIcon size={16} />
-                        </Box>
-                      </Tooltip>
-                    }
-                  ></FormControlLabel>
+                    label="Open"
+                  />
+
+                  <FormControlLabel
+                    value="closed"
+                    control={<Radio />}
+                    label="Closed"
+                  />
+                </RadioGroup>
+              </FormControl>
+              <FormControl className="ButtonArea">
+                <FormLabel id="radio-button-date" className="TextFieldLabel">
+                  GitHub Issue Created At Filter*
+                </FormLabel>
+                <RadioGroup
+                  row
+                  aria-labelledby="radio-button-date"
+                  name="radioButton-date"
+                  value={hasDateFilter}
+                  onChange={(e) => setHasDateFilter(e.target.value)}
+                >
+                  <FormControlLabel
+                    value="false"
+                    control={<Radio />}
+                    label="No filter (all)"
+                  />
+
+                  <FormControlLabel
+                    value="true"
+                    control={<Radio />}
+                    label="Filter"
+                  />
                 </RadioGroup>
               </FormControl>
               <Box
                 className="ButtonArea"
                 style={{
-                  visibility:
-                    filterType === "keywords" ? "visible" : "collapse",
+                  visibility: hasDateFilter === "true" ? "visible" : "collapse",
                 }}
               >
-                <Typography className="TextFieldLabel">
-                  Environment keywords
-                </Typography>
                 <Box
                   style={{
                     display: "flex",
@@ -732,25 +861,64 @@ const NewEnvironment = () => {
                     width: "100%",
                   }}
                 >
-                  <TextField
-                    id="txt-repository"
-                    fullWidth
-                    variant="outlined"
-                    placeholder="Insert the disered keyword for the filter"
-                  />
-                  <Button
-                    onClick={addKeyword}
-                    style={{ marginLeft: "0.5em" }}
-                    id="btn-add-keyword"
-                    onMouseOver={() => {
-                      setAddButtonKeywordColor("#7da7fa");
-                    }}
-                    onMouseOut={() => {
-                      setAddButtonKeywordColor("#0084fe");
+                  <Typography
+                    className="TextFieldLabel"
+                    style={{
+                      width: "45%",
+                      marginRight: "2.5%",
                     }}
                   >
-                    <FeedPlusIcon size={24} fill={addButtonKeywordColor} />
-                  </Button>
+                    Since
+                  </Typography>
+                  <Typography
+                    className="TextFieldLabel"
+                    style={{
+                      marginLeft: "2.5%",
+                    }}
+                  >
+                    Until
+                  </Typography>
+                </Box>
+                <Box
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    width: "100%",
+                  }}
+                >
+                  <Box
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      width: "45%",
+                      marginRight: "2.5%",
+                    }}
+                  >
+                    <TextField
+                      title="Since"
+                      id="txt-created_at_since"
+                      type="date"
+                      fullWidth
+                      variant="outlined"
+                    />
+                  </Box>
+
+                  <Box
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      width: "45%",
+                      marginLeft: "2.5%",
+                    }}
+                  >
+                    <TextField
+                      title="Until"
+                      id="txt-created_at_until"
+                      type="date"
+                      fullWidth
+                      variant="outlined"
+                    />
+                  </Box>
                 </Box>
               </Box>
               <Button className="LoginBtnSignUp" onClick={createNewEnvironment}>

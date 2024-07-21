@@ -35,6 +35,9 @@ const EnvironmentBase = Joi.object({
     final_rcr: Joi.object().allow(null).required(),
     keywords: Joi.array().items(Joi.string()).allow(null),
     rcr_keywords: Joi.array().items(Joi.string()).allow(null),
+    mining_filter_date_since: Joi.date().iso().allow(null),
+    mining_filter_date_until: Joi.date().iso().allow(null),
+    mining_issues_status: Joi.string().required(),
   }),
   userFeedbackChannels: Joi.array()
     .items(
@@ -168,6 +171,10 @@ const EnvironmentVotingUsers = Joi.object({
   voting_users: Joi.array().items(Joi.string()).required(),
 });
 
+const EnvironmentDefinitionRCREndToPriority = Joi.object({
+  rcrs_selected: Joi.array().items(Joi.number()).required(),
+});
+
 module.exports = {
   EnvironmentBase,
   EnvironmentRequest,
@@ -189,4 +196,5 @@ module.exports = {
   EnvironmentUpdatePriorityDateWithStatusRequest,
   EnvironmentStatus,
   EnvironmentUpdateFinalDataWithStatusRequest,
+  EnvironmentDefinitionRCREndToPriority,
 };

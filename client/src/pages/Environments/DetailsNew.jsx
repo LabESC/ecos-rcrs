@@ -10,7 +10,7 @@ import {
   Select,
   MenuItem,
   FormControl,
-  Badge,
+  Pagination,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import { ThemeProvider } from "@mui/material/styles";
@@ -42,9 +42,11 @@ import {
   // ! Novos
   getTopicInfo,
   getTopicDataByTopicNumAndPage,
+  setIssueToLocalStorage,
+  hasRCRInDefinitionData,
 } from "../../api/Environments.jsx";
 
-const EnvironmentDetail = () => {
+const EnvironmentDetailNew = () => {
   // ! Instanciando o useNavigate para redirecionar o usuário pra alguma página
   const redirect = useNavigate();
 
@@ -53,43 +55,21 @@ const EnvironmentDetail = () => {
     // . Mudando nome da página
     document.body.style.background = "white";
 
-    // . Função para ordenar as issues dos topicos pelo tamanho do  array "relatedTo"
-    const orderIssuesByRelatedTo = (topics) => {
-      // . Ordenando as issues
-      topics.forEach((topic) => {
-        topic.issues.sort((a, b) => {
-          return b.relatedTo.length - a.relatedTo.length;
-        });
-      });
-      return topics;
-    };
-
     // . Função para obter os topicos
     const getDetails = async (userId, userToken) => {
       // . Obtendo o id do ambiente
       const environmentId = getEnvironmentIdFromUrl2();
-      /*if (environmentId === null) {
-        // . Voltar a página anterior
-        redirect("/my-environments");
-        return;
-      }
-*/
+
       // . Armazenando o id do ambiente
       setEnvironmentId(environmentId);
 
       // . Obtendo o nome do ambiente
       const environmentName = getEnvironmentNameFromLocalStorage();
 
-      /*if (environmentName === null) {
-        redirect("/my-environments");
-        return;
-      }
-*/
       setEnvironmentName(environmentName);
       document.title = `SECO-RCR: ${environmentName}`;
 
       // . Obtendo os dados do tópico do ambiente
-      //const response = await
       const responseinfo = await getTopicInfo(userId, userToken, environmentId);
       const responseActual = await getTopicDataByTopicNumAndPage(
         userId,
@@ -98,46 +78,16 @@ const EnvironmentDetail = () => {
         actualTopic,
         page
       );
-      console.log(responseinfo);
-      console.log(responseActual);
 
-      const response = await getTopicData(userId, userToken, environmentId);
+      setTopics(responseinfo);
+      setTopicIssuesData(responseActual);
+      setMaxPage(Math.ceil(responseinfo[actualTopic].length / 24));
 
-      // . Verificando se ocorreu algum erro
-      if (response.error) {
-        setIsLoading(false);
-        activeErrorDialog(
-          `${response.error.code}: Getting environment detail`,
-          response.error.message,
-          response.status
-        );
-        return;
-      }
-
-      // . Armazenando os ambientes
-      const topics = orderIssuesByRelatedTo(response);
-      setTopics(topics);
-
-      // . Verificando se há topico selecionado no localStorage
-      /*const topicsLocalStorage = getTopicDataFromLocalStorage();
-      let actualTopic = 0;
-      if (topicsLocalStorage !== null) {
-        const topicIndex = topics.findIndex(
-          (topic) => topic.id === topicsLocalStorage.id
-        );
-
-        if (topicIndex !== -1) {
-          actualTopic = topicIndex;
-        }
-      }
-*/
       // . Setando o topico atual no localStorage e todos os topicos
       setActualTopic(actualTopic);
-      //setAllTopicsDataToLocalStorage(topics);
-      //setTopicDataToLocalStorage(topics[actualTopic]);
 
       // . Obtendo rcrs prioritarias associadas
-      const definitionRCRs = await getDefinitionRCRs(
+      /* const definitionRCRs = await getDefinitionRCRs(
         userId,
         userToken,
         environmentId
@@ -159,6 +109,16 @@ const EnvironmentDetail = () => {
 
       // . Setando as rcrs prioritarias
       setDefinitionRCRs(definitionRCRs.rcrs);
+*/
+      const hasRCR = await hasRCRInDefinitionData(
+        userId,
+        userToken,
+        environmentId
+      );
+
+      if (!hasRCR.error) {
+        setHasRCR(hasRCR);
+      }
 
       // . Finalizando o carregamento
       setIsLoading(false);
@@ -214,17 +174,17 @@ const EnvironmentDetail = () => {
   ]); // . Armazena os ambientes do usuário
   const [actualTopic, setActualTopic] = useState(0); // . Armazena o ambiente atual
   const [page, setPage] = useState(1); // . Armazena a página atual
+  const [maxPage, setMaxPage] = useState(1); // . Armazena a quantidade máxima de páginas do topico atual
   const [topicIssuesData, setTopicIssuesData] = useState([]); // . Armazena os dados das issues do tópico atual [Array]
+  const [hasRCR, setHasRCR] = useState(false); // . Armazena se o ambiente possui RCRs [Boolean]
   const [definitionRCRs, setDefinitionRCRs] = useState([]); // . Armazena as RCRs prioritarias [Array]
-
-  // . Função para mudar o topico atual (SELECT)
-  const changeTopic = (event) => {
-    setActualTopic(event.target.value);
-    setTopicDataToLocalStorage(topics[event.target.value]);
-  };
 
   // . Função para ir a pagina da issue
   const goToissueDetail = (issue) => {
+    console.log(issue);
+    // . Obtendo o nome do topico da issue
+    issue.topicName = topics[issue.topicNum].name;
+    setIssueToLocalStorage(issue);
     redirect(`/environment/${environmentId}/issue/${issue.id}`);
   };
 
@@ -261,6 +221,45 @@ const EnvironmentDetail = () => {
 
   const closeDetailsModal = () => {
     setDetailsModal(false);
+  };
+
+  // ! Funçao pra mudar de topico
+  const changeActualTopic = async (e) => {
+    console.log(e.target.value);
+    setActualTopic(e.target.value);
+    setPage(1);
+    console.log(topics[e.target.value], topics[e.target.value].length);
+    setMaxPage(Math.ceil(topics[e.target.value].length / 24));
+    setIsLoading(true);
+
+    const newTopicData = await getTopicDataByTopicNumAndPage(
+      loggedUser.userId,
+      loggedUser.userToken,
+      environmentId,
+      e.target.value,
+      1
+    );
+
+    setTopicIssuesData(newTopicData);
+    setIsLoading(false);
+  };
+
+  // ! Função pra mudar de pagina
+  const changePage = async (newPage) => {
+    setIsLoading(true);
+    // Buscando dados do topico atual pra nova pagina
+    const newTopicData = await getTopicDataByTopicNumAndPage(
+      loggedUser.userId,
+      loggedUser.userToken,
+      environmentId,
+      actualTopic,
+      newPage
+    );
+
+    // Setando os dados do topico atual
+    setPage(newPage);
+    setTopicIssuesData(newTopicData);
+    setIsLoading(false);
   };
 
   // . Declarando elementos da página
@@ -316,7 +315,7 @@ const EnvironmentDetail = () => {
             action={() => {
               openDefinitionRCRVoteModal();
             }}
-            visibility={definitionRCRs.length !== 0 ? "visible" : "hidden"}
+            visibility={hasRCR ? "visible" : "hidden"}
           />
 
           <SuccessButton
@@ -331,7 +330,7 @@ const EnvironmentDetail = () => {
             action={() => {
               openPriorityListRcrModal();
             }}
-            visibility={definitionRCRs.length !== 0 ? "visible" : "hidden"}
+            visibility={hasRCR ? "visible" : "hidden"}
           />
         </Box>
         <FormControl
@@ -345,7 +344,7 @@ const EnvironmentDetail = () => {
             id="slcTopic"
             value={actualTopic}
             label="Topic"
-            onChange={(e) => changeTopic(e)}
+            onChange={(e) => changeActualTopic(e)}
           >
             {topics.map((env) => {
               return (
@@ -373,18 +372,32 @@ const EnvironmentDetail = () => {
             margin: "0.5em 0.3em",
           }}
         >
-          {topics.length !== 0 && topics[actualTopic].issues !== ""
-            ? topics[actualTopic].issues.map((issue) => {
+          {topicIssuesData // topics.length !== 0 && topics[actualTopic].issues !== ""
+            ? topicIssuesData.map((issue) => {
                 return (
                   <IssueCard
                     key={`EnvCard-${issue.id}`}
                     id={issue.id}
                     issue={issue}
-                    onClick={() => goToissueDetail(issue, topics[actualTopic])}
+                    onClick={() => goToissueDetail(issue)}
                   />
                 );
               })
             : ""}
+        </Box>
+        <Box
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            paddingBottom: "0.5em",
+          }}
+        >
+          <Pagination
+            color="primary"
+            count={maxPage}
+            page={page}
+            onChange={(_, v) => changePage(v)}
+          />
         </Box>
       </Box>
     );
@@ -413,16 +426,13 @@ const EnvironmentDetail = () => {
         close={closePriorityListRcrModal}
         environmentId={environmentId}
         environmentName={environmentName}
-        rcrs={definitionRCRs}
-        setDefinitionRCRs={setDefinitionRCRs}
-        loggedUser={loggedUser}
         setIsLoading={setIsLoading}
         openVotingModal={openDefinitionRCRVoteModal}
       />
       <OpenRCRDefinitionVotePopUp
         open={startRCRDefinitionVoteModalOpen}
         close={closeDefinitionRCRVoteModal}
-        rcrs={definitionRCRs}
+        //rcrs={definitionRCRs}
         environmentId={environmentId}
       />
       <DetailsEnvironmentModal
@@ -436,4 +446,4 @@ const EnvironmentDetail = () => {
   );
 };
 
-export default EnvironmentDetail;
+export default EnvironmentDetailNew;

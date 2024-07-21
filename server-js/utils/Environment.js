@@ -286,14 +286,20 @@ module.exports = class Environment {
       const vote = sortedVotes[i];
       //. search the rcr with the same id
       const rcr = priorityData.rcrs.find((rcr) => rcr.id === vote.id);
-      rcr.votes_position = i + 1;
+
+      if (!rcr) {
+        continue;
+      }
+
+      //rcr.votes_position = i + 1;
       rcr.position = i + 1;
       rcr.positions = vote.positions;
     }
 
     // * Ordenar as rcrs pelo votes_position ascendentemente
     priorityData.rcrs.sort((a, b) => {
-      return a.votes_position - b.votes_position;
+      return a.position - b.position;
+      //return a.votes_position - b.votes_position;
     });
 
     // . Erasing closing_date and status

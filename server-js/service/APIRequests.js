@@ -45,6 +45,10 @@ class APIRequests {
     repos,
     filter_type,
     keywords,
+    rcr_keywords,
+    mining_filter_date_since,
+    mining_filter_date_until,
+    mining_issues_status,
     user_id
   ) {
     // * Defining url
@@ -60,6 +64,10 @@ class APIRequests {
           filter_type: filter_type,
           keywords: keywords,
           user_id: user_id,
+          rcr_keywords: rcr_keywords,
+          mining_filter_date_since: mining_filter_date_since,
+          mining_filter_date_until: mining_filter_date_until,
+          mining_issues_status: mining_issues_status,
         },
         {
           headers: {

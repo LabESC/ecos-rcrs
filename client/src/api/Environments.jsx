@@ -106,6 +106,30 @@ export const setTopicSelectedToLocalStorage = (topicSelected) => {
   return;
 };
 
+export const getIssueFromLocalStorage = () => {
+  const issue = localStorage.getItem("SECO_24_issue-data");
+
+  if (!issue) {
+    return null;
+  }
+
+  // . Parseando JSON string para JSON objeto
+  return JSON.parse(issue);
+};
+
+export const setIssueToLocalStorage = (issueData) => {
+  if (!issueData) {
+    return;
+  }
+
+  // . Parseando JSON objeto para JSON string
+  localStorage.setItem("SECO_24_issue-data", JSON.stringify(issueData));
+};
+
+export const cleanIssueFromLocalStorage = () => {
+  localStorage.removeItem("SECO_24_issue-data");
+};
+
 export const getEnvironmentIdFromUrlVoting = () => {
   // . Obtendo o id do ambiente
   const url = window.location.href;
@@ -384,7 +408,10 @@ export const createEnvironment = async (
   organizationName,
   keywords,
   rcrKeywords,
-  userFeedbackChannels
+  userFeedbackChannels,
+  createdAtSince,
+  createdAtUntil,
+  status
 ) => {
   const result = await Axios.post(
     `${baseUrl}/environment`,
@@ -404,6 +431,9 @@ export const createEnvironment = async (
         final_rcr: null,
         keywords: keywords,
         rcr_keywords: rcrKeywords,
+        mining_filter_date_since: createdAtSince,
+        mining_filter_date_until: createdAtUntil,
+        mining_issues_status: status,
       },
       userFeedbackChannels: userFeedbackChannels,
     },
@@ -426,6 +456,51 @@ export const createEnvironment = async (
 export const getTopicData = async (userId, userToken, environmentId) => {
   const result = await Axios.get(
     `${baseUrl}/environment/${environmentId}/topicdata`,
+    { headers: { "user-id": userId, "user-token": userToken } }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+
+  return result;
+};
+
+export const getTopicInfo = async (userId, userToken, environmentId) => {
+  const result = await Axios.get(
+    `${baseUrl}/environment/${environmentId}/topicinfo`,
+    { headers: { "user-id": userId, "user-token": userToken } }
+  )
+    .then((res) => {
+      console.log("res.data", res.data);
+      return res.data;
+    })
+    .catch((err) => {
+      console.log("err", err);
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+  return result;
+};
+
+export const getTopicDataByTopicNumAndPage = async (
+  userId,
+  userToken,
+  environmentId,
+  topicNum,
+  page
+) => {
+  const result = await Axios.get(
+    `${baseUrl}/environment/${environmentId}/topicdata/${topicNum}/${page}`,
     { headers: { "user-id": userId, "user-token": userToken } }
   )
     .then((res) => {
@@ -985,9 +1060,16 @@ export const updateRCRAtDefinitionData = async (
   environmentId,
   rcr
 ) => {
+  const rcrCopy = { ...rcr };
+  // . Filtrando os ids dos issues relacionados e da main issue
+  rcrCopy.mainIssue = rcrCopy.mainIssue.id;
+  rcrCopy.relatedToIssues = rcrCopy.relatedToIssues.map((issue) => {
+    return issue.id;
+  });
+
   const result = await Axios.put(
     `${baseUrl}/environment/${environmentId}/definitiondata/rcr`,
-    rcr,
+    rcrCopy,
     { headers: { "user-id": userId, "user-token": userToken } }
   )
     .then((res) => {
@@ -1063,5 +1145,83 @@ export const updateRCRPrioritiesAtDefinitionData = async (
         return getServerError();
       }
     });
+  return result;
+};
+
+export const hasRCRInDefinitionData = async (
+  userId,
+  userToken,
+  environmentId
+) => {
+  const result = await Axios.get(
+    `${baseUrl}/environment/${environmentId}/hasrcrdefinitiondata`,
+    { headers: { "user-id": userId, "user-token": userToken } }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      console.log("err", err);
+      try {
+        return {
+          error: err.response.data.message["en-US"],
+          status: err.response.status,
+        };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+  return result;
+};
+
+export const getDefinitionRCRsNew = async (
+  userId,
+  userToken,
+  environmentId
+) => {
+  const result = await Axios.get(
+    `${baseUrl}/environment/${environmentId}/definitiondatanew`,
+    {
+      headers: { "user-id": userId, "user-token": userToken },
+    }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+
+  return result;
+};
+
+export const endDefinitionRCRAndGoToPriorityRCR = async (
+  userId,
+  userToken,
+  environmentId,
+  priorityData
+) => {
+  const result = await Axios.post(
+    `${baseUrl}/environment/${environmentId}/endrcr/definition`,
+    { priority_data: priorityData },
+    {
+      headers: { "user-id": userId, "user-token": userToken },
+    }
+  )
+    .then((res) => {
+      return res.data;
+    })
+    .catch((err) => {
+      try {
+        return { error: err.response.data, status: err.response.status };
+      } catch (e) {
+        return getServerError();
+      }
+    });
+
   return result;
 };

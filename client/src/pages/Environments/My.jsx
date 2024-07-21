@@ -187,7 +187,7 @@ const MyEnvironment = () => {
             environmentId,
             status,
             code: "Topic generation",
-            msg: "You want to request the generation of topics?",
+            msg: "You want to request the topic generation?",
           }
           //activeEnvironmentErrorDialog()
         );
@@ -322,8 +322,8 @@ const MyEnvironment = () => {
           action.environmentId
         );
         setRequest({
-          title: "Topics generation requested",
-          message: "The generation of topics has been requested.",
+          title: "Topic generation requested",
+          message: "The topic generation has been requested.",
         });
         setRequestMade(true);
         setAction(null);

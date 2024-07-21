@@ -174,4 +174,39 @@ module.exports = {
         return res.status(200).json(user);
     }
   },
+
+  async registerAllVotes(req, res) {
+    // * Checking if e-mail and environmentId were provided
+    if (!req.params.id || !req.params.environmentId) {
+      return res
+        .status(422)
+        .json(ErrorSchema(422, "Id and/or environment id not provided!"));
+    }
+
+    // * Checking if the body is valid
+    const { error } = VotingUserSchemas.VotingUserAllVote.validate(req.body);
+
+    if (error) {
+      return res.status(422).json(ErrorSchema(422, error.details[0].message));
+    }
+
+    const user = await VotingUserService.registerAllVotes(
+      req.params.id,
+      req.params.environmentId,
+      req.body.accessCode,
+      req.body.definition_vote,
+      req.body.priority_vote
+    );
+
+    switch (user) {
+      case -1:
+        return res.status(500).json(ErrorSchema(500, msg_500));
+      case -2:
+        return res.status(404).json(ErrorSchema(404, msg_404));
+      case -3:
+        return res.status(400).json(ErrorSchema(400, msg_access_code_wrong));
+      default:
+        return res.status(200).json(user);
+    }
+  },
 };

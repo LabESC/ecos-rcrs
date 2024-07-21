@@ -125,6 +125,9 @@ router.post("/api/request/mining", async (req, res) => {
       user_id: environmentData.user_id,
       keywords: environmentData.keywords,
       rcr_keywords: environmentData.rcr_keywords,
+      mining_filter_date_since: environmentData.mining_filter_date_since,
+      mining_filter_date_until: environmentData.mining_filter_date_until,
+      mining_issues_status: environmentData.mining_issues_status,
     },
     {
       headers: {

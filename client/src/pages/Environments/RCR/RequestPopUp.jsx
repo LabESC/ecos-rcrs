@@ -163,14 +163,14 @@ export function RequestRCRPopUp(props) {
       setIsLoading(false);
       setAlertMessage({
         title: "RCR created",
-        message: "The RCR was successfully created. Reloading page...",
+        message: "The RCR was successfully created. Please reload the page...",
         severity: "success",
       });
       setHasAlert(true);
     }
 
     close();
-    location.reload();
+    //location.reload();
   };
 
   return (

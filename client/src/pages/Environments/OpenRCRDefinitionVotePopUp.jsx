@@ -27,7 +27,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CircleCheckedFilled from "@mui/icons-material/CheckCircle";
 import CircleUnchecked from "@mui/icons-material/RadioButtonUnchecked";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import { useState, forwardRef } from "react";
+import { useState, forwardRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 // ! Importações de componentes criados
@@ -40,6 +40,9 @@ import {
   updateDefinitionRCRWithStatus,
   getIssueDetailsFromTopicDataLocalStorage,
   getIssueDetailsWithRelatedScoreFromTopicDataLocalStorage,
+  getDefinitionRCRsNew,
+  getEnvironmentIdFromUrl2,
+  getEnvironmentNameFromLocalStorage,
 } from "../../api/Environments";
 
 // ! Função para os título dos steps
@@ -56,6 +59,7 @@ function getSteps() {
     </Typography>,
   ];
 }
+
 // ! Função para a transição do Dialog
 const Transition = forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -70,7 +74,77 @@ export function OpenRCRDefinitionVotePopUp(props) {
   const fullScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   // ! Imports do props (recebidos do componente pai)
-  const { open, close, rcrs, environmentId } = props;
+  const { open, close } = props;
+
+  // . Variáveis de estado
+  const [loggedUser, setLoggedUser] = useState({});
+  const [environmentId, setEnvironmentId] = useState();
+  const [environmentName, setEnvironmentName] = useState();
+  const [rcrs, setDefinitionRCRs] = useState([]);
+
+  // ! Executado ao iniciar o componente
+  useEffect(() => {
+    // . Mudando nome da página
+    document.body.style.background = "white";
+
+    // . Função para obter os rcrs
+    const getRCRs = async (userId, userToken) => {
+      // . Obtendo o id do ambiente e armazenando-o no estado
+      const environmentId = getEnvironmentIdFromUrl2();
+      setEnvironmentId(environmentId);
+
+      // . Obtendo o nome do ambiente e armazenando-o no estado
+      const environmentName = getEnvironmentNameFromLocalStorage();
+      setEnvironmentName(environmentName);
+
+      // . Obtendo os RCRs do ambiente
+      const definitionRCRs = await getDefinitionRCRsNew(
+        userId,
+        userToken,
+        environmentId
+      );
+
+      if (definitionRCRs.error) {
+        setIsLoading(false);
+        if (definitionRCRs.status === 404) {
+          return;
+        }
+
+        activeErrorDialog(
+          `${definitionRCRs.error.code}: Getting definition RCRs`,
+          definitionRCRs.error.message,
+          definitionRCRs.status
+        );
+        return;
+      }
+
+      // . Setando as rcrs prioritarias
+      setDefinitionRCRs(definitionRCRs.rcrs);
+
+      // . Finalizando o carregamento
+      setIsLoading(false);
+    };
+
+    // . Verificando se o usuário está logado e obtendo seus dados
+    const checkUser = async () => {
+      const verifyUser = await verifyLoggedUser();
+
+      // . Se não houver usuário logado, redireciona para a página de login
+      if (verifyUser === null) {
+        redirect("/");
+        return;
+      }
+
+      // . Armazenando os dados do usuário
+      setLoggedUser(verifyUser);
+
+      // . Obtendo os ambientes do usuário
+      await getRCRs(verifyUser.userId, verifyUser.userToken);
+    };
+
+    // . Executando a função
+    checkUser();
+  }, []);
 
   // ! Variavies para os steps
   const [activeStep, setActiveStep] = useState(0);
@@ -122,19 +196,8 @@ export function OpenRCRDefinitionVotePopUp(props) {
 
   const [issueModalOpen, setIssueModalOpen] = useState(false);
 
-  const openMainIssueOnModal = (issue) => {
-    const issueData = getIssueDetailsFromTopicDataLocalStorage(issue);
-    setIssueModal(issueData);
-    setIssueModalOpen(true);
-  };
-
-  const openRelatedIssueOnModal = (issueId, mainIssueId, topicNum) => {
-    const issueData = getIssueDetailsWithRelatedScoreFromTopicDataLocalStorage(
-      parseInt(issueId),
-      parseInt(mainIssueId),
-      parseInt(topicNum)
-    );
-    setIssueModal(issueData);
+  const openIssueOnModal = (issue) => {
+    setIssueModal(issue);
     setIssueModalOpen(true);
   };
 
@@ -164,10 +227,8 @@ export function OpenRCRDefinitionVotePopUp(props) {
   const handleRCRSelection = (rcrId, event) => {
     if (rcrsSelected.includes(rcrId)) {
       const newRcrsSelected = rcrsSelected.filter((r) => r !== rcrId);
-      console.log(newRcrsSelected);
       setRcrsSelected(newRcrsSelected);
     } else {
-      console.log(rcrsSelected.concat(rcrId));
       setRcrsSelected(rcrsSelected.concat(rcrId));
     }
   };
@@ -239,10 +300,10 @@ export function OpenRCRDefinitionVotePopUp(props) {
                             variant="outlined"
                             style={{ padding: "0em", marginLeft: "0.4em" }}
                             onClick={() => {
-                              openMainIssueOnModal(rcr.mainIssue);
+                              openIssueOnModal(rcr.mainIssue);
                             }}
                           >
-                            {rcr.mainIssue}
+                            {rcr.mainIssue.id}
                           </Button>
                         </Box>
 
@@ -251,7 +312,7 @@ export function OpenRCRDefinitionVotePopUp(props) {
                           {rcr.relatedToIssues.map((issue) => {
                             return (
                               <Button
-                                key={`RelIssue-${issue}`}
+                                key={`RelIssue-${issue.id}`}
                                 variant="outlined"
                                 style={{
                                   padding: "0em",
@@ -259,14 +320,10 @@ export function OpenRCRDefinitionVotePopUp(props) {
                                   marginTop: "0.8em",
                                 }}
                                 onClick={() => {
-                                  openRelatedIssueOnModal(
-                                    issue,
-                                    rcr.mainIssue,
-                                    rcr.topicNum
-                                  );
+                                  openIssueOnModal(issue);
                                 }}
                               >
-                                {issue}
+                                {issue.id}
                               </Button>
                             );
                           })}

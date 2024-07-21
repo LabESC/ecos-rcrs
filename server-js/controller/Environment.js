@@ -170,6 +170,10 @@ module.exports = {
       newEnvironment.repos,
       newEnvironment.filter_type,
       newEnvironment.keywords,
+      newEnvironment.rcr_keywords,
+      newEnvironment.mining_filter_date_since,
+      newEnvironment.mining_filter_date_until,
+      newEnvironment.mining_issues_status,
       newEnvironment.user_id
     );
 
@@ -826,6 +830,104 @@ module.exports = {
     }
   },
 
+  async getTopicsInfo(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
+    let grantAccess = false;
+
+    // * Checking if the user is authorized
+    if ((await AuthValidator.validateUser(req.headers)) === true) {
+      grantAccess = true;
+    }
+
+    // * Checking if the service is authorized
+    if ((await AuthValidator.validateService(req.headers)) === true) {
+      grantAccess = true;
+    }
+
+    // * if none of them granted access, refuse
+    if (grantAccess === false) {
+      return res.status(401).json(ErrorSchema("Auth", "Unauthorized!"));
+    }
+
+    // * Validating id
+    if (!req.params.id) {
+      return res.status(422).json(ErrorSchema(422, "Id not provided!"));
+    }
+
+    // * Getting topic data
+    const topicsInfo = await EnvironmentService.getTopicsInfo(req.params.id);
+
+    switch (topicsInfo) {
+      case -1:
+        return res.status(500).send(ErrorSchema("server", msg_500));
+      case null:
+        return res.status(404).send(ErrorSchema(entity_name, msg_404));
+      default:
+        return res.status(200).send(topicsInfo);
+    }
+  },
+
+  async getTopicDataByTopicAndPage(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
+    let grantAccess = false;
+
+    // * Checking if the user is authorized
+    if ((await AuthValidator.validateUser(req.headers)) === true) {
+      grantAccess = true;
+    }
+
+    // * Checking if the service is authorized
+    if ((await AuthValidator.validateService(req.headers)) === true) {
+      grantAccess = true;
+    }
+
+    // * if none of them granted access, refuse
+    if (grantAccess === false) {
+      return res.status(401).json(ErrorSchema("Auth", "Unauthorized!"));
+    }
+
+    // * Validating id, page and topicNum
+    if (!req.params.id || !req.params.page || !req.params.topicNum) {
+      return res
+        .status(422)
+        .json(
+          ErrorSchema(
+            422,
+            "Environment ID and/or page and/or topic number not provided!"
+          )
+        );
+    }
+
+    // * Checking if page and topicNum were provided correctly:
+    if (req.params.page < 1 || req.params.topicNum < 0) {
+      return res
+        .status(422)
+        .json(
+          ErrorSchema(422, "Page and/or topic number not provided correctly!")
+        );
+    }
+
+    // * Getting topic data by topic and page
+    const topicData = await EnvironmentService.getTopicDataByTopicAndPage(
+      req.params.id,
+      req.params.topicNum,
+      req.params.page
+    );
+
+    switch (topicData) {
+      case -1:
+        return res.status(500).send(ErrorSchema("server", msg_500));
+      case null:
+        return res.status(404).send(ErrorSchema(entity_name, msg_404));
+      default:
+        return res.status(200).send(topicData);
+    }
+  },
+
   async getDefinitionData(req, res) {
     // . LOGGER
     Logger(req.method, req.url);
@@ -1240,5 +1342,96 @@ module.exports = {
       return res.status(500).send(ErrorSchema("server", msg_500));
 
     return res.status(200).send(count);
+  },
+
+  async hasDefinitionRCR(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
+    // * Checking if the user is authorized
+    const auth = await AuthValidator.validateUser(req.headers);
+
+    if (!auth) {
+      return res.status(401).json(ErrorSchema("Auth", "Unauthorized!"));
+    }
+
+    // * Validating id
+    if (!req.params.id) {
+      return res.status(422).json(ErrorSchema(422, "Id not provided!"));
+    }
+
+    // * Checking if the environment has definition RCR
+    const hasRCR = await EnvironmentService.hasDefinitionRCR(req.params.id);
+
+    if (hasRCR === -1)
+      return res.status(500).send(ErrorSchema("server", msg_500));
+
+    if (!hasRCR || hasRCR === 0) return res.status(200).send(false);
+    return res.status(200).send(true);
+  },
+
+  async getDefinitionDataNew(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
+    // * Checking if the user is authorized
+    /* const auth = AuthValidator.validateUser(req.headers);
+
+    if (!auth) {
+      return res.status(401).json(ErrorSchema("Auth", "Unauthorized!"));
+    }
+*/
+    // * Validating id
+    if (!req.params.id) {
+      return res.status(422).json(ErrorSchema(422, "Id not provided!"));
+    }
+
+    // * Getting definition data
+    const definitionData = await EnvironmentService.getDefinitionDataNew(
+      req.params.id
+    );
+
+    switch (definitionData) {
+      case -1:
+        return res.status(500).send(ErrorSchema("server", msg_500));
+      case null:
+        return res.status(404).send(ErrorSchema(entity_name, msg_404));
+      default:
+        return res.status(200).send(definitionData);
+    }
+  },
+
+  async endDefinitionRCRAndGoToPriorityRCR(req, res) {
+    // . LOGGER
+    Logger(req.method, req.url);
+
+    // * Checking if the user is authorized
+    /* const auth = AuthValidator.validateUser(req.headers);
+
+    if (!auth) {
+      return res.status(401).json(ErrorSchema("Auth", "Unauthorized!"));
+    }
+*/
+
+    // * Validating id
+    if (!req.params.id) {
+      return res.status(422).json(ErrorSchema(422, "Id not provided!"));
+    }
+
+    // * Updating priority data
+    const priorityData =
+      await EnvironmentService.endDefinitionRCRAndGoToPriorityRCR(
+        req.params.id,
+        req.body.priority_data
+      );
+
+    switch (priorityData) {
+      case -1:
+        return res.status(500).send(ErrorSchema("server", msg_500));
+      case null:
+        return res.status(404).send(ErrorSchema(entity_name, msg_404));
+      default:
+        return res.status(200).send(priorityData);
+    }
   },
 };

@@ -187,6 +187,47 @@ class VotingUser {
       return -1;
     }
   }
+
+  static async registerAllVotes(
+    votingUserId,
+    environmentId,
+    accessCode,
+    definitionVote,
+    priorityVote
+  ) {
+    // * Check if the user is already in the database
+    let user = null;
+    try {
+      user = await VotingUserRepository.validateAccessCodeById(
+        votingUserId,
+        accessCode
+      );
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    // * If the user is not in the database or the code is invalid, return an error
+    if (user === null) {
+      return -2;
+    }
+    if (user === false) {
+      return -3;
+    }
+
+    // * Registering solution vote
+    try {
+      return await VotingUserRepository.registerAllVotes(
+        votingUserId,
+        environmentId,
+        definitionVote,
+        priorityVote
+      );
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+  }
 }
 
 module.exports = VotingUser;

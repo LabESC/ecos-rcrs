@@ -170,10 +170,10 @@ class Environment {
     let emailText = "";
     if (!requestTopic) {
       emailText = `<br/>The mining data for your environment ${environmentUser.name} is done!\n`;
-      emailText += `<br/>You need to log on the system to request the topics generation.\n`;
+      emailText += `<br/>You need to log on the system to request the topic generation.\n`;
     } else {
       emailText = `<br/>The mining data for your environment ${environmentUser.name} is done!\n`;
-      emailText += `<br/>The topics generation is being processed, when finished, you'll be notified.\n`;
+      emailText += `<br/>The topic generation is being processed, when finished, you'll be notified.\n`;
     }
 
     try {
@@ -205,7 +205,7 @@ class Environment {
     const environmentUser =
       await EnvironmentRepository.getCreatedUserEmailByEnvironmentId(id);
 
-    const subject = `SECO - RCR: ${environmentUser.name} topics generation done`;
+    const subject = `SECO - RCR: ${environmentUser.name} topic generation done`;
     let emailText = `<br/>The topics for your environment ${environmentUser.name} were generated!\n`;
     emailText += `<br/>You can log on the system to read them.\n`;
 
@@ -279,9 +279,9 @@ class Environment {
 
     if (definitionData === false) return false;
     // * Find the rcr to be updated, and change it
-    for (let rcr of definitionData.rcrs) {
-      if (rcr.id === definitionDataChanged.id) {
-        rcr = definitionDataChanged;
+    for (let i = 0; i < definitionData.rcrs.length; i++) {
+      if (definitionData.rcrs[i].id === definitionDataChanged.id) {
+        definitionData.rcrs[i] = definitionDataChanged;
         break;
       }
     }
@@ -343,6 +343,9 @@ class Environment {
         }
       }
     }
+
+    // . Ordering the rcrs by priority
+    definitionData.rcrs.sort((a, b) => a.priority - b.priority);
 
     // * Updating the environment
     try {
@@ -570,6 +573,99 @@ class Environment {
     }
   }
 
+  static async getTopicsInfo(id) {
+    try {
+      return await EnvironmentRepository.getTopicsInfo(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+  }
+
+  static async getTopicDataByTopicAndPage(id, topicNum, page) {
+    let topicData = null;
+
+    try {
+      topicData = await EnvironmentRepository.getTopicDataByTopicAndPage(
+        id,
+        topicNum,
+        page
+      );
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    if (!topicData) return topicData;
+
+    // * Obtaining the issues from the mining data
+    // . Filtering the relatedToIssuesId
+    let relatedToIssuesID = topicData.map((issue) => {
+      return issue.relatedTo.map((issue) => issue.id);
+    });
+    relatedToIssuesID = relatedToIssuesID.flat(); // * Converting the array of arrays into a single array
+    relatedToIssuesID = [...new Set(relatedToIssuesID)]; // * Removing duplicates
+    relatedToIssuesID = relatedToIssuesID.sort((a, b) => a - b); // * Ordering the relatedToIssuesId
+
+    // . Querying the mining data
+    if (relatedToIssuesID.length > 0) {
+      let queriedData = null;
+      try {
+        queriedData = await EnvironmentRepository.getMiningDataByIssuesID(
+          id,
+          relatedToIssuesID
+        );
+      } catch (e) {
+        console.log(e);
+        return -1;
+      }
+
+      if (!queriedData.issues) return queriedData;
+
+      // * Joining the relatedToIssuesData with the topic data
+      for (const issue of topicData) {
+        for (const related of issue.relatedTo) {
+          const moreDataOfRelatedTo = queriedData.issues.find(
+            (issue) => issue.id === related.id
+          );
+
+          related.relatedToScore = parseFloat(related.score).toFixed(5);
+          delete related.score;
+
+          Object.assign(related, moreDataOfRelatedTo);
+        }
+      }
+
+      // * Querying the topicScore for the issues at the relatedTo
+      queriedData = null;
+      try {
+        queriedData =
+          await EnvironmentRepository.getTopicScoresByTopicAndIssuesID(
+            id,
+            topicNum,
+            relatedToIssuesID
+          );
+      } catch (e) {
+        console.log(e);
+        return -1;
+      }
+
+      if (!queriedData) return queriedData;
+
+      // * Joining the topicScore with the topic data
+      for (const issue of topicData) {
+        for (const related of issue.relatedTo) {
+          const topicScore = queriedData.issuesAndScore.find(
+            (topicIssue) => parseInt(topicIssue.id) === related.id
+          );
+
+          related.score = parseFloat(topicScore.topicScore).toFixed(5);
+        }
+      }
+    }
+    return topicData;
+  }
+
   static async getDefinitionData(id) {
     try {
       return await EnvironmentRepository.getDefinitionData(id);
@@ -652,10 +748,19 @@ class Environment {
 
     let definitionData = null;
     let miningData = null;
+    let topicData = null;
 
     // * Obtaining mining data if exists
     try {
       miningData = await EnvironmentRepository.getMiningData(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    // * Obtaining topic data if exists
+    try {
+      topicData = await EnvironmentRepository.getTopicData(id);
     } catch (e) {
       console.log(e);
       return -1;
@@ -671,6 +776,7 @@ class Environment {
 
     if (!miningData) return miningData;
     if (!definitionData) return definitionData;
+    if (!topicData) return topicData;
 
     // * Filtering the rcrs who are going to vote
     definitionData.rcrs = definitionData.rcrs.filter((rcr) => {
@@ -1110,6 +1216,111 @@ class Environment {
     return true;
   }
 
+  static async endDefinitionRCRAndGoToPriorityRCR(id, finalPriorityData) {
+    // * Obtaining environment data
+    let environment = null;
+
+    try {
+      environment = await this.updatePriorityData(id, finalPriorityData);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    if (!environment || environment === -1) return environment;
+
+    try {
+      environment = await EnvironmentRepository.getPriorityVoteForEnding(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    if (!environment) return environment;
+
+    // . Updating environment status
+    let updateStatus = null;
+    try {
+      updateStatus = await EnvironmentRepository.updateStatus(
+        id,
+        "processing_rcr_priority"
+      );
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    if (updateStatus === -1) {
+      console.log(`Error updating the status of the environment with ID ${id}`);
+      return -1;
+    }
+
+    // . Getting the votes for the environment
+    let votes = null;
+
+    try {
+      votes = await VotingUserRepository.getPriorityVotesOfEnvironment(id);
+    } catch (e) {
+      console.log(`Error getting the votes for the environment with ID ${id}`);
+    }
+
+    if (votes === null) {
+      console.log(`Error getting the votes for the environment with ID ${id}`);
+    }
+
+    // . Joining all object from the arrays inside votes array into a single array
+    votes = votes.flat();
+
+    // . Joining the definition data with the votes
+    const finalData = EnvironmentUtils.joinPriorityDataWithVotes(
+      environment.priority_data,
+      votes
+    );
+
+    // . Updating the status of the environment and defining priority RCRs
+    let updated = null;
+    try {
+      updated = await EnvironmentRepository.updateFinalRcr(
+        id,
+        finalData,
+        "rcr_priority_done"
+      );
+    } catch (e) {
+      console.log(e);
+    }
+
+    if (updated === -1) {
+      console.log(`Error updating the status of the environment with ID ${id}`);
+    }
+
+    // . Ending the status of the priorityData for the environment
+    let priorityDataUpdated = null;
+    try {
+      priorityDataUpdated =
+        await EnvironmentRepository.endPriorityVoteForEnvironment(id);
+    } catch (e) {
+      console.log(e);
+    }
+
+    if (priorityDataUpdated === -1) {
+      console.log(
+        `Error ending the definitionData status for the environment with ID ${id}`
+      );
+    }
+
+    // . Sending the email to the user who created the environment
+    const subject = `SECO - RCR: ${environment.name} definition rcr voting completed`;
+    let emailText = `The RCR voting for your environment ${environment.name} was completed and processed!`;
+    emailText += `<br/>You can log on the system to see the results.\n`;
+
+    try {
+      await APIRequests.sendEmail(environment.User.email, subject, emailText);
+    } catch (e) {
+      console.log(e);
+    }
+    return true;
+  }
+
   static async countVotesForEnvironment(id, status) {
     let votes = null;
 
@@ -1136,6 +1347,58 @@ class Environment {
     }
 
     return votes;
+  }
+
+  static async hasDefinitionRCR(id) {
+    try {
+      return await EnvironmentRepository.hasDefinitionRCR(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+  }
+
+  static async getDefinitionDataNew(id) {
+    // * Check if the environment is in the right status
+    let environment = null;
+    try {
+      environment = await EnvironmentRepository.getById(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    if (!environment) return environment;
+
+    // * Obtaining mining data if exists
+    let miningData = null;
+    try {
+      miningData = await EnvironmentRepository.getMiningData(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    if (!miningData) return miningData;
+
+    // * Obtaining definition data if exists
+    let definitionData = null;
+    try {
+      definitionData = await EnvironmentRepository.getDefinitionData(id);
+    } catch (e) {
+      console.log(e);
+      return -1;
+    }
+
+    if (!definitionData) return definitionData;
+
+    // * Joining data with EnvironmentUtils
+    definitionData = EnvironmentUtils.joinMiningAndDefinition(
+      miningData,
+      definitionData
+    );
+
+    return definitionData;
   }
 }
 
