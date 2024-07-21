@@ -110,10 +110,12 @@ const EnvironmentDetailPriority = () => {
         );
         return;
       }
-      console.log(response.rcrs);
+
+      // . Ordenando as rcrs de acordo com a posição
+      const rcrs = response.rcrs.sort((a, b) => a.position - b.position);
 
       // . Armazenando os ambientes
-      setRCRS(response.rcrs);
+      setRCRS(rcrs);
 
       // . Setando o topico atual no localStorage e todos os topicos
       setFinalRCRLToLocalStorage(response);
@@ -189,7 +191,7 @@ const EnvironmentDetailPriority = () => {
       },
       final_vote: null,
       position: 0,
-      votes_position: 0,
+      position: 0,
     },
   ]); // . Armazena os ambientes do usuário
   const [positions, setPositions] = useState({}); // . Armazena as posições das rcrs
@@ -202,7 +204,7 @@ const EnvironmentDetailPriority = () => {
     // . Buscando no array de rcrs
     for (const rcr of rcrs) {
       if (rcr.id === rcrId) {
-        return rcr.votes_position;
+        return rcr.position;
       }
     }
   };
@@ -217,9 +219,9 @@ const EnvironmentDetailPriority = () => {
             return;
           }
 
-          const temp = newRCRs[i].votes_position;
-          newRCRs[i].votes_position = newRCRs[i - 1].votes_position;
-          newRCRs[i - 1].votes_position = temp;
+          const temp = newRCRs[i].position;
+          newRCRs[i].position = newRCRs[i - 1].position;
+          newRCRs[i - 1].position = temp;
           break;
         } else {
           if (i === newRCRs.length - 1) {
@@ -227,21 +229,21 @@ const EnvironmentDetailPriority = () => {
             return;
           }
 
-          const temp = newRCRs[i].votes_position;
-          newRCRs[i].votes_position = newRCRs[i + 1].votes_position;
-          newRCRs[i + 1].votes_position = temp;
+          const temp = newRCRs[i].position;
+          newRCRs[i].position = newRCRs[i + 1].position;
+          newRCRs[i + 1].position = temp;
           break;
         }
       }
     }
 
     // . Reordenando o array de rcrs de acordo com a nova posição
-    newRCRs.sort((a, b) => a.votes_position - b.votes_position);
+    newRCRs.sort((a, b) => a.position - b.position);
 
     // . Obtendo cada id e a posicao e salvando
     const votesUpdated = [];
     for (const rcr of rcrs) {
-      votesUpdated.push({ id: rcr.id, position: rcr.votes_position });
+      votesUpdated.push({ id: rcr.id, position: rcr.position });
     }
     setPositions({ ...votesUpdated });
   };
@@ -411,7 +413,7 @@ const EnvironmentDetailPriority = () => {
                       maxWidth: "3%",
                     }}
                   >
-                    {rcr.votes_position}
+                    {rcr.position}
                   </Box>
                   <Accordion key={`Acc-${rcr.id}`} style={{ minWidth: "90%" }}>
                     <AccordionSummary

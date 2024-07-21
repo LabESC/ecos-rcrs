@@ -141,7 +141,7 @@ export function EnvironmentCard(props) {
           <Box style={{ display: "flex", alignItems: "center" }}>
             <TasklistIcon size={16} />
             <Typography style={{ fontSize: 9, marginLeft: "0.6em" }}>
-              RCR voting done
+              RCR definition done
             </Typography>
           </Box>
         );

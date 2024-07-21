@@ -683,6 +683,11 @@ const EnvironmentDetailDefinition = () => {
       setAlertOpen(true);
 
       closeVotingStartPopUp();
+
+      // . Redirecionando para a página de meus ambientes após 3 segundos
+      setTimeout(() => {
+        redirect(`/my-environments`);
+      }, 3000);
     }
   };
 
