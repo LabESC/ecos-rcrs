@@ -173,7 +173,11 @@ module.exports = {
       case 2:
         return res.status(401).json(ErrorSchema("user", "User is pending!"));
       case null:
-        return res.status(401).json(ErrorSchema("password", "Wrong password!"));
+        return res
+          .status(401)
+          .json(
+            ErrorSchema("password", "Wrong password or user is not registered!")
+          );
       case false:
         return res.status(404).json(ErrorSchema("user", "User not found!"));
       default:

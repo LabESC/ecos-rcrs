@@ -1,0 +1,16 @@
+bertopic
+top2vec
+pandas
+nltk
+matplotlib
+scikit-learn
+bertopic[gensim]
+bs4
+fastapi
+starlette
+gensim
+beautifulsoup4
+requests
+python-dotenv
+uvicorn
+sentence-transformers

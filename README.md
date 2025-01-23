@@ -5,7 +5,7 @@
 ### Pré-requisitos:
 
 - NodeJS;
-- Python;
+- Python (preferencialmente, versão 3.10);
 - Banco de dados PostgreSQL;
 - Ferramentas de Build do Visual Studio (C++);
 - Token para API do GitHub;

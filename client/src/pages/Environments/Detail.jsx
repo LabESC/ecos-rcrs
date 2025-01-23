@@ -98,7 +98,7 @@ const EnvironmentDetail = () => {
         actualTopic,
         page
       );
-      console.log(responseinfo);
+      // console.log(responseinfo);
       console.log(responseActual);
 
       const response = await getTopicData(userId, userToken, environmentId);
@@ -116,7 +116,7 @@ const EnvironmentDetail = () => {
 
       // . Armazenando os ambientes
       const topics = orderIssuesByRelatedTo(response);
-      setTopics(topics);
+      setTopics(responseinfo);
 
       // . Verificando se há topico selecionado no localStorage
       /*const topicsLocalStorage = getTopicDataFromLocalStorage();
@@ -214,7 +214,6 @@ const EnvironmentDetail = () => {
   ]); // . Armazena os ambientes do usuário
   const [actualTopic, setActualTopic] = useState(0); // . Armazena o ambiente atual
   const [page, setPage] = useState(1); // . Armazena a página atual
-  const [topicIssuesData, setTopicIssuesData] = useState([]); // . Armazena os dados das issues do tópico atual [Array]
   const [definitionRCRs, setDefinitionRCRs] = useState([]); // . Armazena as RCRs prioritarias [Array]
 
   // . Função para mudar o topico atual (SELECT)
